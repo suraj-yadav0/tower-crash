@@ -3,6 +3,7 @@
 
 import QtQuick 2.9
 import Lomiri.Components 1.3
+import QtSystemInfo 5.0
 
 MainView {
     id: root
@@ -10,9 +11,14 @@ MainView {
     applicationName: "tower-crash.surajyadav"
     automaticOrientation: false
 
-
     width: units.gu(45)
     height: units.gu(80)
+
+    ScreenSaver {
+        id: screenSaver
+        screenSaverEnabled: !Qt.application.active
+    }
+
 
     Page {
         id: gamePage

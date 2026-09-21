@@ -1,4 +1,6 @@
 {
-    "policy_groups": [],
+    "policy_groups": [
+        "keep-display-on"
+    ],
     "policy_version": 2404.1
 }
