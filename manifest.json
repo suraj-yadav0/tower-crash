@@ -1,0 +1,15 @@
+{
+    "name": "tower-crash.surajyadav",
+    "description": "Spiral ball jump game for Ubuntu Touch",
+    "architecture": "all",
+    "title": "Tower Crash",
+    "hooks": {
+        "tower-crash": {
+            "apparmor": "apparmor.json",
+            "desktop":  "tower-crash.desktop"
+        }
+    },
+    "version": "1.0.0",
+    "maintainer": "Suraj Yadav <suraj200701@gmail.com>",
+    "framework": "ubuntu-touch-24.04-1.x"
+}

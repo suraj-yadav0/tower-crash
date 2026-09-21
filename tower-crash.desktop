@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=Tower Crash
+Comment=Spiral Ball Jump game for Ubuntu Touch
+Exec=qmlscene %U qml/Main.qml
+Icon=assets/logo.svg
+Terminal=false
+Type=Application
+X-Lomiri-Touch=true

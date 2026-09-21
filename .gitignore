@@ -1,0 +1,4 @@
+build/
+*.stash
+*.click
+.clickable/

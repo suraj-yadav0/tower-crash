@@ -1,0 +1,7 @@
+{
+  "clickable_minimum_required": "8.0.0",
+  "builder": "pure-qml-qmake",
+  "kill": "qmlscene",
+  "framework": "ubuntu-touch-24.04-1.x",
+  "skip_review": true
+}
