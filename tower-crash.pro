@@ -5,7 +5,7 @@ CONFIG += no_check_exist
 QML_FILES += \
     qml/Main.qml
 
-INSTALLS += qml desktop apparmor manifest assets
+INSTALLS += qml desktop apparmor manifest assets license
 
 qml.files = qml
 qml.path = /
@@ -21,3 +21,6 @@ manifest.path = /
 
 assets.files = assets
 assets.path = /
+
+license.files = LICENSE
+license.path = /

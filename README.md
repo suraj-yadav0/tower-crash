@@ -41,3 +41,11 @@ clickable build
 - `apparmor.json`: AppArmor security profile.
 - `tower-crash.desktop`: Lomiri desktop entry for the application drawer.
 - `assets/logo.svg`: Application vector icon.
+- `LICENSE`: GNU General Public License v3.0 text.
+
+## Maintainer
+Suraj Yadav <surajyadav200701@gmail.com>
+
+## License
+This project is licensed under the GNU General Public License v3.0 or later (GPL-3.0-or-later). See the [LICENSE](LICENSE) file for the full license text.
+

@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Copyright (C) 2026 Suraj Yadav <surajyadav200701@gmail.com>
+
 import QtQuick 2.9
 import Lomiri.Components 1.3
 
@@ -5,7 +8,8 @@ MainView {
     id: root
     objectName: "mainView"
     applicationName: "tower-crash.surajyadav"
-    automaticOrientation: true
+    automaticOrientation: false
+
 
     width: units.gu(45)
     height: units.gu(80)

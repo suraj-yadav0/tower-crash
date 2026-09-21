@@ -3,6 +3,7 @@
     "description": "Spiral ball jump game for Ubuntu Touch",
     "architecture": "@CLICK_ARCH@",
     "title": "Tower Crash",
+    "icon": "assets/logo.svg",
     "hooks": {
         "tower-crash": {
             "apparmor": "apparmor.json",

@@ -5,4 +5,12 @@ Exec=qmlscene %U qml/Main.qml
 Icon=assets/logo.svg
 Terminal=false
 Type=Application
+Categories=Game;ArcadeGame;
+Keywords=game;arcade;helix;jump;spiral;tower;crash;
+X-Ubuntu-Touch=true
 X-Lomiri-Touch=true
+X-Ubuntu-Supported-Orientations=portrait
+X-Lomiri-Supported-Orientations=portrait
+X-Ubuntu-Splash-Color=#0a0e12
+X-Lomiri-Splash-Color=#0a0e12
+
