@@ -108,6 +108,7 @@ MainView {
             property real ballVy: 0.0
             property real cameraY: 0.0
             property real squash: 1.0
+            property real squashVelocity: 0.0
             property bool isSuperFall: false
 
             property real ringSpacing: units.gu(14)
@@ -151,19 +152,41 @@ MainView {
 
             function spawnParticles(x, y, count, color, speedMultiplier) {
                 var mult = speedMultiplier || 1.0;
+                var midR = (outerRadius + innerRadius) / 2.0;
                 for (var p = 0; p < count; p++) {
                     var angle = Math.random() * Math.PI * 2.0;
                     var speed = (units.gu(2) + Math.random() * units.gu(10)) * mult;
+                    var rSpread = (Math.random() - 0.5) * (outerRadius - innerRadius);
                     particles.push({
-                        x: x,
+                        x: x + Math.cos(angle) * rSpread,
                         y: y,
-                        z: (Math.random() - 0.5) * units.gu(3),
+                        z: midR + Math.sin(angle) * rSpread,
                         vx: Math.cos(angle) * speed,
                         vy: -Math.random() * units.gu(16) * mult,
                         vz: Math.sin(angle) * speed,
                         color: color,
                         alpha: 1.0,
                         size: units.gu(0.4 + Math.random() * 0.6)
+                    });
+                }
+            }
+
+            function spawnBounceDust(y, color1, color2) {
+                var midR = (outerRadius + innerRadius) / 2.0;
+                var count = 9;
+                for (var p = 0; p < count; p++) {
+                    var angle = Math.random() * Math.PI * 2.0;
+                    var speed = units.gu(4.0) + Math.random() * units.gu(8.0);
+                    particles.push({
+                        x: Math.cos(angle) * units.gu(0.6),
+                        y: y,
+                        z: midR + Math.sin(angle) * units.gu(0.6),
+                        vx: Math.cos(angle) * speed,
+                        vy: -units.gu(1.5) - Math.random() * units.gu(4.0),
+                        vz: Math.sin(angle) * speed,
+                        color: (Math.random() < 0.6) ? color1 : color2,
+                        alpha: 0.85,
+                        size: units.gu(0.28 + Math.random() * 0.32)
                     });
                 }
             }
@@ -183,6 +206,7 @@ MainView {
                 ballTrail = [];
                 nextRingIndex = 0;
                 squash = 1.0;
+                squashVelocity = 0.0;
                 isSuperFall = false;
                 bannerText = "";
                 bannerOpacity = 0.0;
@@ -323,7 +347,8 @@ MainView {
 
                                     gameContainer.ballY = ring.y;
                                     gameContainer.ballVy = -gameContainer.bounceSpeed * speedScale * 1.1;
-                                    gameContainer.squash = 0.5;
+                                    gameContainer.squash = 0.45;
+                                    gameContainer.squashVelocity = (1.0 - gameContainer.squash) * 40.0;
                                     nextY = ring.y;
 
                                     gameContainer.bannerText = i18n.tr("LEVEL %1 COMPLETE!").arg(gameContainer.currentLevel);
@@ -351,7 +376,8 @@ MainView {
 
                                     gameContainer.ballY = ring.y;
                                     gameContainer.ballVy = -gameContainer.bounceSpeed * speedScale;
-                                    gameContainer.squash = 0.55;
+                                    gameContainer.squash = 0.48;
+                                    gameContainer.squashVelocity = (1.0 - gameContainer.squash) * 38.0;
                                     nextY = ring.y;
 
                                     if (gameContainer.score > gameContainer.bestScore) {
@@ -366,19 +392,49 @@ MainView {
                                     gameContainer.ballVy = -gameContainer.bounceSpeed * speedScale;
                                     gameContainer.streak = 0;
                                     gameContainer.isSuperFall = false;
-                                    gameContainer.squash = 0.65;
+                                    gameContainer.squash = 0.54;
+                                    gameContainer.squashVelocity = (1.0 - gameContainer.squash) * 36.0;
                                     nextY = ring.y;
 
                                     soundManager.play("bounce");
                                     soundManager.haptic(false);
 
+                                    ring.recoil = units.gu(0.42);
+                                    ring.recoilVelocity = units.gu(4.2);
+
+                                    if (!ring.shockwaves) ring.shockwaves = [];
+                                    ring.shockwaves.push({
+                                        angle: relAngle,
+                                        radius: units.gu(0.5),
+                                        maxRadius: units.gu(4.5),
+                                        speed: units.gu(26.0),
+                                        alpha: 0.85,
+                                        maxAlpha: 0.85
+                                    });
+
+                                    if (!ring.splats) ring.splats = [];
+                                    var droplets = [];
+                                    var dropCount = 4 + Math.floor(Math.random() * 3);
+                                    for (var d = 0; d < dropCount; d++) {
+                                        var dAngle = Math.random() * Math.PI * 2.0;
+                                        var dDist = units.gu(1.8 + Math.random() * 1.5);
+                                        droplets.push({
+                                            dx: Math.cos(dAngle) * dDist,
+                                            dy: Math.sin(dAngle) * dDist,
+                                            radius: units.gu(0.22 + Math.random() * 0.3)
+                                        });
+                                    }
                                     ring.splats.push({
                                         angle: relAngle,
-                                        radius: units.gu(1.5 + Math.random() * 0.8)
+                                        radius: units.gu(0.4),
+                                        targetRadius: units.gu(1.6 + Math.random() * 0.7),
+                                        growthSpeed: units.gu(20.0),
+                                        droplets: droplets,
+                                        dropletScale: 0.1
                                     });
 
                                     var theme = Themes.getTheme(gameContainer.currentLevel);
-                                    gameContainer.spawnParticles(0, ring.y, 7, theme.ballMid, 0.7);
+                                    gameContainer.spawnBounceDust(ring.y, theme.ballMid, theme.ballLight);
                                     break;
                                 } else if (segType === 2) {
                                     gameContainer.ballY = ring.y;
@@ -433,7 +489,55 @@ MainView {
                         }
                     }
 
-                    gameContainer.squash += (1.0 - gameContainer.squash) * 0.28;
+                    var squashSpringK = 360.0;
+                    var squashDamping = 22.0;
+                    var squashForce = -squashSpringK * (gameContainer.squash - 1.0) - squashDamping * gameContainer.squashVelocity;
+                    gameContainer.squashVelocity += squashForce * dt;
+                    gameContainer.squash += gameContainer.squashVelocity * dt;
+                    if (Math.abs(gameContainer.squash - 1.0) < 0.002 && Math.abs(gameContainer.squashVelocity) < 0.005) {
+                        gameContainer.squash = 1.0;
+                        gameContainer.squashVelocity = 0.0;
+                    }
+
+                    for (var rIdx = 0; rIdx < gameContainer.rings.length; rIdx++) {
+                        var rObj = gameContainer.rings[rIdx];
+                        if (rObj.broken) continue;
+
+                        if (rObj.recoil !== 0 || rObj.recoilVelocity !== 0) {
+                            var rSpringK = 520.0;
+                            var rDamping = 28.0;
+                            var rForce = -rSpringK * rObj.recoil - rDamping * rObj.recoilVelocity;
+                            rObj.recoilVelocity += rForce * dt;
+                            rObj.recoil += rObj.recoilVelocity * dt;
+                            if (Math.abs(rObj.recoil) < 0.0005 && Math.abs(rObj.recoilVelocity) < 0.001) {
+                                rObj.recoil = 0.0;
+                                rObj.recoilVelocity = 0.0;
+                            }
+                        }
+
+                        if (rObj.shockwaves && rObj.shockwaves.length > 0) {
+                            for (var sw = rObj.shockwaves.length - 1; sw >= 0; sw--) {
+                                var wave = rObj.shockwaves[sw];
+                                wave.radius += wave.speed * dt;
+                                wave.alpha = Math.max(0.0, wave.maxAlpha * (1.0 - wave.radius / wave.maxRadius));
+                                if (wave.alpha <= 0.01 || wave.radius >= wave.maxRadius) {
+                                    rObj.shockwaves.splice(sw, 1);
+                                }
+                            }
+                        }
+
+                        if (rObj.splats && rObj.splats.length > 0) {
+                            for (var sp = 0; sp < rObj.splats.length; sp++) {
+                                var splat = rObj.splats[sp];
+                                if (splat.radius < splat.targetRadius) {
+                                    splat.radius = Math.min(splat.targetRadius, splat.radius + splat.growthSpeed * dt);
+                                }
+                                if (splat.dropletScale < 1.0) {
+                                    splat.dropletScale = Math.min(1.0, splat.dropletScale + dt * 14.0);
+                                }
+                            }
+                        }
+                    }
 
                     for (var p = gameContainer.particles.length - 1; p >= 0; p--) {
                         var pt = gameContainer.particles[p];

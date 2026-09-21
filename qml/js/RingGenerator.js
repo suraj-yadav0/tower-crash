@@ -52,6 +52,9 @@ function createRing(index, ringSpacing) {
         broken: false,
         isGoal: isGoal,
         goalAwarded: false,
+        recoil: 0.0,
+        recoilVelocity: 0.0,
+        shockwaves: [],
         splats: []
     };
 }

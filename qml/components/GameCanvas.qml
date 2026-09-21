@@ -51,13 +51,14 @@ Canvas {
         var inR = game.innerRadius;
         var tilt = game.tiltRatio;
         var rHeight = game.ringHeight;
+        var midR = (outR + inR) / 2.0;
 
         // Render platforms
         for (var r = 0; r < game.rings.length; r++) {
             var ring = game.rings[r];
             if (ring.broken) continue;
 
-            var ringScreenY = bScreenY + (ring.y - camY);
+            var ringScreenY = bScreenY + (ring.y - camY) + (ring.recoil || 0);
             if (ringScreenY < -rSpacing || ringScreenY > h + rSpacing) {
                 continue;
             }
@@ -124,26 +125,85 @@ Canvas {
                 ctx.restore();
             }
 
+            // Render platform shockwave ripples
+            if (ring.shockwaves && ring.shockwaves.length > 0) {
+                for (var sw = 0; sw < ring.shockwaves.length; sw++) {
+                    var wave = ring.shockwaves[sw];
+                    var waveAngle = game.towerAngle + wave.angle;
+                    var wx = centerX + midR * Math.cos(waveAngle);
+                    var wy = ringScreenY + midR * Math.sin(waveAngle) * tilt;
+
+                    ctx.save();
+                    ctx.translate(wx, wy);
+                    ctx.scale(1.0, tilt);
+
+                    ctx.beginPath();
+                    ctx.arc(0, 0, wave.radius, 0, Math.PI * 2.0);
+                    ctx.lineWidth = Math.max(1.0, 3.2 * (wave.alpha / wave.maxAlpha));
+                    ctx.strokeStyle = "rgba(255, 255, 255, " + wave.alpha.toFixed(2) + ")";
+                    ctx.stroke();
+
+                    ctx.beginPath();
+                    ctx.arc(0, 0, wave.radius * 0.62, 0, Math.PI * 2.0);
+                    ctx.lineWidth = 1.6;
+                    ctx.strokeStyle = "rgba(255, 255, 255, " + (wave.alpha * 0.45).toFixed(2) + ")";
+                    ctx.stroke();
+
+                    ctx.restore();
+                }
+            }
+
             // Render platform paint splats
-            if (ring.splats.length > 0) {
+            if (ring.splats && ring.splats.length > 0) {
                 for (var sp = 0; sp < ring.splats.length; sp++) {
                     var splat = ring.splats[sp];
                     var splatAngle = game.towerAngle + splat.angle;
-                    var midR = (outR + inR) / 2.0;
                     var sx = centerX + midR * Math.cos(splatAngle);
                     var sy = ringScreenY + midR * Math.sin(splatAngle) * tilt;
 
                     ctx.save();
                     ctx.translate(sx, sy);
                     ctx.scale(1.0, tilt);
+
                     ctx.beginPath();
                     ctx.arc(0, 0, splat.radius, 0, Math.PI * 2.0);
                     ctx.fillStyle = theme.ballMid;
-                    ctx.globalAlpha = 0.7;
+                    ctx.globalAlpha = 0.75;
                     ctx.fill();
+
+                    ctx.beginPath();
+                    ctx.arc(-splat.radius * 0.28, -splat.radius * 0.28, splat.radius * 0.32, 0, Math.PI * 2.0);
+                    ctx.fillStyle = "rgba(255, 255, 255, 0.45)";
+                    ctx.fill();
+
+                    if (splat.droplets && splat.droplets.length > 0) {
+                        var dropScale = splat.dropletScale || 1.0;
+                        ctx.fillStyle = theme.ballMid;
+                        ctx.globalAlpha = 0.65;
+                        for (var dp = 0; dp < splat.droplets.length; dp++) {
+                            var drop = splat.droplets[dp];
+                            ctx.beginPath();
+                            ctx.arc(drop.dx * dropScale, drop.dy * dropScale, drop.radius * dropScale, 0, Math.PI * 2.0);
+                            ctx.fill();
+                        }
+                    }
+
                     ctx.restore();
                 }
             }
+        }
+
+        // Dynamic squash-and-stretch computation combining impact compression and flight elongation
+        var renderSquash = game.squash;
+        if (game.squash >= 1.0) {
+            var flightStretch = 1.0;
+            if (game.ballVy < 0) {
+                flightStretch += 0.22 * Math.min(1.0, Math.abs(game.ballVy) / game.bounceSpeed);
+            } else {
+                var stretchFactor = game.isSuperFall ? 0.34 : 0.18;
+                flightStretch += stretchFactor * Math.min(1.0, game.ballVy / game.maxFallSpeed);
+            }
+            renderSquash = game.squash * flightStretch;
         }
 
         // Platform drop shadow
@@ -153,15 +213,19 @@ Canvas {
             if (targetRing.y >= bY) {
                 var dist = targetRing.y - bY;
                 if (dist < rSpacing * 1.6) {
-                    var shadowY = bScreenY + (targetRing.y - camY);
-                    var alpha = Math.max(0.1, 0.5 * (1.0 - dist / (rSpacing * 1.6)));
-                    var shadowScale = Math.max(0.4, 1.0 - (dist / (rSpacing * 1.6)) * 0.5);
+                    var shadowY = bScreenY + (targetRing.y - camY) + (targetRing.recoil || 0) + midR * tilt;
+                    var distFraction = Math.min(1.0, dist / (rSpacing * 1.6));
+                    var proximity = 1.0 - distFraction;
+                    var alpha = Math.max(0.08, 0.60 * Math.pow(proximity, 1.8));
+                    var shadowScale = Math.max(0.35, 1.0 - distFraction * 0.55);
+                    var shadowSx = (1.0 / Math.sqrt(renderSquash)) * shadowScale;
+                    var shadowSy = shadowScale;
 
                     ctx.save();
                     ctx.translate(centerX, shadowY);
-                    ctx.scale(1.0, tilt);
+                    ctx.scale(shadowSx, shadowSy * tilt);
                     ctx.beginPath();
-                    ctx.arc(0, 0, game.ballRadius * shadowScale, 0, Math.PI * 2.0);
+                    ctx.arc(0, 0, game.ballRadius, 0, Math.PI * 2.0);
                     ctx.fillStyle = "rgba(0, 0, 0, " + alpha.toFixed(2) + ")";
                     ctx.fill();
                     ctx.restore();
@@ -175,7 +239,7 @@ Canvas {
         for (var tr = 0; tr < game.ballTrail.length; tr++) {
             var trItem = game.ballTrail[tr];
             if (trItem.alpha <= 0) continue;
-            var trailScreenY = bScreenY + (trItem.y - camY);
+            var trailScreenY = bScreenY + (trItem.y - camY) + midR * tilt - bRadius;
             var trailRadius = bRadius * (0.4 + 0.5 * (tr / game.ballTrail.length));
 
             ctx.save();
@@ -188,7 +252,8 @@ Canvas {
             ctx.restore();
         }
 
-        var actualBallScreenY = bScreenY + (game.ballY - camY);
+        var contactScreenY = bScreenY + (game.ballY - camY) + midR * tilt;
+        var actualBallScreenY = contactScreenY - bRadius * renderSquash;
 
         // Super fall flame aura
         if (game.isSuperFall) {
@@ -208,7 +273,7 @@ Canvas {
         // Ball rendering with squash-and-stretch
         ctx.save();
         ctx.translate(centerX, actualBallScreenY);
-        ctx.scale(1.0 / Math.sqrt(game.squash), game.squash);
+        ctx.scale(1.0 / Math.sqrt(renderSquash), renderSquash);
 
         var ballGrad = ctx.createRadialGradient(
             -bRadius * 0.32,
