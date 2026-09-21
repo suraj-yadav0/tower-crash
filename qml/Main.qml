@@ -101,7 +101,7 @@ MainView {
                 anchors.left: parent.left
                 anchors.right: parent.right
                 height: units.dp(1)
-                color: "#223142"
+                color: gameContainer.currentTheme ? gameContainer.currentTheme.cardBorder : "#223142"
                 z: 50
             }
 
@@ -117,6 +117,8 @@ MainView {
 
             property bool soundEnabled: true
             property bool hapticsEnabled: true
+            property int themeMode: 0
+            property var currentTheme: Themes.getTheme(themeMode, currentLevel)
 
             property real towerAngle: 0.0
             property real angularVelocity: 0.0
@@ -270,6 +272,7 @@ MainView {
                 soundEnabled = stats.soundEnabled;
                 hapticsEnabled = stats.hapticsEnabled;
                 speedMode = stats.speedMode;
+                themeMode = (stats.themeMode !== undefined) ? stats.themeMode : 0;
                 isWelcomeOpen = true;
                 initGame();
             }
@@ -678,6 +681,7 @@ MainView {
                 levelProgress: gameContainer.levelProgress
                 streak: gameContainer.streak
                 isSuperFall: gameContainer.isSuperFall
+                theme: gameContainer.currentTheme
             }
 
             MilestoneBanner {
@@ -690,6 +694,8 @@ MainView {
                 bestScore: gameContainer.bestScore
                 totalRings: gameContainer.totalRings
                 speedMode: gameContainer.speedMode
+                theme: gameContainer.currentTheme
+                themeName: Themes.getThemeName(gameContainer.themeMode, gameContainer.currentLevel)
                 onPlayRequested: {
                     soundManager.buttonHaptic();
                     gameContainer.startGame();
@@ -699,6 +705,17 @@ MainView {
                     gameContainer.wasPausedBeforeSettings = false;
                     gameContainer.isSettingsOpen = true;
                 }
+                onThemeCycleRequested: {
+                    soundManager.buttonHaptic();
+                    gameContainer.themeMode = (gameContainer.themeMode + 1) % Themes.themeOptions.length;
+                    Storage.saveStat("themeMode", gameContainer.themeMode.toString());
+                    gameCanvas.requestPaint();
+                }
+                onSpeedCycleRequested: {
+                    soundManager.buttonHaptic();
+                    gameContainer.speedMode = (gameContainer.speedMode + 1) % 3;
+                    Storage.saveStat("speedMode", gameContainer.speedMode.toString());
+                }
             }
 
             PauseModal {
@@ -706,6 +723,7 @@ MainView {
                 soundEnabled: gameContainer.soundEnabled
                 hapticsEnabled: gameContainer.hapticsEnabled
                 speedMode: gameContainer.speedMode
+                theme: gameContainer.currentTheme
                 onResumeRequested: {
                     soundManager.buttonHaptic();
                     gameContainer.isPaused = false;
@@ -740,8 +758,10 @@ MainView {
                 soundEnabled: gameContainer.soundEnabled
                 hapticsEnabled: gameContainer.hapticsEnabled
                 speedMode: gameContainer.speedMode
+                themeMode: gameContainer.themeMode
                 bestScore: gameContainer.bestScore
                 totalRings: gameContainer.totalRings
+                theme: gameContainer.currentTheme
                 onCloseRequested: {
                     soundManager.buttonHaptic();
                     gameContainer.isSettingsOpen = false;
@@ -764,6 +784,12 @@ MainView {
                     gameContainer.speedMode = newMode;
                     Storage.saveStat("speedMode", newMode.toString());
                 }
+                onThemeModeSelected: {
+                    soundManager.buttonHaptic();
+                    gameContainer.themeMode = newMode;
+                    Storage.saveStat("themeMode", newMode.toString());
+                    gameCanvas.requestPaint();
+                }
             }
 
             GameOverModal {
@@ -771,6 +797,7 @@ MainView {
                 score: gameContainer.score
                 bestScore: gameContainer.bestScore
                 levelReached: gameContainer.currentLevel
+                theme: gameContainer.currentTheme
                 onRestartRequested: {
                     soundManager.buttonHaptic();
                     gameContainer.startGame();

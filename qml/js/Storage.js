@@ -11,7 +11,8 @@ function loadStats() {
         totalRings: 0,
         soundEnabled: true,
         hapticsEnabled: true,
-        speedMode: 1
+        speedMode: 1,
+        themeMode: 0
     };
 
     try {
@@ -26,6 +27,7 @@ function loadStats() {
                 else if (row.k === "soundEnabled") stats.soundEnabled = (row.v !== "0");
                 else if (row.k === "hapticsEnabled") stats.hapticsEnabled = (row.v !== "0");
                 else if (row.k === "speedMode") stats.speedMode = parseInt(row.v) || 1;
+                else if (row.k === "themeMode") stats.themeMode = parseInt(row.v) || 0;
             }
         });
     } catch (e) {}

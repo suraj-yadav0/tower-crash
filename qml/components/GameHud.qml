@@ -10,6 +10,7 @@ Column {
     property real levelProgress: 0.0
     property int streak: 0
     property bool isSuperFall: false
+    property var theme: null
 
     width: units.gu(36)
     spacing: units.gu(0.45)
@@ -20,8 +21,8 @@ Column {
         width: Math.min(parent.width, units.gu(36))
         height: units.gu(3.8)
         radius: units.gu(1.9)
-        color: "#D90B1015"
-        border.color: "#223142"
+        color: root.theme ? root.theme.cardInner : "#D90B1015"
+        border.color: root.theme ? root.theme.cardBorder : "#223142"
         border.width: units.gu(0.12)
 
         Row {
@@ -33,8 +34,8 @@ Column {
                 width: units.gu(5.0)
                 height: units.gu(2.6)
                 radius: units.gu(1.3)
-                color: "#162836"
-                border.color: "#00D2D3"
+                color: root.theme ? root.theme.accentBg : "#162836"
+                border.color: root.theme ? root.theme.accent : "#00D2D3"
                 border.width: units.gu(0.12)
                 anchors.verticalCenter: parent.verticalCenter
 
@@ -43,7 +44,7 @@ Column {
                     text: i18n.tr("L%1").arg(root.currentLevel)
                     font.pixelSize: units.gu(1.3)
                     font.weight: Font.Bold
-                    color: "#00D2D3"
+                    color: root.theme ? root.theme.accent : "#00D2D3"
                 }
             }
 
@@ -53,7 +54,7 @@ Column {
                 height: units.gu(0.85)
                 radius: units.gu(0.42)
                 color: "#060A0D"
-                border.color: "#1E2A38"
+                border.color: root.theme ? root.theme.cardBorder : "#1E2A38"
                 border.width: units.gu(0.08)
                 anchors.verticalCenter: parent.verticalCenter
                 clip: true
@@ -62,7 +63,7 @@ Column {
                     width: Math.max(parent.radius * 2, parent.width * Math.min(1.0, Math.max(0.0, root.levelProgress)))
                     height: parent.height
                     radius: parent.radius
-                    color: "#00D2D3"
+                    color: root.theme ? root.theme.accent : "#00D2D3"
 
                     Behavior on width {
                         NumberAnimation { duration: 160; easing.type: Easing.OutQuad }
@@ -75,8 +76,8 @@ Column {
                 width: units.gu(5.0)
                 height: units.gu(2.6)
                 radius: units.gu(1.3)
-                color: "#111720"
-                border.color: "#243242"
+                color: root.theme ? root.theme.cardOuter : "#111720"
+                border.color: root.theme ? root.theme.cardBorder : "#243242"
                 border.width: units.gu(0.1)
                 anchors.verticalCenter: parent.verticalCenter
 
@@ -98,7 +99,7 @@ Column {
         height: units.gu(1.9)
         radius: units.gu(0.95)
         color: "#800B1015"
-        border.color: "#1E2A38"
+        border.color: root.theme ? root.theme.cardBorder : "#1E2A38"
         border.width: units.gu(0.08)
 
         Label {
@@ -155,8 +156,8 @@ Column {
         width: bestRow.width + units.gu(2.4)
         height: units.gu(2.4)
         radius: units.gu(1.2)
-        color: "#D90B1015"
-        border.color: "#273546"
+        color: root.theme ? root.theme.cardInner : "#D90B1015"
+        border.color: root.theme ? root.theme.cardBorder : "#273546"
         border.width: units.gu(0.1)
         visible: root.bestScore > 0
 
@@ -169,7 +170,7 @@ Column {
                 width: units.gu(0.75)
                 height: units.gu(0.75)
                 radius: units.gu(0.375)
-                color: "#F59E0B"
+                color: root.theme ? root.theme.ballMid : "#F59E0B"
                 anchors.verticalCenter: parent.verticalCenter
             }
 
@@ -177,7 +178,7 @@ Column {
                 text: i18n.tr("BEST %1").arg(root.bestScore)
                 font.pixelSize: units.gu(1.2)
                 font.weight: Font.Bold
-                color: "#FBBF24"
+                color: root.theme ? root.theme.ballMid : "#FBBF24"
                 anchors.verticalCenter: parent.verticalCenter
             }
         }
@@ -190,8 +191,8 @@ Column {
         width: streakText.width + units.gu(3.2)
         height: units.gu(3.2)
         radius: units.gu(1.6)
-        color: root.isSuperFall ? "#E6C0392B" : "#D91C1709"
-        border.color: root.isSuperFall ? "#FF4757" : "#F59E0B"
+        color: root.isSuperFall ? "#E6C0392B" : (root.theme ? root.theme.accentBg : "#D91C1709")
+        border.color: root.isSuperFall ? "#FF4757" : (root.theme ? root.theme.accent : "#F59E0B")
         border.width: units.gu(0.14)
         visible: root.streak > 1 || root.isSuperFall
         opacity: visible ? 1.0 : 0.0
@@ -219,7 +220,7 @@ Column {
                 width: units.gu(0.9)
                 height: units.gu(0.9)
                 radius: units.gu(0.45)
-                color: root.isSuperFall ? "#FFFFFF" : "#F59E0B"
+                color: root.isSuperFall ? "#FFFFFF" : (root.theme ? root.theme.accent : "#F59E0B")
                 anchors.verticalCenter: parent.verticalCenter
             }
 
@@ -228,7 +229,7 @@ Column {
                 text: root.isSuperFall ? i18n.tr("FIREBALL SMASH!") : i18n.tr("COMBO x%1").arg(root.streak)
                 font.pixelSize: units.gu(1.4)
                 font.weight: Font.Bold
-                color: root.isSuperFall ? "#FFFFFF" : "#FBBF24"
+                color: root.isSuperFall ? "#FFFFFF" : (root.theme ? root.theme.accent : "#FBBF24")
                 anchors.verticalCenter: parent.verticalCenter
             }
         }

@@ -8,6 +8,11 @@ Canvas {
 
     property var game: null
 
+    Connections {
+        target: game
+        onCurrentThemeChanged: root.requestPaint()
+    }
+
     onPaint: {
         if (!game) return;
 
@@ -18,7 +23,7 @@ Canvas {
 
         ctx.clearRect(0, 0, w, h);
 
-        var theme = Themes.getTheme(game.currentLevel);
+        var theme = (game && game.currentTheme) ? game.currentTheme : Themes.getTheme(game ? game.currentLevel : 1);
 
         // Dynamic gradient background
         var bgGrad = ctx.createLinearGradient(0, 0, 0, h);
