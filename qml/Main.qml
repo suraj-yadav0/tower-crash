@@ -166,8 +166,14 @@ MainView {
             property var particles: []
             property var ballTrail: []
 
-            property int currentLevel: Math.floor(Math.max(0, ballY) / (ringSpacing * 20)) + 1
-            property real levelProgress: ((Math.max(0, ballY) / ringSpacing) % 20) / 20.0
+            property int levelRings: 20
+            property int currentLevel: Math.floor(Math.max(0, ballY - units.gu(2)) / (ringSpacing * levelRings)) + 1
+            property real levelProgress: {
+                var depthInLevel = (Math.max(0, ballY) / ringSpacing) - (currentLevel - 1) * levelRings;
+                return Math.min(1.0, Math.max(0.0, depthInLevel / levelRings));
+            }
+            property string bannerText: ""
+            property real bannerOpacity: 0.0
 
             function getDatabase() {
                 return LocalStorage.openDatabaseSync("TowerCrashDB", "1.0", "Tower Crash Persistence", 100000);
@@ -291,7 +297,7 @@ MainView {
                 var index = nextRingIndex++;
                 var ringY = (index + 1) * ringSpacing;
                 var segments = [0, 0, 0, 0, 0, 0, 0, 0];
-                var isGoal = (index > 0 && index % 20 === 0);
+                var isGoal = (index > 0 && (index + 1) % 20 === 0);
 
                 if (index === 0) {
                     segments[2] = 0;
@@ -357,6 +363,8 @@ MainView {
                 nextRingIndex = 0;
                 squash = 1.0;
                 isSuperFall = false;
+                bannerText = "";
+                bannerOpacity = 0.0;
 
                 for (var i = 0; i < 14; i++) {
                     generateRing();
@@ -442,9 +450,14 @@ MainView {
                         gameContainer.ballTrail[t].alpha -= dt * 3.5;
                     }
 
+                    if (gameContainer.bannerOpacity > 0) {
+                        gameContainer.bannerOpacity = Math.max(0.0, gameContainer.bannerOpacity - dt * 0.6);
+                    }
+
                     if (gameContainer.ballVy > 0) {
                         for (var i = 0; i < gameContainer.rings.length; i++) {
                             var ring = gameContainer.rings[i];
+                            if (ring.broken) continue;
 
                             if (prevY <= ring.y && nextY >= ring.y) {
                                 var relAngle = ((Math.PI / 2.0 - gameContainer.towerAngle) % (2.0 * Math.PI));
@@ -458,26 +471,56 @@ MainView {
 
                                 var segType = ring.segments[segmentIdx];
 
-                                // Super fall smashes through any platform, neutralizes hazard, and executes a full safe bounce
+                                if (ring.isGoal) {
+                                    ring.broken = true;
+                                    gameContainer.spawnParticles(0, ring.y, 45, "#ffd700", 2.2);
+                                    gameContainer.spawnParticles(0, ring.y, 25, "#ffffff", 1.8);
+                                    root.playSound("smash");
+                                    root.triggerHaptic(true);
+
+                                    gameContainer.score += 100;
+                                    gameContainer.streak = 0;
+                                    gameContainer.isSuperFall = false;
+                                    gameContainer.totalRings++;
+                                    gameContainer.saveStat("totalRings", gameContainer.totalRings);
+
+                                    gameContainer.ballY = ring.y;
+                                    gameContainer.ballVy = -gameContainer.bounceSpeed * speedScale * 1.1;
+                                    gameContainer.squash = 0.5;
+                                    nextY = ring.y;
+
+                                    gameContainer.bannerText = i18n.tr("LEVEL %1 COMPLETE!").arg(gameContainer.currentLevel);
+                                    gameContainer.bannerOpacity = 1.0;
+
+                                    if (gameContainer.score > gameContainer.bestScore) {
+                                        gameContainer.bestScore = gameContainer.score;
+                                        gameContainer.saveStat("bestScore", gameContainer.bestScore);
+                                    }
+                                    break;
+                                }
+
                                 if (gameContainer.isSuperFall && segType !== 1) {
-                                    ring.segments[segmentIdx] = 0;
-                                    gameContainer.spawnParticles(0, ring.y, 28, "#ff9f43", 1.8);
+                                    ring.broken = true;
+                                    gameContainer.spawnParticles(0, ring.y, 35, "#ff9f43", 2.0);
+                                    gameContainer.spawnParticles(0, ring.y, 15, "#ff5252", 1.6);
                                     root.playSound("smash");
                                     root.triggerHaptic(true);
 
                                     gameContainer.score += 25;
                                     gameContainer.streak = 0;
                                     gameContainer.isSuperFall = false;
+                                    gameContainer.totalRings++;
+                                    gameContainer.saveStat("totalRings", gameContainer.totalRings);
 
                                     gameContainer.ballY = ring.y;
                                     gameContainer.ballVy = -gameContainer.bounceSpeed * speedScale;
                                     gameContainer.squash = 0.55;
                                     nextY = ring.y;
 
-                                    ring.splats.push({
-                                        angle: relAngle,
-                                        radius: units.gu(2.2)
-                                    });
+                                    if (gameContainer.score > gameContainer.bestScore) {
+                                        gameContainer.bestScore = gameContainer.score;
+                                        gameContainer.saveStat("bestScore", gameContainer.bestScore);
+                                    }
                                     break;
                                 }
 
@@ -492,22 +535,13 @@ MainView {
                                     root.playSound("bounce");
                                     root.triggerHaptic(false);
 
-                                    // Record platform paint splat
                                     ring.splats.push({
                                         angle: relAngle,
                                         radius: units.gu(1.5 + Math.random() * 0.8)
                                     });
 
                                     var theme = gameContainer.getTheme(gameContainer.currentLevel);
-                                    if (ring.isGoal) {
-                                        if (!ring.goalAwarded) {
-                                            ring.goalAwarded = true;
-                                            gameContainer.score += 50;
-                                            gameContainer.spawnParticles(0, ring.y, 30, "#ffd700", 2.0);
-                                        }
-                                    } else {
-                                        gameContainer.spawnParticles(0, ring.y, 7, theme.ballMid, 0.7);
-                                    }
+                                    gameContainer.spawnParticles(0, ring.y, 7, theme.ballMid, 0.7);
                                     break;
                                 } else if (segType === 2) {
                                     gameContainer.ballY = ring.y;
@@ -531,6 +565,13 @@ MainView {
                                         gameContainer.score += gameContainer.streak;
                                         gameContainer.totalRings++;
                                         root.playSound("pass");
+
+                                        if (gameContainer.streak >= 3) {
+                                            root.triggerHaptic(true);
+                                            if (gameContainer.ballVy > gameContainer.gravity * 0.35) {
+                                                gameContainer.isSuperFall = true;
+                                            }
+                                        }
 
                                         if (gameContainer.score > gameContainer.bestScore) {
                                             gameContainer.bestScore = gameContainer.score;
@@ -931,6 +972,29 @@ MainView {
                     font.weight: Font.Bold
                     color: gameContainer.isSuperFall ? "#ff9f43" : "#ffd166"
                     visible: gameContainer.streak > 1 || gameContainer.isSuperFall
+                }
+            }
+
+            // Milestone alert banner
+            Rectangle {
+                anchors.centerIn: parent
+                anchors.verticalCenterOffset: -units.gu(8)
+                width: bannerLabel.width + units.gu(4)
+                height: units.gu(5)
+                radius: units.gu(2.5)
+                color: "#E6000000"
+                border.color: "#FFD700"
+                border.width: units.gu(0.2)
+                opacity: gameContainer.bannerOpacity
+                visible: opacity > 0
+
+                Label {
+                    id: bannerLabel
+                    anchors.centerIn: parent
+                    text: gameContainer.bannerText
+                    font.pixelSize: units.gu(2.2)
+                    font.weight: Font.Bold
+                    color: "#FFD700"
                 }
             }
 
