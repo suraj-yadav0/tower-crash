@@ -20,7 +20,7 @@ Rectangle {
     signal themeModeSelected(int newMode)
 
     anchors.fill: parent
-    color: "#E604070A"
+    color: "#E608090A"
     visible: false
     z: 200
 
@@ -34,9 +34,9 @@ Rectangle {
         anchors.centerIn: parent
         width: Math.min(parent.width - units.gu(4.0), units.gu(36))
         height: innerCore.height + units.gu(2.0)
-        radius: units.gu(2.4)
-        color: root.theme ? root.theme.cardOuter : "#0E141C"
-        border.color: root.theme ? root.theme.cardBorder : "#223142"
+        radius: units.gu(2.0)
+        color: root.theme ? root.theme.cardOuter : "#141517"
+        border.color: root.theme ? root.theme.cardBorder : "#2A2C30"
         border.width: units.gu(0.15)
         scale: root.visible ? 1.0 : 0.88
         opacity: root.visible ? 1.0 : 0.0
@@ -53,9 +53,9 @@ Rectangle {
             anchors.centerIn: parent
             width: outerShell.width - units.gu(1.6)
             height: modalContent.height + units.gu(3.2)
-            radius: units.gu(1.8)
-            color: root.theme ? root.theme.cardInner : "#080C10"
-            border.color: root.theme ? root.theme.cardBorder : "#16202C"
+            radius: units.gu(1.6)
+            color: root.theme ? root.theme.cardInner : "#0D0E0F"
+            border.color: root.theme ? root.theme.cardBorder : "#222428"
             border.width: units.gu(0.1)
 
             Column {
@@ -70,17 +70,17 @@ Rectangle {
                     width: eyebrowLabel.width + units.gu(2.0)
                     height: units.gu(2.2)
                     radius: units.gu(1.1)
-                    color: root.theme ? root.theme.accentBg : "#162230"
-                    border.color: root.theme ? root.theme.accentBorder : "#243447"
+                    color: root.theme ? root.theme.accentBg : "#261E10"
+                    border.color: root.theme ? root.theme.accentBorder : "#544020"
                     border.width: units.gu(0.1)
 
                     Label {
                         id: eyebrowLabel
                         anchors.centerIn: parent
-                        text: i18n.tr("PREFERENCES")
+                        text: i18n.tr("INSTRUMENTATION")
                         font.pixelSize: units.gu(1.0)
                         font.weight: Font.Bold
-                        color: root.theme ? root.theme.accent : "#00D2D3"
+                        color: root.theme ? root.theme.accent : "#D99B26"
                     }
                 }
 
@@ -90,7 +90,7 @@ Rectangle {
                     text: i18n.tr("SETTINGS")
                     font.pixelSize: units.gu(2.4)
                     font.weight: Font.Black
-                    color: "#FFFFFF"
+                    color: "#F5F3EF"
                 }
 
                 // Theme Selection Card
@@ -99,8 +99,8 @@ Rectangle {
                     width: parent.width
                     height: units.gu(8.8)
                     radius: units.gu(1.4)
-                    color: root.theme ? root.theme.cardOuter : "#0E141C"
-                    border.color: root.theme ? root.theme.cardBorder : "#223142"
+                    color: root.theme ? root.theme.cardOuter : "#141517"
+                    border.color: root.theme ? root.theme.cardBorder : "#2A2C30"
                     border.width: units.gu(0.1)
 
                     Column {
@@ -110,10 +110,10 @@ Rectangle {
 
                         Label {
                             anchors.horizontalCenter: parent.horizontalCenter
-                            text: i18n.tr("COLOR THEME")
+                            text: i18n.tr("MATERIAL PALETTE")
                             font.pixelSize: units.gu(0.95)
                             font.weight: Font.Bold
-                            color: "#64748B"
+                            color: "#848890"
                         }
 
                         Grid {
@@ -128,11 +128,11 @@ Rectangle {
                                     height: units.gu(2.7)
                                     radius: units.gu(1.35)
                                     color: root.themeMode === modelData.id
-                                           ? (root.theme ? root.theme.accentBg : "#162836")
-                                           : (themeChipMouse.pressed ? "#1E2A3A" : "#121A24")
+                                           ? (root.theme ? root.theme.accentBg : "#261E10")
+                                           : (themeChipMouse.pressed ? "#1E2024" : (root.theme ? root.theme.cardInner : "#0D0E0F"))
                                     border.color: root.themeMode === modelData.id
-                                                  ? (root.theme ? root.theme.accent : "#00D2D3")
-                                                  : "#253344"
+                                                  ? (root.theme ? root.theme.accent : "#D99B26")
+                                                  : (root.theme ? root.theme.cardBorder : "#2A2C30")
                                     border.width: root.themeMode === modelData.id ? units.gu(0.12) : units.gu(0.08)
                                     scale: themeChipMouse.pressed ? 0.94 : 1.0
 
@@ -155,8 +155,8 @@ Rectangle {
                                             font.pixelSize: units.gu(1.0)
                                             font.weight: root.themeMode === modelData.id ? Font.Bold : Font.DemiBold
                                             color: root.themeMode === modelData.id
-                                                   ? (root.theme ? root.theme.accent : "#00D2D3")
-                                                   : "#94A3B8"
+                                                   ? (root.theme ? root.theme.accent : "#D99B26")
+                                                   : "#8E929A"
                                             anchors.verticalCenter: parent.verticalCenter
                                         }
                                     }
@@ -178,8 +178,8 @@ Rectangle {
                     width: parent.width
                     height: units.gu(5.6)
                     radius: units.gu(1.4)
-                    color: root.theme ? root.theme.cardOuter : "#0E141C"
-                    border.color: root.theme ? root.theme.cardBorder : "#223142"
+                    color: root.theme ? root.theme.cardOuter : "#141517"
+                    border.color: root.theme ? root.theme.cardBorder : "#2A2C30"
                     border.width: units.gu(0.1)
 
                     Column {
@@ -191,7 +191,7 @@ Rectangle {
                             text: i18n.tr("FALL SPEED")
                             font.pixelSize: units.gu(0.95)
                             font.weight: Font.Bold
-                            color: "#64748B"
+                            color: "#848890"
                         }
 
                         Row {
@@ -203,11 +203,11 @@ Rectangle {
                                 height: units.gu(2.7)
                                 radius: units.gu(1.35)
                                 color: root.speedMode === 0
-                                       ? (root.theme ? root.theme.accent : "#00D2D3")
-                                       : (slowMouse.pressed ? "#1E2A3A" : "#121A24")
+                                       ? (root.theme ? root.theme.accent : "#D99B26")
+                                       : (slowMouse.pressed ? "#1E2024" : (root.theme ? root.theme.cardInner : "#0D0E0F"))
                                 border.color: root.speedMode === 0
-                                              ? (root.theme ? root.theme.accent : "#00D2D3")
-                                              : "#253344"
+                                              ? (root.theme ? root.theme.accent : "#D99B26")
+                                              : (root.theme ? root.theme.cardBorder : "#2A2C30")
                                 border.width: units.gu(0.1)
                                 scale: slowMouse.pressed ? 0.94 : 1.0
 
@@ -219,8 +219,8 @@ Rectangle {
                                     font.pixelSize: units.gu(1.15)
                                     font.weight: Font.Bold
                                     color: root.speedMode === 0
-                                           ? (root.theme ? root.theme.accentText : "#04070A")
-                                           : "#94A3B8"
+                                           ? (root.theme ? root.theme.accentText : "#0B0C0D")
+                                           : "#8E929A"
                                 }
 
                                 MouseArea {
@@ -235,11 +235,11 @@ Rectangle {
                                 height: units.gu(2.7)
                                 radius: units.gu(1.35)
                                 color: root.speedMode === 1
-                                       ? (root.theme ? root.theme.accent : "#00D2D3")
-                                       : (normalMouse.pressed ? "#1E2A3A" : "#121A24")
+                                       ? (root.theme ? root.theme.accent : "#D99B26")
+                                       : (normalMouse.pressed ? "#1E2024" : (root.theme ? root.theme.cardInner : "#0D0E0F"))
                                 border.color: root.speedMode === 1
-                                              ? (root.theme ? root.theme.accent : "#00D2D3")
-                                              : "#253344"
+                                              ? (root.theme ? root.theme.accent : "#D99B26")
+                                              : (root.theme ? root.theme.cardBorder : "#2A2C30")
                                 border.width: units.gu(0.1)
                                 scale: normalMouse.pressed ? 0.94 : 1.0
 
@@ -251,8 +251,8 @@ Rectangle {
                                     font.pixelSize: units.gu(1.15)
                                     font.weight: Font.Bold
                                     color: root.speedMode === 1
-                                           ? (root.theme ? root.theme.accentText : "#04070A")
-                                           : "#94A3B8"
+                                           ? (root.theme ? root.theme.accentText : "#0B0C0D")
+                                           : "#8E929A"
                                 }
 
                                 MouseArea {
@@ -267,11 +267,11 @@ Rectangle {
                                 height: units.gu(2.7)
                                 radius: units.gu(1.35)
                                 color: root.speedMode === 2
-                                       ? (root.theme ? root.theme.accent : "#00D2D3")
-                                       : (fastMouse.pressed ? "#1E2A3A" : "#121A24")
+                                       ? (root.theme ? root.theme.accent : "#D99B26")
+                                       : (fastMouse.pressed ? "#1E2024" : (root.theme ? root.theme.cardInner : "#0D0E0F"))
                                 border.color: root.speedMode === 2
-                                              ? (root.theme ? root.theme.accent : "#00D2D3")
-                                              : "#253344"
+                                              ? (root.theme ? root.theme.accent : "#D99B26")
+                                              : (root.theme ? root.theme.cardBorder : "#2A2C30")
                                 border.width: units.gu(0.1)
                                 scale: fastMouse.pressed ? 0.94 : 1.0
 
@@ -283,8 +283,8 @@ Rectangle {
                                     font.pixelSize: units.gu(1.15)
                                     font.weight: Font.Bold
                                     color: root.speedMode === 2
-                                           ? (root.theme ? root.theme.accentText : "#04070A")
-                                           : "#94A3B8"
+                                           ? (root.theme ? root.theme.accentText : "#0B0C0D")
+                                           : "#8E929A"
                                 }
 
                                 MouseArea {
@@ -308,10 +308,10 @@ Rectangle {
                         width: (parent.width - units.gu(1.0)) / 2.0
                         height: units.gu(3.8)
                         radius: units.gu(1.9)
-                        color: soundToggleMouse.pressed ? "#1E2A3A" : "#121A24"
+                        color: soundToggleMouse.pressed ? "#1E2024" : (root.theme ? root.theme.cardOuter : "#141517")
                         border.color: root.soundEnabled
-                                      ? (root.theme ? root.theme.accent : "#10B981")
-                                      : (root.theme ? root.theme.cardBorder : "#223142")
+                                      ? (root.theme ? root.theme.accent : "#D99B26")
+                                      : (root.theme ? root.theme.cardBorder : "#2A2C30")
                         border.width: units.gu(0.12)
                         scale: soundToggleMouse.pressed ? 0.94 : 1.0
 
@@ -328,16 +328,16 @@ Rectangle {
                                 height: units.gu(0.8)
                                 radius: units.gu(0.4)
                                 color: root.soundEnabled
-                                       ? (root.theme ? root.theme.accent : "#10B981")
-                                       : "#64748B"
+                                       ? (root.theme ? root.theme.accent : "#D99B26")
+                                       : "#555A64"
                                 anchors.verticalCenter: parent.verticalCenter
                             }
 
                             Label {
-                                text: root.soundEnabled ? i18n.tr("Sound ON") : i18n.tr("Sound OFF")
+                                text: root.soundEnabled ? i18n.tr("Audio ON") : i18n.tr("Audio OFF")
                                 font.pixelSize: units.gu(1.2)
                                 font.weight: Font.DemiBold
-                                color: root.soundEnabled ? "#FFFFFF" : "#64748B"
+                                color: root.soundEnabled ? "#F5F3EF" : "#848890"
                                 anchors.verticalCenter: parent.verticalCenter
                             }
                         }
@@ -354,10 +354,10 @@ Rectangle {
                         width: (parent.width - units.gu(1.0)) / 2.0
                         height: units.gu(3.8)
                         radius: units.gu(1.9)
-                        color: hapticsToggleMouse.pressed ? "#1E2A3A" : "#121A24"
+                        color: hapticsToggleMouse.pressed ? "#1E2024" : (root.theme ? root.theme.cardOuter : "#141517")
                         border.color: root.hapticsEnabled
-                                      ? (root.theme ? root.theme.accent : "#10B981")
-                                      : (root.theme ? root.theme.cardBorder : "#223142")
+                                      ? (root.theme ? root.theme.accent : "#D99B26")
+                                      : (root.theme ? root.theme.cardBorder : "#2A2C30")
                         border.width: units.gu(0.12)
                         scale: hapticsToggleMouse.pressed ? 0.94 : 1.0
 
@@ -374,16 +374,16 @@ Rectangle {
                                 height: units.gu(0.8)
                                 radius: units.gu(0.4)
                                 color: root.hapticsEnabled
-                                       ? (root.theme ? root.theme.accent : "#10B981")
-                                       : "#64748B"
+                                       ? (root.theme ? root.theme.accent : "#D99B26")
+                                       : "#555A64"
                                 anchors.verticalCenter: parent.verticalCenter
                             }
 
                             Label {
-                                text: root.hapticsEnabled ? i18n.tr("Vibe ON") : i18n.tr("Vibe OFF")
+                                text: root.hapticsEnabled ? i18n.tr("Haptic ON") : i18n.tr("Haptic OFF")
                                 font.pixelSize: units.gu(1.2)
                                 font.weight: Font.DemiBold
-                                color: root.hapticsEnabled ? "#FFFFFF" : "#64748B"
+                                color: root.hapticsEnabled ? "#F5F3EF" : "#848890"
                                 anchors.verticalCenter: parent.verticalCenter
                             }
                         }
@@ -402,8 +402,8 @@ Rectangle {
                     width: parent.width
                     height: units.gu(4.4)
                     radius: units.gu(1.4)
-                    color: root.theme ? root.theme.cardOuter : "#0E141C"
-                    border.color: root.theme ? root.theme.cardBorder : "#223142"
+                    color: root.theme ? root.theme.cardOuter : "#141517"
+                    border.color: root.theme ? root.theme.cardBorder : "#2A2C30"
                     border.width: units.gu(0.1)
 
                     Row {
@@ -419,10 +419,10 @@ Rectangle {
 
                                 Label {
                                     anchors.horizontalCenter: parent.horizontalCenter
-                                    text: i18n.tr("BEST SCORE")
+                                    text: i18n.tr("BEST RECORD")
                                     font.pixelSize: units.gu(0.85)
                                     font.weight: Font.Bold
-                                    color: "#64748B"
+                                    color: "#848890"
                                 }
 
                                 Label {
@@ -430,7 +430,7 @@ Rectangle {
                                     text: root.bestScore.toString()
                                     font.pixelSize: units.gu(1.4)
                                     font.weight: Font.Black
-                                    color: root.theme ? root.theme.ballMid : "#FFD166"
+                                    color: root.theme ? root.theme.ballMid : "#E6D7BA"
                                 }
                             }
                         }
@@ -439,7 +439,7 @@ Rectangle {
                             anchors.verticalCenter: parent.verticalCenter
                             width: units.dp(1)
                             height: parent.height - units.gu(1.6)
-                            color: "#1E2A3A"
+                            color: root.theme ? root.theme.cardBorder : "#2A2C30"
                         }
 
                         Item {
@@ -452,10 +452,10 @@ Rectangle {
 
                                 Label {
                                     anchors.horizontalCenter: parent.horizontalCenter
-                                    text: i18n.tr("TOTAL RINGS")
+                                    text: i18n.tr("TOTAL SMASHED")
                                     font.pixelSize: units.gu(0.85)
                                     font.weight: Font.Bold
-                                    color: "#64748B"
+                                    color: "#848890"
                                 }
 
                                 Label {
@@ -463,7 +463,7 @@ Rectangle {
                                     text: root.totalRings.toString()
                                     font.pixelSize: units.gu(1.4)
                                     font.weight: Font.Black
-                                    color: root.theme ? root.theme.accent : "#00D2D3"
+                                    color: root.theme ? root.theme.accent : "#D99B26"
                                 }
                             }
                         }
@@ -478,8 +478,8 @@ Rectangle {
                     height: units.gu(4.4)
                     radius: units.gu(2.2)
                     color: doneMouse.pressed
-                           ? (root.theme ? root.theme.accentHover : "#00B4B5")
-                           : (root.theme ? root.theme.accent : "#00D2D3")
+                           ? (root.theme ? root.theme.accentHover : "#BF8419")
+                           : (root.theme ? root.theme.accent : "#D99B26")
                     scale: doneMouse.pressed ? 0.95 : 1.0
 
                     Behavior on scale {
@@ -488,10 +488,10 @@ Rectangle {
 
                     Label {
                         anchors.centerIn: parent
-                        text: i18n.tr("Done")
-                        font.pixelSize: units.gu(1.5)
+                        text: i18n.tr("Apply & Close")
+                        font.pixelSize: units.gu(1.45)
                         font.weight: Font.Bold
-                        color: root.theme ? root.theme.accentText : "#04070A"
+                        color: root.theme ? root.theme.accentText : "#0B0C0D"
                     }
 
                     MouseArea {

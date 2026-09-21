@@ -72,8 +72,8 @@ Canvas {
                 var segType = ring.segments[seg];
                 if (segType === 1) continue;
 
-                var topColor = ring.isGoal ? "#ffd700" : ((segType === 0) ? theme.topSafe : theme.topHazard);
-                var sideColor = ring.isGoal ? "#cca300" : ((segType === 0) ? theme.sideSafe : theme.sideHazard);
+                var topColor = ring.isGoal ? (theme.goalTop || "#E8C872") : ((segType === 0) ? theme.topSafe : theme.topHazard);
+                var sideColor = ring.isGoal ? (theme.goalSide || "#B09242") : ((segType === 0) ? theme.sideSafe : theme.sideHazard);
 
                 var startAngle = game.towerAngle + seg * (Math.PI / 4.0);
                 var endAngle = startAngle + (Math.PI / 4.0);

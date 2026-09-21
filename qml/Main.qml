@@ -101,7 +101,7 @@ MainView {
                 anchors.left: parent.left
                 anchors.right: parent.right
                 height: units.dp(1)
-                color: gameContainer.currentTheme ? gameContainer.currentTheme.cardBorder : "#223142"
+                color: gameContainer.currentTheme ? gameContainer.currentTheme.cardBorder : "#2A2C30"
                 z: 50
             }
 
@@ -427,8 +427,8 @@ MainView {
 
                                 if (gameContainer.isSuperFall && segType !== 1) {
                                     ring.broken = true;
-                                    gameContainer.spawnParticles(0, ring.y, 35, "#ff9f43", 2.0);
-                                    gameContainer.spawnParticles(0, ring.y, 15, "#ff5252", 1.6);
+                                    gameContainer.spawnParticles(0, ring.y, 35, gameContainer.currentTheme.topSafe, 2.0);
+                                    gameContainer.spawnParticles(0, ring.y, 15, gameContainer.currentTheme.ballMid, 1.6);
                                     soundManager.play("smash");
                                     soundManager.haptic(true);
 
@@ -497,7 +497,7 @@ MainView {
                                         dropletScale: 0.1
                                     });
 
-                                    var theme = Themes.getTheme(gameContainer.currentLevel);
+                                    var theme = gameContainer.currentTheme;
                                     gameContainer.spawnBounceDust(ring.y, theme.ballMid, theme.ballLight);
                                     break;
                                 } else if (segType === 2) {
@@ -507,7 +507,7 @@ MainView {
                                     gameContainer.isSuperFall = false;
                                     soundManager.play("gameover");
                                     soundManager.haptic(true);
-                                    gameContainer.spawnParticles(0, ring.y, 24, "#ff4757", 1.4);
+                                    gameContainer.spawnParticles(0, ring.y, 24, gameContainer.currentTheme.topHazard, 1.4);
 
                                     if (gameContainer.score > gameContainer.bestScore) {
                                         gameContainer.bestScore = gameContainer.score;

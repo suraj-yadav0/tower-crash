@@ -17,7 +17,7 @@ Rectangle {
     signal speedModeSelected(int newMode)
 
     anchors.fill: parent
-    color: "#E604070A"
+    color: "#E608090A"
 
     MouseArea {
         anchors.fill: parent
@@ -30,9 +30,9 @@ Rectangle {
         anchors.centerIn: parent
         width: Math.min(parent.width - units.gu(4.0), units.gu(34))
         height: innerCore.height + units.gu(2.0)
-        radius: units.gu(2.4)
-        color: root.theme ? root.theme.cardOuter : "#0E141C"
-        border.color: root.theme ? root.theme.cardBorder : "#223142"
+        radius: units.gu(2.0)
+        color: root.theme ? root.theme.cardOuter : "#141517"
+        border.color: root.theme ? root.theme.cardBorder : "#2A2C30"
         border.width: units.gu(0.15)
         scale: root.visible ? 1.0 : 0.88
         opacity: root.visible ? 1.0 : 0.0
@@ -50,9 +50,9 @@ Rectangle {
             anchors.centerIn: parent
             width: outerShell.width - units.gu(1.6)
             height: modalContent.height + units.gu(3.6)
-            radius: units.gu(1.8)
-            color: root.theme ? root.theme.cardInner : "#080C10"
-            border.color: root.theme ? root.theme.cardBorder : "#16202C"
+            radius: units.gu(1.6)
+            color: root.theme ? root.theme.cardInner : "#0D0E0F"
+            border.color: root.theme ? root.theme.cardBorder : "#222428"
             border.width: units.gu(0.1)
 
             Column {
@@ -67,17 +67,17 @@ Rectangle {
                     width: eyebrowLabel.width + units.gu(2.0)
                     height: units.gu(2.2)
                     radius: units.gu(1.1)
-                    color: root.theme ? root.theme.accentBg : "#162230"
-                    border.color: root.theme ? root.theme.accentBorder : "#243447"
+                    color: root.theme ? root.theme.accentBg : "#261E10"
+                    border.color: root.theme ? root.theme.accentBorder : "#544020"
                     border.width: units.gu(0.1)
 
                     Label {
                         id: eyebrowLabel
                         anchors.centerIn: parent
-                        text: i18n.tr("GAME SUSPENDED")
+                        text: i18n.tr("DESCENT SUSPENDED")
                         font.pixelSize: units.gu(1.0)
                         font.weight: Font.Bold
-                        color: root.theme ? root.theme.accent : "#00D2D3"
+                        color: root.theme ? root.theme.accent : "#D99B26"
                     }
                 }
 
@@ -87,7 +87,7 @@ Rectangle {
                     text: i18n.tr("PAUSED")
                     font.pixelSize: units.gu(2.8)
                     font.weight: Font.Black
-                    color: "#FFFFFF"
+                    color: "#F5F3EF"
                 }
 
                 // Primary CTA: Resume Game
@@ -98,8 +98,8 @@ Rectangle {
                     height: units.gu(5.0)
                     radius: units.gu(2.5)
                     color: resumeMouse.pressed
-                           ? (root.theme ? root.theme.accentHover : "#00B4B5")
-                           : (root.theme ? root.theme.accent : "#00D2D3")
+                           ? (root.theme ? root.theme.accentHover : "#BF8419")
+                           : (root.theme ? root.theme.accent : "#D99B26")
                     scale: resumeMouse.pressed ? 0.95 : 1.0
 
                     Behavior on scale {
@@ -110,10 +110,10 @@ Rectangle {
                         anchors.left: parent.left
                         anchors.leftMargin: units.gu(2.6)
                         anchors.verticalCenter: parent.verticalCenter
-                        text: i18n.tr("Resume Game")
+                        text: i18n.tr("Resume Descent")
                         font.pixelSize: units.gu(1.6)
                         font.weight: Font.Bold
-                        color: root.theme ? root.theme.accentText : "#04070A"
+                        color: root.theme ? root.theme.accentText : "#0B0C0D"
                     }
 
                     Rectangle {
@@ -133,7 +133,7 @@ Rectangle {
                             onPaint: {
                                 var ctx = getContext("2d");
                                 ctx.clearRect(0, 0, width, height);
-                                ctx.fillStyle = root.theme ? root.theme.accentText : "#04070A";
+                                ctx.fillStyle = root.theme ? root.theme.accentText : "#0B0C0D";
                                 ctx.beginPath();
                                 ctx.moveTo(width * 0.2, height * 0.1);
                                 ctx.lineTo(width * 0.85, height * 0.5);
@@ -162,8 +162,8 @@ Rectangle {
                     width: parent.width
                     height: units.gu(4.4)
                     radius: units.gu(2.2)
-                    color: restartMouse.pressed ? "#1E2A3A" : "#121A24"
-                    border.color: root.theme ? root.theme.cardBorder : "#223142"
+                    color: restartMouse.pressed ? "#1E2024" : (root.theme ? root.theme.cardOuter : "#141517")
+                    border.color: root.theme ? root.theme.cardBorder : "#2A2C30"
                     border.width: units.gu(0.12)
                     scale: restartMouse.pressed ? 0.95 : 1.0
 
@@ -173,10 +173,10 @@ Rectangle {
 
                     Label {
                         anchors.centerIn: parent
-                        text: i18n.tr("Restart Level")
-                        font.pixelSize: units.gu(1.5)
+                        text: i18n.tr("Restart Stage")
+                        font.pixelSize: units.gu(1.45)
                         font.weight: Font.DemiBold
-                        color: "#E2E8F0"
+                        color: "#D6D5D2"
                     }
 
                     MouseArea {
@@ -193,8 +193,8 @@ Rectangle {
                     width: parent.width
                     height: units.gu(4.4)
                     radius: units.gu(2.2)
-                    color: menuMouse.pressed ? "#1E2A3A" : "#121A24"
-                    border.color: root.theme ? root.theme.cardBorder : "#223142"
+                    color: menuMouse.pressed ? "#1E2024" : (root.theme ? root.theme.cardOuter : "#141517")
+                    border.color: root.theme ? root.theme.cardBorder : "#2A2C30"
                     border.width: units.gu(0.12)
                     scale: menuMouse.pressed ? 0.95 : 1.0
 
@@ -205,9 +205,9 @@ Rectangle {
                     Label {
                         anchors.centerIn: parent
                         text: i18n.tr("Main Menu")
-                        font.pixelSize: units.gu(1.5)
+                        font.pixelSize: units.gu(1.45)
                         font.weight: Font.DemiBold
-                        color: "#94A3B8"
+                        color: "#848890"
                     }
 
                     MouseArea {
@@ -223,8 +223,8 @@ Rectangle {
                     width: parent.width
                     height: units.gu(5.6)
                     radius: units.gu(1.4)
-                    color: root.theme ? root.theme.cardOuter : "#0E141C"
-                    border.color: root.theme ? root.theme.cardBorder : "#223142"
+                    color: root.theme ? root.theme.cardOuter : "#141517"
+                    border.color: root.theme ? root.theme.cardBorder : "#2A2C30"
                     border.width: units.gu(0.1)
 
                     Column {
@@ -236,7 +236,7 @@ Rectangle {
                             text: i18n.tr("FALL SPEED")
                             font.pixelSize: units.gu(0.95)
                             font.weight: Font.Bold
-                            color: "#64748B"
+                            color: "#848890"
                         }
 
                         Row {
@@ -248,11 +248,11 @@ Rectangle {
                                 height: units.gu(2.7)
                                 radius: units.gu(1.35)
                                 color: root.speedMode === 0
-                                       ? (root.theme ? root.theme.accent : "#00D2D3")
-                                       : (slowMouse.pressed ? "#1E2A3A" : "#121A24")
+                                       ? (root.theme ? root.theme.accent : "#D99B26")
+                                       : (slowMouse.pressed ? "#1E2024" : (root.theme ? root.theme.cardInner : "#0D0E0F"))
                                 border.color: root.speedMode === 0
-                                              ? (root.theme ? root.theme.accent : "#00D2D3")
-                                              : "#253344"
+                                              ? (root.theme ? root.theme.accent : "#D99B26")
+                                              : (root.theme ? root.theme.cardBorder : "#2A2C30")
                                 border.width: units.gu(0.1)
                                 scale: slowMouse.pressed ? 0.94 : 1.0
 
@@ -264,8 +264,8 @@ Rectangle {
                                     font.pixelSize: units.gu(1.15)
                                     font.weight: Font.Bold
                                     color: root.speedMode === 0
-                                           ? (root.theme ? root.theme.accentText : "#04070A")
-                                           : "#94A3B8"
+                                           ? (root.theme ? root.theme.accentText : "#0B0C0D")
+                                           : "#8E929A"
                                 }
 
                                 MouseArea {
@@ -280,11 +280,11 @@ Rectangle {
                                 height: units.gu(2.7)
                                 radius: units.gu(1.35)
                                 color: root.speedMode === 1
-                                       ? (root.theme ? root.theme.accent : "#00D2D3")
-                                       : (normalMouse.pressed ? "#1E2A3A" : "#121A24")
+                                       ? (root.theme ? root.theme.accent : "#D99B26")
+                                       : (normalMouse.pressed ? "#1E2024" : (root.theme ? root.theme.cardInner : "#0D0E0F"))
                                 border.color: root.speedMode === 1
-                                              ? (root.theme ? root.theme.accent : "#00D2D3")
-                                              : "#253344"
+                                              ? (root.theme ? root.theme.accent : "#D99B26")
+                                              : (root.theme ? root.theme.cardBorder : "#2A2C30")
                                 border.width: units.gu(0.1)
                                 scale: normalMouse.pressed ? 0.94 : 1.0
 
@@ -296,8 +296,8 @@ Rectangle {
                                     font.pixelSize: units.gu(1.15)
                                     font.weight: Font.Bold
                                     color: root.speedMode === 1
-                                           ? (root.theme ? root.theme.accentText : "#04070A")
-                                           : "#94A3B8"
+                                           ? (root.theme ? root.theme.accentText : "#0B0C0D")
+                                           : "#8E929A"
                                 }
 
                                 MouseArea {
@@ -312,11 +312,11 @@ Rectangle {
                                 height: units.gu(2.7)
                                 radius: units.gu(1.35)
                                 color: root.speedMode === 2
-                                       ? (root.theme ? root.theme.accent : "#00D2D3")
-                                       : (fastMouse.pressed ? "#1E2A3A" : "#121A24")
+                                       ? (root.theme ? root.theme.accent : "#D99B26")
+                                       : (fastMouse.pressed ? "#1E2024" : (root.theme ? root.theme.cardInner : "#0D0E0F"))
                                 border.color: root.speedMode === 2
-                                              ? (root.theme ? root.theme.accent : "#00D2D3")
-                                              : "#253344"
+                                              ? (root.theme ? root.theme.accent : "#D99B26")
+                                              : (root.theme ? root.theme.cardBorder : "#2A2C30")
                                 border.width: units.gu(0.1)
                                 scale: fastMouse.pressed ? 0.94 : 1.0
 
@@ -328,8 +328,8 @@ Rectangle {
                                     font.pixelSize: units.gu(1.15)
                                     font.weight: Font.Bold
                                     color: root.speedMode === 2
-                                           ? (root.theme ? root.theme.accentText : "#04070A")
-                                           : "#94A3B8"
+                                           ? (root.theme ? root.theme.accentText : "#0B0C0D")
+                                           : "#8E929A"
                                 }
 
                                 MouseArea {
@@ -353,10 +353,10 @@ Rectangle {
                         width: (parent.width - units.gu(1.2)) / 2.0
                         height: units.gu(4.0)
                         radius: units.gu(2.0)
-                        color: soundToggleMouse.pressed ? "#1E2A3A" : "#121A24"
+                        color: soundToggleMouse.pressed ? "#1E2024" : (root.theme ? root.theme.cardOuter : "#141517")
                         border.color: root.soundEnabled
-                                      ? (root.theme ? root.theme.accent : "#10B981")
-                                      : (root.theme ? root.theme.cardBorder : "#223142")
+                                      ? (root.theme ? root.theme.accent : "#D99B26")
+                                      : (root.theme ? root.theme.cardBorder : "#2A2C30")
                         border.width: units.gu(0.12)
                         scale: soundToggleMouse.pressed ? 0.94 : 1.0
 
@@ -373,16 +373,16 @@ Rectangle {
                                 height: units.gu(0.8)
                                 radius: units.gu(0.4)
                                 color: root.soundEnabled
-                                       ? (root.theme ? root.theme.accent : "#10B981")
-                                       : "#64748B"
+                                       ? (root.theme ? root.theme.accent : "#D99B26")
+                                       : "#555A64"
                                 anchors.verticalCenter: parent.verticalCenter
                             }
 
                             Label {
-                                text: root.soundEnabled ? i18n.tr("Sound ON") : i18n.tr("Sound OFF")
+                                text: root.soundEnabled ? i18n.tr("Audio ON") : i18n.tr("Audio OFF")
                                 font.pixelSize: units.gu(1.2)
                                 font.weight: Font.DemiBold
-                                color: root.soundEnabled ? "#FFFFFF" : "#64748B"
+                                color: root.soundEnabled ? "#F5F3EF" : "#848890"
                                 anchors.verticalCenter: parent.verticalCenter
                             }
                         }
@@ -399,10 +399,10 @@ Rectangle {
                         width: (parent.width - units.gu(1.2)) / 2.0
                         height: units.gu(4.0)
                         radius: units.gu(2.0)
-                        color: hapticsToggleMouse.pressed ? "#1E2A3A" : "#121A24"
+                        color: hapticsToggleMouse.pressed ? "#1E2024" : (root.theme ? root.theme.cardOuter : "#141517")
                         border.color: root.hapticsEnabled
-                                      ? (root.theme ? root.theme.accent : "#10B981")
-                                      : (root.theme ? root.theme.cardBorder : "#223142")
+                                      ? (root.theme ? root.theme.accent : "#D99B26")
+                                      : (root.theme ? root.theme.cardBorder : "#2A2C30")
                         border.width: units.gu(0.12)
                         scale: hapticsToggleMouse.pressed ? 0.94 : 1.0
 
@@ -419,16 +419,16 @@ Rectangle {
                                 height: units.gu(0.8)
                                 radius: units.gu(0.4)
                                 color: root.hapticsEnabled
-                                       ? (root.theme ? root.theme.accent : "#10B981")
-                                       : "#64748B"
+                                       ? (root.theme ? root.theme.accent : "#D99B26")
+                                       : "#555A64"
                                 anchors.verticalCenter: parent.verticalCenter
                             }
 
                             Label {
-                                text: root.hapticsEnabled ? i18n.tr("Vibe ON") : i18n.tr("Vibe OFF")
+                                text: root.hapticsEnabled ? i18n.tr("Haptic ON") : i18n.tr("Haptic OFF")
                                 font.pixelSize: units.gu(1.2)
                                 font.weight: Font.DemiBold
-                                color: root.hapticsEnabled ? "#FFFFFF" : "#64748B"
+                                color: root.hapticsEnabled ? "#F5F3EF" : "#848890"
                                 anchors.verticalCenter: parent.verticalCenter
                             }
                         }
