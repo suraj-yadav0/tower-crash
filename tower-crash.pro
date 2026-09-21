@@ -3,7 +3,16 @@ TEMPLATE = aux
 CONFIG += no_check_exist
 
 QML_FILES += \
-    qml/Main.qml
+    qml/Main.qml \
+    qml/components/GameCanvas.qml \
+    qml/components/GameHud.qml \
+    qml/components/MilestoneBanner.qml \
+    qml/components/PauseModal.qml \
+    qml/components/GameOverModal.qml \
+    qml/components/SoundManager.qml \
+    qml/js/Themes.js \
+    qml/js/Storage.js \
+    qml/js/RingGenerator.js
 
 INSTALLS += qml desktop apparmor manifest assets license
 
