@@ -13,7 +13,7 @@ Rectangle {
     signal toggleHapticsRequested()
 
     anchors.fill: parent
-    color: "#D90A0E12"
+    color: "#E6080C10"
 
     MouseArea {
         anchors.fill: parent
@@ -23,59 +23,64 @@ Rectangle {
     Rectangle {
         anchors.centerIn: parent
         width: Math.min(parent.width - units.gu(4), units.gu(32))
-        height: units.gu(30)
-        radius: units.gu(1.5)
-        color: "#1c2228"
-        border.color: "#2f3842"
+        height: contentColumn.height + units.gu(4.0)
+        radius: units.gu(2.0)
+        color: "#141A22"
+        border.color: "#253344"
         border.width: units.gu(0.15)
 
         Column {
+            id: contentColumn
             anchors.centerIn: parent
-            width: parent.width - units.gu(4)
+            width: parent.width - units.gu(4.0)
             spacing: units.gu(1.4)
 
             Label {
                 anchors.horizontalCenter: parent.horizontalCenter
                 text: i18n.tr("PAUSED")
-                font.pixelSize: units.gu(3.0)
+                font.pixelSize: units.gu(2.8)
                 font.weight: Font.Bold
                 color: "#FFFFFF"
             }
 
             Button {
                 anchors.horizontalCenter: parent.horizontalCenter
-                text: i18n.tr("Resume")
+                text: i18n.tr("Resume Game")
                 color: "#00b4d8"
-                width: units.gu(20)
-                height: units.gu(4.2)
+                width: parent.width
+                height: units.gu(4.5)
                 onClicked: root.resumeRequested()
             }
 
             Button {
                 anchors.horizontalCenter: parent.horizontalCenter
-                text: i18n.tr("Restart")
-                color: "#3b444f"
-                width: units.gu(20)
+                text: i18n.tr("Restart Level")
+                color: "#273240"
+                width: parent.width
                 height: units.gu(4.2)
                 onClicked: root.restartRequested()
             }
 
-            Button {
+            Row {
                 anchors.horizontalCenter: parent.horizontalCenter
-                text: root.soundEnabled ? i18n.tr("Sound: ON") : i18n.tr("Sound: OFF")
-                color: root.soundEnabled ? "#2ed573" : "#57606f"
-                width: units.gu(20)
-                height: units.gu(3.8)
-                onClicked: root.toggleSoundRequested()
-            }
+                spacing: units.gu(1.2)
+                width: parent.width
 
-            Button {
-                anchors.horizontalCenter: parent.horizontalCenter
-                text: root.hapticsEnabled ? i18n.tr("Vibration: ON") : i18n.tr("Vibration: OFF")
-                color: root.hapticsEnabled ? "#2ed573" : "#57606f"
-                width: units.gu(20)
-                height: units.gu(3.8)
-                onClicked: root.toggleHapticsRequested()
+                Button {
+                    width: (parent.width - units.gu(1.2)) / 2.0
+                    height: units.gu(4.0)
+                    text: root.soundEnabled ? i18n.tr("Sound: ON") : i18n.tr("Sound: OFF")
+                    color: root.soundEnabled ? "#10B981" : "#374151"
+                    onClicked: root.toggleSoundRequested()
+                }
+
+                Button {
+                    width: (parent.width - units.gu(1.2)) / 2.0
+                    height: units.gu(4.0)
+                    text: root.hapticsEnabled ? i18n.tr("Vibe: ON") : i18n.tr("Vibe: OFF")
+                    color: root.hapticsEnabled ? "#10B981" : "#374151"
+                    onClicked: root.toggleHapticsRequested()
+                }
             }
         }
     }

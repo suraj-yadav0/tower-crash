@@ -27,8 +27,48 @@ MainView {
     }
 
     Page {
+        id: mainPage
         anchors.fill: parent
-        header: null
+
+        header: PageHeader {
+            id: pageHeader
+            title: i18n.tr("Tower Crash")
+            subtitle: i18n.tr("Level %1").arg(gameContainer.currentLevel)
+            StyleHints {
+                backgroundColor: "#0D1318"
+                foregroundColor: "#FFFFFF"
+                dividerColor: "#1E2836"
+            }
+            trailingActionBar.actions: [
+                Action {
+                    iconName: gameContainer.isPaused ? "media-playback-start" : "media-playback-pause"
+                    text: gameContainer.isPaused ? i18n.tr("Resume") : i18n.tr("Pause")
+                    onTriggered: {
+                        if (!gameContainer.gameOver) {
+                            soundManager.buttonHaptic();
+                            gameContainer.isPaused = !gameContainer.isPaused;
+                        }
+                    }
+                },
+                Action {
+                    iconName: gameContainer.soundEnabled ? "audio-volume-high" : "audio-volume-muted"
+                    text: gameContainer.soundEnabled ? i18n.tr("Sound") : i18n.tr("Muted")
+                    onTriggered: {
+                        soundManager.buttonHaptic();
+                        gameContainer.soundEnabled = !gameContainer.soundEnabled;
+                        Storage.saveStat("soundEnabled", gameContainer.soundEnabled ? "1" : "0");
+                    }
+                },
+                Action {
+                    iconName: "view-refresh"
+                    text: i18n.tr("Restart")
+                    onTriggered: {
+                        soundManager.buttonHaptic();
+                        gameContainer.initGame();
+                    }
+                }
+            ]
+        }
 
         Item {
             id: gameContainer
@@ -69,7 +109,7 @@ MainView {
             property real bounceSpeed: units.gu(48)
             property real maxFallSpeed: units.gu(120)
 
-            property real ballScreenY: height * 0.35
+            property real ballScreenY: pageHeader.height + units.gu(20)
             property var rings: []
             property int nextRingIndex: 0
             property var particles: []
@@ -423,6 +463,9 @@ MainView {
             }
 
             GameHud {
+                anchors.top: parent.top
+                anchors.topMargin: pageHeader.height + units.gu(1.2)
+                anchors.horizontalCenter: parent.horizontalCenter
                 score: gameContainer.score
                 bestScore: gameContainer.bestScore
                 currentLevel: gameContainer.currentLevel
