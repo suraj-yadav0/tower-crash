@@ -79,6 +79,15 @@ MainView {
             }
             focus: true
 
+            Rectangle {
+                anchors.top: parent.top
+                anchors.left: parent.left
+                anchors.right: parent.right
+                height: units.dp(1)
+                color: "#223142"
+                z: 50
+            }
+
             property int score: 0
             property int bestScore: 0
             property int streak: 0
@@ -109,11 +118,12 @@ MainView {
             property real ringHeight: units.gu(1.2)
             property real tiltRatio: 0.36
 
-            property real gravity: units.gu(185)
-            property real bounceSpeed: units.gu(48)
-            property real maxFallSpeed: units.gu(120)
+            property real gravity: units.gu(250)
+            property real bounceSpeed: units.gu(56)
+            property real maxFallSpeed: units.gu(160)
+            property real lastPhysicsTime: 0.0
 
-            property real ballScreenY: units.gu(18.0)
+            property real ballScreenY: units.gu(20.0)
             property var rings: []
             property int nextRingIndex: 0
             property var particles: []
@@ -175,7 +185,14 @@ MainView {
                 cameraY = ringSpacing;
                 gameOver = false;
                 isPaused = false;
+                lastPhysicsTime = 0.0;
                 gameCanvas.requestPaint();
+            }
+
+            onIsPausedChanged: {
+                if (!isPaused) {
+                    lastPhysicsTime = 0.0;
+                }
             }
 
             Component.onCompleted: {
@@ -214,12 +231,19 @@ MainView {
                 running: !gameContainer.gameOver && !gameContainer.isPaused
 
                 onTriggered: {
-                    var dt = 0.016;
+                    var now = Date.now();
+                    if (gameContainer.lastPhysicsTime <= 0) {
+                        gameContainer.lastPhysicsTime = now;
+                    }
+                    var elapsedSec = (now - gameContainer.lastPhysicsTime) / 1000.0;
+                    gameContainer.lastPhysicsTime = now;
+
+                    var dt = Math.min(0.040, Math.max(0.008, elapsedSec));
                     var prevY = gameContainer.ballY;
 
                     if (!gameContainer.isDragging && Math.abs(gameContainer.angularVelocity) > 0.0001) {
                         gameContainer.towerAngle += gameContainer.angularVelocity;
-                        gameContainer.angularVelocity *= 0.88;
+                        gameContainer.angularVelocity *= Math.pow(0.04, dt);
                     }
 
                     var currentDepth = Math.floor(gameContainer.ballY / gameContainer.ringSpacing);

@@ -30,6 +30,15 @@ Rectangle {
         color: "#0E141C"
         border.color: "#223142"
         border.width: units.gu(0.15)
+        scale: root.visible ? 1.0 : 0.88
+        opacity: root.visible ? 1.0 : 0.0
+
+        Behavior on scale {
+            NumberAnimation { duration: 220; easing.type: Easing.OutBack }
+        }
+        Behavior on opacity {
+            NumberAnimation { duration: 180; easing.type: Easing.OutQuad }
+        }
 
         // Inner Core
         Rectangle {

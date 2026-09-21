@@ -226,6 +226,13 @@ Canvas {
         ctx.arc(0, 0, bRadius, 0, Math.PI * 2.0);
         ctx.fillStyle = ballGrad;
         ctx.fill();
+
+        // High-gloss specular highlight
+        ctx.beginPath();
+        ctx.arc(-bRadius * 0.32, -bRadius * 0.35, bRadius * 0.26, 0, Math.PI * 2.0);
+        ctx.fillStyle = "rgba(255, 255, 255, 0.55)";
+        ctx.fill();
+
         ctx.restore();
 
         // Render active 3D particles

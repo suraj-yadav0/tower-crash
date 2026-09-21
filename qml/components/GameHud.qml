@@ -11,28 +11,28 @@ Column {
     property int streak: 0
     property bool isSuperFall: false
 
-    width: units.gu(34)
-    spacing: units.gu(0.5)
+    width: units.gu(36)
+    spacing: units.gu(0.45)
 
     // Double-Bezel Level Progression Card
     Rectangle {
         anchors.horizontalCenter: parent.horizontalCenter
-        width: Math.min(parent.width, units.gu(34))
-        height: units.gu(3.6)
-        radius: units.gu(1.8)
+        width: Math.min(parent.width, units.gu(36))
+        height: units.gu(3.8)
+        radius: units.gu(1.9)
         color: "#D90B1015"
         border.color: "#223142"
         border.width: units.gu(0.12)
 
         Row {
             anchors.centerIn: parent
-            spacing: units.gu(0.8)
+            spacing: units.gu(0.9)
 
             // Current Level Tag
             Rectangle {
-                width: units.gu(4.8)
-                height: units.gu(2.4)
-                radius: units.gu(1.2)
+                width: units.gu(5.0)
+                height: units.gu(2.6)
+                radius: units.gu(1.3)
                 color: "#162836"
                 border.color: "#00D2D3"
                 border.width: units.gu(0.12)
@@ -47,11 +47,11 @@ Column {
                 }
             }
 
-            // Recessed Progress Bar
+            // Recessed Progress Bar with Glowing Fill
             Rectangle {
-                width: units.gu(18)
-                height: units.gu(0.8)
-                radius: units.gu(0.4)
+                width: units.gu(18.5)
+                height: units.gu(0.85)
+                radius: units.gu(0.42)
                 color: "#060A0D"
                 border.color: "#1E2A38"
                 border.width: units.gu(0.08)
@@ -72,9 +72,9 @@ Column {
 
             // Next Level Tag
             Rectangle {
-                width: units.gu(4.8)
-                height: units.gu(2.4)
-                radius: units.gu(1.2)
+                width: units.gu(5.0)
+                height: units.gu(2.6)
+                radius: units.gu(1.3)
                 color: "#111720"
                 border.color: "#243242"
                 border.width: units.gu(0.1)
@@ -94,9 +94,9 @@ Column {
     // Eyebrow tag
     Rectangle {
         anchors.horizontalCenter: parent.horizontalCenter
-        width: eyebrowLabel.width + units.gu(2.0)
-        height: units.gu(1.8)
-        radius: units.gu(0.9)
+        width: eyebrowLabel.width + units.gu(2.2)
+        height: units.gu(1.9)
+        radius: units.gu(0.95)
         color: "#800B1015"
         border.color: "#1E2A38"
         border.width: units.gu(0.08)
@@ -111,25 +111,40 @@ Column {
         }
     }
 
-    // Heroic Score Readout with micro-scale bounce on change
-    Label {
-        id: scoreLabel
+    // Heroic Score with drop depth
+    Item {
         anchors.horizontalCenter: parent.horizontalCenter
-        text: root.score.toString()
-        font.pixelSize: units.gu(4.8)
-        font.weight: Font.Black
-        color: "#FFFFFF"
-        transformOrigin: Item.Center
+        width: scoreLabel.width
+        height: scoreLabel.height
 
-        SequentialAnimation {
-            id: scorePopAnim
-            NumberAnimation { target: scoreLabel; property: "scale"; to: 1.16; duration: 80; easing.type: Easing.OutQuad }
-            NumberAnimation { target: scoreLabel; property: "scale"; to: 1.0; duration: 150; easing.type: Easing.OutBack }
+        Label {
+            anchors.centerIn: parent
+            anchors.verticalCenterOffset: units.gu(0.12)
+            text: root.score.toString()
+            font.pixelSize: units.gu(5.0)
+            font.weight: Font.Black
+            color: "#4D000000"
         }
 
-        onTextChanged: {
-            if (root.score > 0) {
-                scorePopAnim.restart();
+        Label {
+            id: scoreLabel
+            anchors.centerIn: parent
+            text: root.score.toString()
+            font.pixelSize: units.gu(5.0)
+            font.weight: Font.Black
+            color: "#FFFFFF"
+            transformOrigin: Item.Center
+
+            SequentialAnimation {
+                id: scorePopAnim
+                NumberAnimation { target: scoreLabel; property: "scale"; to: 1.18; duration: 80; easing.type: Easing.OutQuad }
+                NumberAnimation { target: scoreLabel; property: "scale"; to: 1.0; duration: 150; easing.type: Easing.OutBack }
+            }
+
+            onTextChanged: {
+                if (root.score > 0) {
+                    scorePopAnim.restart();
+                }
             }
         }
     }
@@ -151,9 +166,9 @@ Column {
             spacing: units.gu(0.8)
 
             Rectangle {
-                width: units.gu(0.7)
-                height: units.gu(0.7)
-                radius: units.gu(0.35)
+                width: units.gu(0.75)
+                height: units.gu(0.75)
+                radius: units.gu(0.375)
                 color: "#F59E0B"
                 anchors.verticalCenter: parent.verticalCenter
             }
@@ -168,25 +183,32 @@ Column {
         }
     }
 
-    // Streak / Fireball dynamic status pill
+    // Dynamic Streak & Fireball status pill
     Rectangle {
         id: streakPill
         anchors.horizontalCenter: parent.horizontalCenter
-        width: streakText.width + units.gu(3.0)
-        height: units.gu(3.0)
-        radius: units.gu(1.5)
+        width: streakText.width + units.gu(3.2)
+        height: units.gu(3.2)
+        radius: units.gu(1.6)
         color: root.isSuperFall ? "#E6C0392B" : "#D91C1709"
         border.color: root.isSuperFall ? "#FF4757" : "#F59E0B"
         border.width: units.gu(0.14)
         visible: root.streak > 1 || root.isSuperFall
         opacity: visible ? 1.0 : 0.0
-        scale: visible ? 1.0 : 0.8
+        scale: visible ? 1.0 : 0.85
 
         Behavior on opacity {
-            NumberAnimation { duration: 150; easing.type: Easing.OutQuad }
+            NumberAnimation { duration: 160; easing.type: Easing.OutQuad }
         }
         Behavior on scale {
-            NumberAnimation { duration: 150; easing.type: Easing.OutBack }
+            NumberAnimation { duration: 160; easing.type: Easing.OutBack }
+        }
+
+        SequentialAnimation on scale {
+            running: root.isSuperFall
+            loops: Animation.Infinite
+            NumberAnimation { to: 1.06; duration: 260; easing.type: Easing.InOutQuad }
+            NumberAnimation { to: 0.96; duration: 260; easing.type: Easing.InOutQuad }
         }
 
         Row {

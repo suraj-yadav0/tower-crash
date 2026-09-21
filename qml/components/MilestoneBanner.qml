@@ -23,6 +23,7 @@ Item {
         color: "#E6241D09"
         border.color: "#F59E0B"
         border.width: units.gu(0.15)
+        scale: Math.min(1.0, 0.85 + 0.15 * root.bannerOpacity)
 
         Rectangle {
             id: innerCore
