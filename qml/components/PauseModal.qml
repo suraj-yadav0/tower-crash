@@ -176,6 +176,8 @@ Rectangle {
                         anchors.fill: parent
                         onClicked: root.restartRequested()
                     }
+                }
+
                 // Game Speed Setting Card
                 Rectangle {
                     anchors.horizontalCenter: parent.horizontalCenter
