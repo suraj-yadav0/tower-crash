@@ -9,6 +9,7 @@ Rectangle {
     property int levelReached: 1
 
     signal restartRequested()
+    signal mainMenuRequested()
 
     anchors.fill: parent
     color: "#E604070A"
@@ -262,6 +263,37 @@ Rectangle {
                         id: playAgainMouse
                         anchors.fill: parent
                         onClicked: root.restartRequested()
+                    }
+                }
+
+                // Secondary CTA: Main Menu
+                Rectangle {
+                    id: menuBtn
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    width: parent.width
+                    height: units.gu(4.4)
+                    radius: units.gu(2.2)
+                    color: menuMouse.pressed ? "#1E2A3A" : "#121A24"
+                    border.color: "#223142"
+                    border.width: units.gu(0.12)
+                    scale: menuMouse.pressed ? 0.95 : 1.0
+
+                    Behavior on scale {
+                        NumberAnimation { duration: 120; easing.type: Easing.OutQuad }
+                    }
+
+                    Label {
+                        anchors.centerIn: parent
+                        text: i18n.tr("Main Menu")
+                        font.pixelSize: units.gu(1.5)
+                        font.weight: Font.DemiBold
+                        color: "#94A3B8"
+                    }
+
+                    MouseArea {
+                        id: menuMouse
+                        anchors.fill: parent
+                        onClicked: root.mainMenuRequested()
                     }
                 }
             }

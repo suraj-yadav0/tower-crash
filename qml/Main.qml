@@ -18,7 +18,7 @@ MainView {
 
     ScreenSaver {
         id: screenSaver
-        screenSaverEnabled: gameContainer.gameOver || gameContainer.isPaused
+        screenSaverEnabled: gameContainer.gameOver || gameContainer.isPaused || gameContainer.isWelcomeOpen
     }
 
     SoundManager {
@@ -34,7 +34,7 @@ MainView {
         header: PageHeader {
             id: pageHeader
             title: i18n.tr("Tower Crash")
-            subtitle: i18n.tr("Level %1").arg(gameContainer.currentLevel)
+            subtitle: gameContainer.isWelcomeOpen ? i18n.tr("Arcade Edition") : i18n.tr("Level %1").arg(gameContainer.currentLevel)
             z: 100
             visible: true
 
@@ -43,6 +43,7 @@ MainView {
                 Action {
                     iconName: gameContainer.isPaused ? "media-playback-start" : "media-playback-pause"
                     text: gameContainer.isPaused ? i18n.tr("Resume") : i18n.tr("Pause")
+                    visible: !gameContainer.isWelcomeOpen
                     onTriggered: {
                         if (!gameContainer.gameOver) {
                             soundManager.buttonHaptic();
@@ -53,10 +54,11 @@ MainView {
                 Action {
                     iconName: "settings"
                     text: i18n.tr("Settings")
+                    visible: true
                     onTriggered: {
                         soundManager.buttonHaptic();
                         gameContainer.wasPausedBeforeSettings = gameContainer.isPaused;
-                        if (!gameContainer.gameOver) {
+                        if (!gameContainer.gameOver && !gameContainer.isWelcomeOpen) {
                             gameContainer.isPaused = true;
                         }
                         gameContainer.isSettingsOpen = true;
@@ -65,6 +67,7 @@ MainView {
                 Action {
                     iconName: gameContainer.soundEnabled ? "audio-volume-high" : "audio-volume-muted"
                     text: gameContainer.soundEnabled ? i18n.tr("Sound") : i18n.tr("Muted")
+                    visible: !gameContainer.isWelcomeOpen
                     onTriggered: {
                         soundManager.buttonHaptic();
                         gameContainer.soundEnabled = !gameContainer.soundEnabled;
@@ -74,9 +77,10 @@ MainView {
                 Action {
                     iconName: "view-refresh"
                     text: i18n.tr("Restart")
+                    visible: !gameContainer.isWelcomeOpen
                     onTriggered: {
                         soundManager.buttonHaptic();
-                        gameContainer.initGame();
+                        gameContainer.startGame();
                     }
                 }
             ]
@@ -109,6 +113,7 @@ MainView {
             property bool isPaused: false
             property bool isSettingsOpen: false
             property bool wasPausedBeforeSettings: false
+            property bool isWelcomeOpen: true
 
             property bool soundEnabled: true
             property bool hapticsEnabled: true
@@ -241,6 +246,17 @@ MainView {
                 gameCanvas.requestPaint();
             }
 
+            function startGame() {
+                initGame();
+                isWelcomeOpen = false;
+                soundManager.play("bounce");
+            }
+
+            function goToMainMenu() {
+                initGame();
+                isWelcomeOpen = true;
+            }
+
             onIsPausedChanged: {
                 if (!isPaused) {
                     lastPhysicsTime = 0.0;
@@ -254,27 +270,32 @@ MainView {
                 soundEnabled = stats.soundEnabled;
                 hapticsEnabled = stats.hapticsEnabled;
                 speedMode = stats.speedMode;
+                isWelcomeOpen = true;
                 initGame();
             }
 
             Keys.onLeftPressed: {
-                if (!gameOver && !isPaused && !isSettingsOpen) {
+                if (!gameOver && !isPaused && !isSettingsOpen && !isWelcomeOpen) {
                     towerAngle += 0.12;
                     gameCanvas.requestPaint();
                 }
             }
             Keys.onRightPressed: {
-                if (!gameOver && !isPaused && !isSettingsOpen) {
+                if (!gameOver && !isPaused && !isSettingsOpen && !isWelcomeOpen) {
                     towerAngle -= 0.12;
                     gameCanvas.requestPaint();
                 }
             }
             Keys.onSpacePressed: {
+                if (isWelcomeOpen) {
+                    startGame();
+                    return;
+                }
                 if (isSettingsOpen) {
                     return;
                 }
                 if (gameOver) {
-                    initGame();
+                    startGame();
                 } else {
                     isPaused = !isPaused;
                 }
@@ -282,10 +303,10 @@ MainView {
             Keys.onEscapePressed: {
                 if (isSettingsOpen) {
                     isSettingsOpen = false;
-                    if (!wasPausedBeforeSettings && !gameOver) {
+                    if (!wasPausedBeforeSettings && !gameOver && !isWelcomeOpen) {
                         isPaused = false;
                     }
-                } else if (isPaused) {
+                } else if (!isWelcomeOpen && isPaused) {
                     isPaused = false;
                 }
             }
@@ -294,9 +315,19 @@ MainView {
                 id: physicsTimer
                 interval: 16
                 repeat: true
-                running: !gameContainer.gameOver && !gameContainer.isPaused && !gameContainer.isSettingsOpen
+                running: true
 
                 onTriggered: {
+                    if (gameContainer.isWelcomeOpen) {
+                        gameContainer.towerAngle -= 0.005;
+                        gameCanvas.requestPaint();
+                        return;
+                    }
+
+                    if (gameContainer.gameOver || gameContainer.isPaused || gameContainer.isSettingsOpen) {
+                        return;
+                    }
+
                     var now = Date.now();
                     if (gameContainer.lastPhysicsTime <= 0) {
                         gameContainer.lastPhysicsTime = now;
@@ -613,7 +644,7 @@ MainView {
                 }
 
                 onPositionChanged: {
-                    if (pressed && !gameContainer.gameOver && !gameContainer.isPaused && !gameContainer.isSettingsOpen) {
+                    if (pressed && !gameContainer.gameOver && !gameContainer.isPaused && !gameContainer.isSettingsOpen && !gameContainer.isWelcomeOpen) {
                         var now = Date.now();
                         var elapsed = Math.max(1, now - gameContainer.lastDragTime);
                         var dx = mouse.x - gameContainer.lastDragX;
@@ -637,6 +668,7 @@ MainView {
             }
 
             GameHud {
+                visible: !gameContainer.isWelcomeOpen
                 anchors.top: parent.top
                 anchors.topMargin: units.gu(1.2)
                 anchors.horizontalCenter: parent.horizontalCenter
@@ -653,8 +685,24 @@ MainView {
                 bannerOpacity: gameContainer.bannerOpacity
             }
 
+            WelcomeScreen {
+                visible: gameContainer.isWelcomeOpen
+                bestScore: gameContainer.bestScore
+                totalRings: gameContainer.totalRings
+                speedMode: gameContainer.speedMode
+                onPlayRequested: {
+                    soundManager.buttonHaptic();
+                    gameContainer.startGame();
+                }
+                onSettingsRequested: {
+                    soundManager.buttonHaptic();
+                    gameContainer.wasPausedBeforeSettings = false;
+                    gameContainer.isSettingsOpen = true;
+                }
+            }
+
             PauseModal {
-                visible: gameContainer.isPaused && !gameContainer.isSettingsOpen && !gameContainer.gameOver
+                visible: gameContainer.isPaused && !gameContainer.isSettingsOpen && !gameContainer.gameOver && !gameContainer.isWelcomeOpen
                 soundEnabled: gameContainer.soundEnabled
                 hapticsEnabled: gameContainer.hapticsEnabled
                 speedMode: gameContainer.speedMode
@@ -664,7 +712,11 @@ MainView {
                 }
                 onRestartRequested: {
                     soundManager.buttonHaptic();
-                    gameContainer.initGame();
+                    gameContainer.startGame();
+                }
+                onMainMenuRequested: {
+                    soundManager.buttonHaptic();
+                    gameContainer.goToMainMenu();
                 }
                 onToggleSoundRequested: {
                     soundManager.buttonHaptic();
@@ -693,7 +745,7 @@ MainView {
                 onCloseRequested: {
                     soundManager.buttonHaptic();
                     gameContainer.isSettingsOpen = false;
-                    if (!gameContainer.wasPausedBeforeSettings && !gameContainer.gameOver) {
+                    if (!gameContainer.wasPausedBeforeSettings && !gameContainer.gameOver && !gameContainer.isWelcomeOpen) {
                         gameContainer.isPaused = false;
                     }
                 }
@@ -715,13 +767,17 @@ MainView {
             }
 
             GameOverModal {
-                visible: gameContainer.gameOver && !gameContainer.isSettingsOpen
+                visible: gameContainer.gameOver && !gameContainer.isSettingsOpen && !gameContainer.isWelcomeOpen
                 score: gameContainer.score
                 bestScore: gameContainer.bestScore
                 levelReached: gameContainer.currentLevel
                 onRestartRequested: {
                     soundManager.buttonHaptic();
-                    gameContainer.initGame();
+                    gameContainer.startGame();
+                }
+                onMainMenuRequested: {
+                    soundManager.buttonHaptic();
+                    gameContainer.goToMainMenu();
                 }
             }
         }
