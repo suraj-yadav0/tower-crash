@@ -214,7 +214,8 @@ MainView {
             }
 
             function generateRing() {
-                rings.push(RingGen.createRing(nextRingIndex++, ringSpacing));
+                var prevRing = rings.length > 0 ? rings[rings.length - 1] : null;
+                rings.push(RingGen.createRing(nextRingIndex++, ringSpacing, prevRing));
             }
 
             function initGame() {
@@ -232,6 +233,7 @@ MainView {
                 isSuperFall = false;
                 bannerText = "";
                 bannerOpacity = 0.0;
+                RingGen.resetGenerator();
 
                 for (var i = 0; i < 14; i++) {
                     generateRing();
@@ -687,6 +689,7 @@ MainView {
             MilestoneBanner {
                 text: gameContainer.bannerText
                 bannerOpacity: gameContainer.bannerOpacity
+                theme: gameContainer.currentTheme
             }
 
             WelcomeScreen {
