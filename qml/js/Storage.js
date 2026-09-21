@@ -10,7 +10,8 @@ function loadStats() {
         bestScore: 0,
         totalRings: 0,
         soundEnabled: true,
-        hapticsEnabled: true
+        hapticsEnabled: true,
+        speedMode: 1
     };
 
     try {
@@ -24,6 +25,7 @@ function loadStats() {
                 else if (row.k === "totalRings") stats.totalRings = parseInt(row.v) || 0;
                 else if (row.k === "soundEnabled") stats.soundEnabled = (row.v !== "0");
                 else if (row.k === "hapticsEnabled") stats.hapticsEnabled = (row.v !== "0");
+                else if (row.k === "speedMode") stats.speedMode = parseInt(row.v) || 1;
             }
         });
     } catch (e) {}

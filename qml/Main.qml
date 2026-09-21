@@ -118,9 +118,20 @@ MainView {
             property real ringHeight: units.gu(1.2)
             property real tiltRatio: 0.36
 
-            property real gravity: units.gu(250)
-            property real bounceSpeed: units.gu(56)
-            property real maxFallSpeed: units.gu(160)
+            property int speedMode: 1
+            property real speedMultiplier: {
+                if (speedMode === 0) return 0.78;
+                if (speedMode === 2) return 1.20;
+                return 1.0;
+            }
+
+            property real baseGravity: units.gu(215)
+            property real baseBounceSpeed: units.gu(50)
+            property real baseMaxFallSpeed: units.gu(135)
+
+            property real gravity: baseGravity * speedMultiplier
+            property real bounceSpeed: baseBounceSpeed * Math.sqrt(speedMultiplier)
+            property real maxFallSpeed: baseMaxFallSpeed * speedMultiplier
             property real lastPhysicsTime: 0.0
 
             property real ballScreenY: units.gu(20.0)
@@ -201,6 +212,7 @@ MainView {
                 totalRings = stats.totalRings;
                 soundEnabled = stats.soundEnabled;
                 hapticsEnabled = stats.hapticsEnabled;
+                speedMode = stats.speedMode;
                 initGame();
             }
 
@@ -511,6 +523,7 @@ MainView {
                 visible: gameContainer.isPaused && !gameContainer.gameOver
                 soundEnabled: gameContainer.soundEnabled
                 hapticsEnabled: gameContainer.hapticsEnabled
+                speedMode: gameContainer.speedMode
                 onResumeRequested: {
                     soundManager.buttonHaptic();
                     gameContainer.isPaused = false;
@@ -528,6 +541,11 @@ MainView {
                     soundManager.buttonHaptic();
                     gameContainer.hapticsEnabled = !gameContainer.hapticsEnabled;
                     Storage.saveStat("hapticsEnabled", gameContainer.hapticsEnabled ? "1" : "0");
+                }
+                onSpeedModeSelected: {
+                    soundManager.buttonHaptic();
+                    gameContainer.speedMode = newMode;
+                    Storage.saveStat("speedMode", newMode.toString());
                 }
             }
 

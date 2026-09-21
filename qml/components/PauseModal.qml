@@ -6,11 +6,13 @@ Rectangle {
 
     property bool soundEnabled: true
     property bool hapticsEnabled: true
+    property int speedMode: 1
 
     signal resumeRequested()
     signal restartRequested()
     signal toggleSoundRequested()
     signal toggleHapticsRequested()
+    signal speedModeSelected(int newMode)
 
     anchors.fill: parent
     color: "#E604070A"
@@ -173,6 +175,114 @@ Rectangle {
                         id: restartMouse
                         anchors.fill: parent
                         onClicked: root.restartRequested()
+                    }
+                // Game Speed Setting Card
+                Rectangle {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    width: parent.width
+                    height: units.gu(5.6)
+                    radius: units.gu(1.4)
+                    color: "#0E141C"
+                    border.color: "#223142"
+                    border.width: units.gu(0.1)
+
+                    Column {
+                        anchors.centerIn: parent
+                        spacing: units.gu(0.5)
+
+                        Label {
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            text: i18n.tr("FALL SPEED")
+                            font.pixelSize: units.gu(1.0)
+                            font.weight: Font.Bold
+                            color: "#64748B"
+                        }
+
+                        Row {
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            spacing: units.gu(0.6)
+
+                            // Slow Option
+                            Rectangle {
+                                width: units.gu(7.8)
+                                height: units.gu(2.8)
+                                radius: units.gu(1.4)
+                                color: root.speedMode === 0 ? "#00D2D3" : (slowMouse.pressed ? "#1E2A3A" : "#121A24")
+                                border.color: root.speedMode === 0 ? "#00D2D3" : "#253344"
+                                border.width: units.gu(0.1)
+                                scale: slowMouse.pressed ? 0.94 : 1.0
+
+                                Behavior on scale { NumberAnimation { duration: 100 } }
+
+                                Label {
+                                    anchors.centerIn: parent
+                                    text: i18n.tr("Slow")
+                                    font.pixelSize: units.gu(1.2)
+                                    font.weight: Font.Bold
+                                    color: root.speedMode === 0 ? "#04070A" : "#94A3B8"
+                                }
+
+                                MouseArea {
+                                    id: slowMouse
+                                    anchors.fill: parent
+                                    onClicked: root.speedModeSelected(0)
+                                }
+                            }
+
+                            // Normal Option
+                            Rectangle {
+                                width: units.gu(7.8)
+                                height: units.gu(2.8)
+                                radius: units.gu(1.4)
+                                color: root.speedMode === 1 ? "#00D2D3" : (normalMouse.pressed ? "#1E2A3A" : "#121A24")
+                                border.color: root.speedMode === 1 ? "#00D2D3" : "#253344"
+                                border.width: units.gu(0.1)
+                                scale: normalMouse.pressed ? 0.94 : 1.0
+
+                                Behavior on scale { NumberAnimation { duration: 100 } }
+
+                                Label {
+                                    anchors.centerIn: parent
+                                    text: i18n.tr("Normal")
+                                    font.pixelSize: units.gu(1.2)
+                                    font.weight: Font.Bold
+                                    color: root.speedMode === 1 ? "#04070A" : "#94A3B8"
+                                }
+
+                                MouseArea {
+                                    id: normalMouse
+                                    anchors.fill: parent
+                                    onClicked: root.speedModeSelected(1)
+                                }
+                            }
+
+                            // Fast Option
+                            Rectangle {
+                                width: units.gu(7.8)
+                                height: units.gu(2.8)
+                                radius: units.gu(1.4)
+                                color: root.speedMode === 2 ? "#00D2D3" : (fastMouse.pressed ? "#1E2A3A" : "#121A24")
+                                border.color: root.speedMode === 2 ? "#00D2D3" : "#253344"
+                                border.width: units.gu(0.1)
+                                scale: fastMouse.pressed ? 0.94 : 1.0
+
+                                Behavior on scale { NumberAnimation { duration: 100 } }
+
+                                Label {
+                                    anchors.centerIn: parent
+                                    text: i18n.tr("Fast")
+                                    font.pixelSize: units.gu(1.2)
+                                    font.weight: Font.Bold
+                                    color: root.speedMode === 2 ? "#04070A" : "#94A3B8"
+                                }
+
+                                MouseArea {
+                                    id: fastMouse
+                                    anchors.fill: parent
+                                    onClicked: root.speedModeSelected(2)
+                                }
+                            }
+                        }
                     }
                 }
 
