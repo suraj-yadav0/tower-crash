@@ -8,6 +8,7 @@ QML_FILES += \
     qml/components/GameHud.qml \
     qml/components/MilestoneBanner.qml \
     qml/components/PauseModal.qml \
+    qml/components/SettingsModal.qml \
     qml/components/GameOverModal.qml \
     qml/components/SoundManager.qml \
     qml/js/Themes.js \

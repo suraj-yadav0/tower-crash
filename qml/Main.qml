@@ -38,6 +38,7 @@ MainView {
             z: 100
             visible: true
 
+            trailingActionBar.numberOfSlots: 4
             trailingActionBar.actions: [
                 Action {
                     iconName: gameContainer.isPaused ? "media-playback-start" : "media-playback-pause"
@@ -47,6 +48,18 @@ MainView {
                             soundManager.buttonHaptic();
                             gameContainer.isPaused = !gameContainer.isPaused;
                         }
+                    }
+                },
+                Action {
+                    iconName: "settings"
+                    text: i18n.tr("Settings")
+                    onTriggered: {
+                        soundManager.buttonHaptic();
+                        gameContainer.wasPausedBeforeSettings = gameContainer.isPaused;
+                        if (!gameContainer.gameOver) {
+                            gameContainer.isPaused = true;
+                        }
+                        gameContainer.isSettingsOpen = true;
                     }
                 },
                 Action {
@@ -94,6 +107,8 @@ MainView {
             property int totalRings: 0
             property bool gameOver: false
             property bool isPaused: false
+            property bool isSettingsOpen: false
+            property bool wasPausedBeforeSettings: false
 
             property bool soundEnabled: true
             property bool hapticsEnabled: true
@@ -220,6 +235,8 @@ MainView {
                 cameraY = ringSpacing;
                 gameOver = false;
                 isPaused = false;
+                isSettingsOpen = false;
+                wasPausedBeforeSettings = false;
                 lastPhysicsTime = 0.0;
                 gameCanvas.requestPaint();
             }
@@ -241,22 +258,35 @@ MainView {
             }
 
             Keys.onLeftPressed: {
-                if (!gameOver && !isPaused) {
+                if (!gameOver && !isPaused && !isSettingsOpen) {
                     towerAngle += 0.12;
                     gameCanvas.requestPaint();
                 }
             }
             Keys.onRightPressed: {
-                if (!gameOver && !isPaused) {
+                if (!gameOver && !isPaused && !isSettingsOpen) {
                     towerAngle -= 0.12;
                     gameCanvas.requestPaint();
                 }
             }
             Keys.onSpacePressed: {
+                if (isSettingsOpen) {
+                    return;
+                }
                 if (gameOver) {
                     initGame();
                 } else {
                     isPaused = !isPaused;
+                }
+            }
+            Keys.onEscapePressed: {
+                if (isSettingsOpen) {
+                    isSettingsOpen = false;
+                    if (!wasPausedBeforeSettings && !gameOver) {
+                        isPaused = false;
+                    }
+                } else if (isPaused) {
+                    isPaused = false;
                 }
             }
 
@@ -264,7 +294,7 @@ MainView {
                 id: physicsTimer
                 interval: 16
                 repeat: true
-                running: !gameContainer.gameOver && !gameContainer.isPaused
+                running: !gameContainer.gameOver && !gameContainer.isPaused && !gameContainer.isSettingsOpen
 
                 onTriggered: {
                     var now = Date.now();
@@ -583,7 +613,7 @@ MainView {
                 }
 
                 onPositionChanged: {
-                    if (pressed && !gameContainer.gameOver && !gameContainer.isPaused) {
+                    if (pressed && !gameContainer.gameOver && !gameContainer.isPaused && !gameContainer.isSettingsOpen) {
                         var now = Date.now();
                         var elapsed = Math.max(1, now - gameContainer.lastDragTime);
                         var dx = mouse.x - gameContainer.lastDragX;
@@ -624,7 +654,7 @@ MainView {
             }
 
             PauseModal {
-                visible: gameContainer.isPaused && !gameContainer.gameOver
+                visible: gameContainer.isPaused && !gameContainer.isSettingsOpen && !gameContainer.gameOver
                 soundEnabled: gameContainer.soundEnabled
                 hapticsEnabled: gameContainer.hapticsEnabled
                 speedMode: gameContainer.speedMode
@@ -653,8 +683,39 @@ MainView {
                 }
             }
 
+            SettingsModal {
+                visible: gameContainer.isSettingsOpen
+                soundEnabled: gameContainer.soundEnabled
+                hapticsEnabled: gameContainer.hapticsEnabled
+                speedMode: gameContainer.speedMode
+                bestScore: gameContainer.bestScore
+                totalRings: gameContainer.totalRings
+                onCloseRequested: {
+                    soundManager.buttonHaptic();
+                    gameContainer.isSettingsOpen = false;
+                    if (!gameContainer.wasPausedBeforeSettings && !gameContainer.gameOver) {
+                        gameContainer.isPaused = false;
+                    }
+                }
+                onToggleSoundRequested: {
+                    soundManager.buttonHaptic();
+                    gameContainer.soundEnabled = !gameContainer.soundEnabled;
+                    Storage.saveStat("soundEnabled", gameContainer.soundEnabled ? "1" : "0");
+                }
+                onToggleHapticsRequested: {
+                    soundManager.buttonHaptic();
+                    gameContainer.hapticsEnabled = !gameContainer.hapticsEnabled;
+                    Storage.saveStat("hapticsEnabled", gameContainer.hapticsEnabled ? "1" : "0");
+                }
+                onSpeedModeSelected: {
+                    soundManager.buttonHaptic();
+                    gameContainer.speedMode = newMode;
+                    Storage.saveStat("speedMode", newMode.toString());
+                }
+            }
+
             GameOverModal {
-                visible: gameContainer.gameOver
+                visible: gameContainer.gameOver && !gameContainer.isSettingsOpen
                 score: gameContainer.score
                 bestScore: gameContainer.bestScore
                 levelReached: gameContainer.currentLevel
