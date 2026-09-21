@@ -20,22 +20,22 @@ MainView {
     // Audio effects
     SoundEffect {
         id: sfxBounce
-        source: "assets/sounds/bounce.wav"
+        source: "../assets/sounds/bounce.wav"
         muted: !gameContainer.soundEnabled
     }
     SoundEffect {
         id: sfxPass
-        source: "assets/sounds/pass.wav"
+        source: "../assets/sounds/pass.wav"
         muted: !gameContainer.soundEnabled
     }
     SoundEffect {
         id: sfxSmash
-        source: "assets/sounds/smash.wav"
+        source: "../assets/sounds/smash.wav"
         muted: !gameContainer.soundEnabled
     }
     SoundEffect {
         id: sfxGameOver
-        source: "assets/sounds/gameover.wav"
+        source: "../assets/sounds/gameover.wav"
         muted: !gameContainer.soundEnabled
     }
 
@@ -71,7 +71,7 @@ MainView {
     // Auto-pause when app is unfocused or minimized
     Connections {
         target: Qt.application
-        onActiveChanged: {
+        function onActiveChanged() {
             if (!Qt.application.active && !gameContainer.gameOver) {
                 gameContainer.isPaused = true;
             }
@@ -141,9 +141,9 @@ MainView {
             property real ringHeight: units.gu(1.2)
             property real tiltRatio: 0.36
 
-            property real gravity: units.gu(90)
-            property real bounceSpeed: units.gu(34)
-            property real maxFallSpeed: units.gu(65)
+            property real gravity: units.gu(185)
+            property real bounceSpeed: units.gu(48)
+            property real maxFallSpeed: units.gu(120)
 
             property real ballScreenY: height * 0.35
             property var rings: []
@@ -252,6 +252,9 @@ MainView {
             }
 
             function spawnParticles(x, y, count, color, speedMultiplier) {
+                if (particles.length > 80) {
+                    particles.splice(0, particles.length - 80);
+                }
                 for (var i = 0; i < count; i++) {
                     var angle = Math.random() * Math.PI * 2.0;
                     var speed = (units.gu(8) + Math.random() * units.gu(18)) * speedMultiplier;
@@ -322,6 +325,7 @@ MainView {
                     passed: false,
                     broken: false,
                     isGoal: isGoal,
+                    goalAwarded: false,
                     splats: []
                 });
             }
@@ -402,27 +406,30 @@ MainView {
                     }
 
                     // Super fall triggers when dropping through 3 or more rings at terminal descent
-                    gameContainer.isSuperFall = (gameContainer.streak >= 3 && gameContainer.ballVy > gameContainer.gravity * 0.45);
+                    gameContainer.isSuperFall = (gameContainer.streak >= 3 && gameContainer.ballVy > gameContainer.gravity * 0.35);
 
                     var nextY = gameContainer.ballY + gameContainer.ballVy * dt;
 
                     // Update motion trail
-                    gameContainer.ballTrail.push({
-                        y: gameContainer.ballY,
-                        isSuper: gameContainer.isSuperFall,
-                        alpha: 0.65
-                    });
-                    if (gameContainer.ballTrail.length > 6) {
+                    if (gameContainer.ballVy > 0) {
+                        gameContainer.ballTrail.push({
+                            y: gameContainer.ballY,
+                            isSuper: gameContainer.isSuperFall,
+                            alpha: 0.7
+                        });
+                        if (gameContainer.ballTrail.length > 5) {
+                            gameContainer.ballTrail.shift();
+                        }
+                    } else if (gameContainer.ballTrail.length > 0) {
                         gameContainer.ballTrail.shift();
                     }
                     for (var t = 0; t < gameContainer.ballTrail.length; t++) {
-                        gameContainer.ballTrail[t].alpha -= dt * 2.2;
+                        gameContainer.ballTrail[t].alpha -= dt * 3.5;
                     }
 
                     if (gameContainer.ballVy > 0) {
                         for (var i = 0; i < gameContainer.rings.length; i++) {
                             var ring = gameContainer.rings[i];
-                            if (ring.broken) continue;
 
                             if (prevY <= ring.y && nextY >= ring.y) {
                                 var relAngle = ((Math.PI / 2.0 - gameContainer.towerAngle) % (2.0 * Math.PI));
@@ -436,18 +443,26 @@ MainView {
 
                                 var segType = ring.segments[segmentIdx];
 
-                                // Super fall smashes through any platform
+                                // Super fall smashes through any platform, neutralizes hazard, and executes a full safe bounce
                                 if (gameContainer.isSuperFall && segType !== 1) {
-                                    ring.broken = true;
-                                    gameContainer.spawnParticles(0, ring.y, 22, "#ff9f43", 1.6);
+                                    ring.segments[segmentIdx] = 0;
+                                    gameContainer.spawnParticles(0, ring.y, 28, "#ff9f43", 1.8);
                                     root.sfxSmash.play();
                                     root.triggerHaptic(true);
-                                    gameContainer.score += 15;
+
+                                    gameContainer.score += 25;
                                     gameContainer.streak = 0;
                                     gameContainer.isSuperFall = false;
-                                    gameContainer.ballVy = -gameContainer.bounceSpeed * 0.35;
+
+                                    gameContainer.ballY = ring.y;
+                                    gameContainer.ballVy = -gameContainer.bounceSpeed * speedScale;
                                     gameContainer.squash = 0.55;
                                     nextY = ring.y;
+
+                                    ring.splats.push({
+                                        angle: relAngle,
+                                        radius: units.gu(2.2)
+                                    });
                                     break;
                                 }
 
@@ -455,6 +470,7 @@ MainView {
                                     gameContainer.ballY = ring.y;
                                     gameContainer.ballVy = -gameContainer.bounceSpeed * speedScale;
                                     gameContainer.streak = 0;
+                                    gameContainer.isSuperFall = false;
                                     gameContainer.squash = 0.65;
                                     nextY = ring.y;
 
@@ -469,8 +485,11 @@ MainView {
 
                                     var theme = gameContainer.getTheme(gameContainer.currentLevel);
                                     if (ring.isGoal) {
-                                        gameContainer.score += 50;
-                                        gameContainer.spawnParticles(0, ring.y, 26, "#ffd700", 1.8);
+                                        if (!ring.goalAwarded) {
+                                            ring.goalAwarded = true;
+                                            gameContainer.score += 50;
+                                            gameContainer.spawnParticles(0, ring.y, 30, "#ffd700", 2.0);
+                                        }
                                     } else {
                                         gameContainer.spawnParticles(0, ring.y, 7, theme.ballMid, 0.7);
                                     }
@@ -479,6 +498,7 @@ MainView {
                                     gameContainer.ballY = ring.y;
                                     gameContainer.ballVy = 0;
                                     gameContainer.gameOver = true;
+                                    gameContainer.isSuperFall = false;
                                     root.sfxGameOver.play();
                                     root.triggerHaptic(true);
                                     gameContainer.spawnParticles(0, ring.y, 24, "#ff4757", 1.4);
@@ -512,12 +532,15 @@ MainView {
 
                     var targetCamera = gameContainer.ballY;
                     if (gameContainer.ballVy < 0) {
-                        gameContainer.cameraY += (targetCamera - gameContainer.cameraY) * 0.08;
+                        gameContainer.cameraY += (targetCamera - gameContainer.cameraY) * 0.12;
                     } else {
-                        gameContainer.cameraY += (targetCamera - gameContainer.cameraY) * 0.22;
+                        gameContainer.cameraY += (targetCamera - gameContainer.cameraY) * 0.32;
+                        if (gameContainer.ballY - gameContainer.cameraY > units.gu(5)) {
+                            gameContainer.cameraY = gameContainer.ballY - units.gu(5);
+                        }
                     }
 
-                    gameContainer.squash += (1.0 - gameContainer.squash) * 0.18;
+                    gameContainer.squash += (1.0 - gameContainer.squash) * 0.28;
 
                     // Update particle physics
                     for (var p = gameContainer.particles.length - 1; p >= 0; p--) {
@@ -533,12 +556,13 @@ MainView {
                     }
 
                     var lastRing = gameContainer.rings[gameContainer.rings.length - 1];
-                    if (lastRing.y < gameContainer.ballY + gameContainer.height + gameContainer.ringSpacing * 3) {
+                    while (lastRing && lastRing.y < gameContainer.cameraY + gameContainer.ringSpacing * 8) {
                         gameContainer.generateRing();
+                        lastRing = gameContainer.rings[gameContainer.rings.length - 1];
                     }
 
                     while (gameContainer.rings.length > 0 &&
-                           gameContainer.rings[0].y < gameContainer.ballY - gameContainer.height - gameContainer.ringSpacing) {
+                           gameContainer.rings[0].y < gameContainer.cameraY - gameContainer.ringSpacing * 3) {
                         gameContainer.rings.shift();
                     }
 
@@ -807,8 +831,9 @@ MainView {
                         var elapsed = Math.max(1, now - gameContainer.lastDragTime);
                         var dx = mouse.x - gameContainer.lastDragX;
 
-                        gameContainer.towerAngle -= dx * 0.012;
-                        gameContainer.angularVelocity = -(dx / elapsed) * 0.16;
+                        gameContainer.towerAngle -= dx * 0.014;
+                        var fling = -(dx / elapsed) * 0.12;
+                        gameContainer.angularVelocity = Math.max(-0.25, Math.min(0.25, fling));
 
                         gameContainer.lastDragX = mouse.x;
                         gameContainer.lastDragTime = now;
