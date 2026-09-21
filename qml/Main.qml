@@ -4,6 +4,9 @@
 import QtQuick 2.9
 import Lomiri.Components 1.3
 import QtSystemInfo 5.0
+import QtMultimedia 5.0
+import QtFeedback 5.0
+import QtQuick.LocalStorage 2.0
 
 MainView {
     id: root
@@ -14,11 +17,71 @@ MainView {
     width: units.gu(45)
     height: units.gu(80)
 
-    ScreenSaver {
-        id: screenSaver
-        screenSaverEnabled: !Qt.application.active
+    // Audio effects
+    SoundEffect {
+        id: sfxBounce
+        source: "assets/sounds/bounce.wav"
+        muted: !gameContainer.soundEnabled
+    }
+    SoundEffect {
+        id: sfxPass
+        source: "assets/sounds/pass.wav"
+        muted: !gameContainer.soundEnabled
+    }
+    SoundEffect {
+        id: sfxSmash
+        source: "assets/sounds/smash.wav"
+        muted: !gameContainer.soundEnabled
+    }
+    SoundEffect {
+        id: sfxGameOver
+        source: "assets/sounds/gameover.wav"
+        muted: !gameContainer.soundEnabled
     }
 
+    // Tactile haptic feedback
+    HapticsEffect {
+        id: hapticLight
+        duration: 25
+        intensity: 0.6
+    }
+    HapticsEffect {
+        id: hapticHeavy
+        duration: 70
+        intensity: 1.0
+    }
+    ThemeEffect {
+        id: themeHaptic
+        effect: ThemeEffect.Press
+    }
+
+    function triggerHaptic(strong) {
+        if (!gameContainer.hapticsEnabled) return;
+        try {
+            if (strong) {
+                hapticHeavy.start();
+            } else {
+                hapticLight.start();
+            }
+        } catch (err) {
+            themeHaptic.play();
+        }
+    }
+
+    // Auto-pause when app is unfocused or minimized
+    Connections {
+        target: Qt.application
+        onActiveChanged: {
+            if (!Qt.application.active && !gameContainer.gameOver) {
+                gameContainer.isPaused = true;
+            }
+        }
+    }
+
+    ScreenSaver {
+        id: screenSaver
+        screenSaverEnabled: !Qt.application.active || gameContainer.isPaused || gameContainer.gameOver
+    }
 
     Page {
         id: gamePage
@@ -27,6 +90,17 @@ MainView {
         header: PageHeader {
             id: header
             title: i18n.tr("Tower Crash")
+            trailingActionBar.actions: [
+                Action {
+                    iconName: gameContainer.isPaused ? "media-playback-start" : "media-playback-pause"
+                    text: gameContainer.isPaused ? i18n.tr("Resume") : i18n.tr("Pause")
+                    onTriggered: {
+                        if (!gameContainer.gameOver) {
+                            gameContainer.isPaused = !gameContainer.isPaused;
+                        }
+                    }
+                }
+            ]
         }
 
         Item {
@@ -40,13 +114,24 @@ MainView {
             property int score: 0
             property int bestScore: 0
             property int streak: 0
+            property int totalRings: 0
             property bool gameOver: false
+            property bool isPaused: false
+
+            property bool soundEnabled: true
+            property bool hapticsEnabled: true
 
             property real towerAngle: 0.0
+            property real angularVelocity: 0.0
+            property bool isDragging: false
+            property real lastDragX: 0.0
+            property real lastDragTime: 0.0
+
             property real ballY: 0.0
             property real ballVy: 0.0
             property real cameraY: 0.0
             property real squash: 1.0
+            property bool isSuperFall: false
 
             property real ringSpacing: units.gu(14)
             property real outerRadius: units.gu(15)
@@ -63,16 +148,141 @@ MainView {
             property real ballScreenY: height * 0.35
             property var rings: []
             property int nextRingIndex: 0
+            property var particles: []
+            property var ballTrail: []
+
+            property int currentLevel: Math.floor(Math.max(0, ballY) / (ringSpacing * 20)) + 1
+            property real levelProgress: ((Math.max(0, ballY) / ringSpacing) % 20) / 20.0
+
+            function getDatabase() {
+                return LocalStorage.openDatabaseSync("TowerCrashDB", "1.0", "Tower Crash Persistence", 100000);
+            }
+
+            function loadPersistence() {
+                try {
+                    var db = getDatabase();
+                    db.transaction(function(tx) {
+                        tx.executeSql('CREATE TABLE IF NOT EXISTS kv (k TEXT UNIQUE, v TEXT)');
+                        var rs = tx.executeSql('SELECT v FROM kv WHERE k = "bestScore"');
+                        if (rs.rows.length > 0) bestScore = parseInt(rs.rows.item(0).v) || 0;
+                        rs = tx.executeSql('SELECT v FROM kv WHERE k = "soundEnabled"');
+                        if (rs.rows.length > 0) soundEnabled = (rs.rows.item(0).v === "1");
+                        rs = tx.executeSql('SELECT v FROM kv WHERE k = "hapticsEnabled"');
+                        if (rs.rows.length > 0) hapticsEnabled = (rs.rows.item(0).v === "1");
+                        rs = tx.executeSql('SELECT v FROM kv WHERE k = "totalRings"');
+                        if (rs.rows.length > 0) totalRings = parseInt(rs.rows.item(0).v) || 0;
+                    });
+                } catch (e) {
+                    // LocalStorage unavailable, fall back to default in-memory state
+                }
+            }
+
+            function saveStat(k, v) {
+                try {
+                    var db = getDatabase();
+                    db.transaction(function(tx) {
+                        tx.executeSql('INSERT OR REPLACE INTO kv VALUES(?, ?)', [k, v.toString()]);
+                    });
+                } catch (e) {}
+            }
+
+            function getTheme(levelNum) {
+                var themeIdx = (levelNum - 1) % 4;
+                if (themeIdx === 0) {
+                    return {
+                        topSafe: "#00b4d8",
+                        sideSafe: "#0077b6",
+                        topHazard: "#ff4757",
+                        sideHazard: "#b71523",
+                        ballLight: "#fff5cc",
+                        ballMid: "#ffd166",
+                        ballDark: "#d62828",
+                        bgTop: "#192026",
+                        bgBottom: "#0e1317",
+                        pole1: "#2c3440",
+                        pole2: "#525f6e",
+                        pole3: "#1c2128"
+                    };
+                } else if (themeIdx === 1) {
+                    return {
+                        topSafe: "#a29bfe",
+                        sideSafe: "#6c5ce7",
+                        topHazard: "#ff6b6b",
+                        sideHazard: "#ee5253",
+                        ballLight: "#e0fcfc",
+                        ballMid: "#00d2d3",
+                        ballDark: "#01a3a4",
+                        bgTop: "#1a1224",
+                        bgBottom: "#0f0b15",
+                        pole1: "#382952",
+                        pole2: "#624b87",
+                        pole3: "#1f1430"
+                    };
+                } else if (themeIdx === 2) {
+                    return {
+                        topSafe: "#ffeaa7",
+                        sideSafe: "#fdcb6e",
+                        topHazard: "#eb2f06",
+                        sideHazard: "#b71540",
+                        ballLight: "#ffe6f9",
+                        ballMid: "#ff9ff3",
+                        ballDark: "#f368e0",
+                        bgTop: "#1c1c14",
+                        bgBottom: "#10100a",
+                        pole1: "#47402c",
+                        pole2: "#786d4e",
+                        pole3: "#262215"
+                    };
+                } else {
+                    return {
+                        topSafe: "#ff9f43",
+                        sideSafe: "#ee5253",
+                        topHazard: "#ff3838",
+                        sideHazard: "#c0392b",
+                        ballLight: "#dff9fb",
+                        ballMid: "#54a0ff",
+                        ballDark: "#2e86de",
+                        bgTop: "#22120e",
+                        bgBottom: "#130a08",
+                        pole1: "#47241b",
+                        pole2: "#784133",
+                        pole3: "#26110c"
+                    };
+                }
+            }
+
+            function spawnParticles(x, y, count, color, speedMultiplier) {
+                for (var i = 0; i < count; i++) {
+                    var angle = Math.random() * Math.PI * 2.0;
+                    var speed = (units.gu(8) + Math.random() * units.gu(18)) * speedMultiplier;
+                    particles.push({
+                        x: x + (Math.random() - 0.5) * units.gu(3),
+                        y: y,
+                        z: (Math.random() - 0.5) * units.gu(3),
+                        vx: Math.cos(angle) * speed,
+                        vy: -Math.random() * units.gu(16) * speedMultiplier,
+                        vz: Math.sin(angle) * speed,
+                        color: color,
+                        alpha: 1.0,
+                        size: units.gu(0.4 + Math.random() * 0.6)
+                    });
+                }
+            }
 
             function generateRing() {
                 var index = nextRingIndex++;
                 var ringY = (index + 1) * ringSpacing;
                 var segments = [0, 0, 0, 0, 0, 0, 0, 0];
+                var isGoal = (index > 0 && index % 20 === 0);
 
                 if (index === 0) {
-                    // Safe front landing on initial spawn
                     segments[2] = 0;
                     segments[6] = 1;
+                } else if (isGoal) {
+                    // Golden stage milestone platform: safe landing across all sectors
+                    for (var s = 0; s < 8; s++) {
+                        segments[s] = 0;
+                    }
                 } else {
                     var gapCount = 1;
                     if (index > 4 && Math.random() < 0.45) {
@@ -89,10 +299,10 @@ MainView {
                     }
 
                     var slots = [0, 1, 2, 3, 4, 5, 6, 7];
-                    for (var s = slots.length - 1; s > 0; s--) {
-                        var randIdx = Math.floor(Math.random() * (s + 1));
-                        var temp = slots[s];
-                        slots[s] = slots[randIdx];
+                    for (var si = slots.length - 1; si > 0; si--) {
+                        var randIdx = Math.floor(Math.random() * (si + 1));
+                        var temp = slots[si];
+                        slots[si] = slots[randIdx];
                         slots[randIdx] = temp;
                     }
 
@@ -109,7 +319,10 @@ MainView {
                     index: index,
                     y: ringY,
                     segments: segments,
-                    passed: false
+                    passed: false,
+                    broken: false,
+                    isGoal: isGoal,
+                    splats: []
                 });
             }
 
@@ -117,11 +330,16 @@ MainView {
                 score = 0;
                 streak = 0;
                 towerAngle = 0.0;
+                angularVelocity = 0.0;
+                isDragging = false;
                 rings = [];
+                particles = [];
+                ballTrail = [];
                 nextRingIndex = 0;
                 squash = 1.0;
+                isSuperFall = false;
 
-                for (var i = 0; i < 12; i++) {
+                for (var i = 0; i < 14; i++) {
                     generateRing();
                 }
 
@@ -129,37 +347,50 @@ MainView {
                 ballVy = 0.0;
                 cameraY = ringSpacing;
                 gameOver = false;
+                isPaused = false;
                 gameCanvas.requestPaint();
             }
 
             Component.onCompleted: {
+                loadPersistence();
                 initGame();
             }
 
-            // Keyboard navigation: left rotates left, right rotates right
             Keys.onLeftPressed: {
-                if (!gameOver) {
+                if (!gameOver && !isPaused) {
                     towerAngle += 0.12;
                     gameCanvas.requestPaint();
                 }
             }
             Keys.onRightPressed: {
-                if (!gameOver) {
+                if (!gameOver && !isPaused) {
                     towerAngle -= 0.12;
                     gameCanvas.requestPaint();
                 }
             }
+            Keys.onSpacePressed: {
+                if (gameOver) {
+                    initGame();
+                } else {
+                    isPaused = !isPaused;
+                }
+            }
 
-            // Continuous physics and collision timer
             Timer {
                 id: physicsTimer
                 interval: 16
                 repeat: true
-                running: !gameContainer.gameOver
+                running: !gameContainer.gameOver && !gameContainer.isPaused
 
                 onTriggered: {
                     var dt = 0.016;
                     var prevY = gameContainer.ballY;
+
+                    // Apply inertial tower rotation friction
+                    if (!gameContainer.isDragging && Math.abs(gameContainer.angularVelocity) > 0.0001) {
+                        gameContainer.towerAngle += gameContainer.angularVelocity;
+                        gameContainer.angularVelocity *= 0.88;
+                    }
 
                     var currentDepth = Math.floor(gameContainer.ballY / gameContainer.ringSpacing);
                     var speedScale = 1.0 + Math.min(0.35, currentDepth * 0.005);
@@ -170,14 +401,30 @@ MainView {
                         gameContainer.ballVy = gameContainer.maxFallSpeed;
                     }
 
+                    // Super fall triggers when dropping through 3 or more rings at terminal descent
+                    gameContainer.isSuperFall = (gameContainer.streak >= 3 && gameContainer.ballVy > gameContainer.gravity * 0.45);
+
                     var nextY = gameContainer.ballY + gameContainer.ballVy * dt;
+
+                    // Update motion trail
+                    gameContainer.ballTrail.push({
+                        y: gameContainer.ballY,
+                        isSuper: gameContainer.isSuperFall,
+                        alpha: 0.65
+                    });
+                    if (gameContainer.ballTrail.length > 6) {
+                        gameContainer.ballTrail.shift();
+                    }
+                    for (var t = 0; t < gameContainer.ballTrail.length; t++) {
+                        gameContainer.ballTrail[t].alpha -= dt * 2.2;
+                    }
 
                     if (gameContainer.ballVy > 0) {
                         for (var i = 0; i < gameContainer.rings.length; i++) {
                             var ring = gameContainer.rings[i];
+                            if (ring.broken) continue;
 
                             if (prevY <= ring.y && nextY >= ring.y) {
-                                // Front of the tower facing the viewer corresponds to angle pi/2
                                 var relAngle = ((Math.PI / 2.0 - gameContainer.towerAngle) % (2.0 * Math.PI));
                                 if (relAngle < 0) {
                                     relAngle += 2.0 * Math.PI;
@@ -189,19 +436,56 @@ MainView {
 
                                 var segType = ring.segments[segmentIdx];
 
+                                // Super fall smashes through any platform
+                                if (gameContainer.isSuperFall && segType !== 1) {
+                                    ring.broken = true;
+                                    gameContainer.spawnParticles(0, ring.y, 22, "#ff9f43", 1.6);
+                                    root.sfxSmash.play();
+                                    root.triggerHaptic(true);
+                                    gameContainer.score += 15;
+                                    gameContainer.streak = 0;
+                                    gameContainer.isSuperFall = false;
+                                    gameContainer.ballVy = -gameContainer.bounceSpeed * 0.35;
+                                    gameContainer.squash = 0.55;
+                                    nextY = ring.y;
+                                    break;
+                                }
+
                                 if (segType === 0) {
                                     gameContainer.ballY = ring.y;
                                     gameContainer.ballVy = -gameContainer.bounceSpeed * speedScale;
                                     gameContainer.streak = 0;
                                     gameContainer.squash = 0.65;
                                     nextY = ring.y;
+
+                                    root.sfxBounce.play();
+                                    root.triggerHaptic(false);
+
+                                    // Record platform paint splat
+                                    ring.splats.push({
+                                        angle: relAngle,
+                                        radius: units.gu(1.5 + Math.random() * 0.8)
+                                    });
+
+                                    var theme = gameContainer.getTheme(gameContainer.currentLevel);
+                                    if (ring.isGoal) {
+                                        gameContainer.score += 50;
+                                        gameContainer.spawnParticles(0, ring.y, 26, "#ffd700", 1.8);
+                                    } else {
+                                        gameContainer.spawnParticles(0, ring.y, 7, theme.ballMid, 0.7);
+                                    }
                                     break;
                                 } else if (segType === 2) {
                                     gameContainer.ballY = ring.y;
                                     gameContainer.ballVy = 0;
                                     gameContainer.gameOver = true;
+                                    root.sfxGameOver.play();
+                                    root.triggerHaptic(true);
+                                    gameContainer.spawnParticles(0, ring.y, 24, "#ff4757", 1.4);
+
                                     if (gameContainer.score > gameContainer.bestScore) {
                                         gameContainer.bestScore = gameContainer.score;
+                                        gameContainer.saveStat("bestScore", gameContainer.bestScore);
                                     }
                                     gameCanvas.requestPaint();
                                     return;
@@ -210,9 +494,14 @@ MainView {
                                         ring.passed = true;
                                         gameContainer.streak++;
                                         gameContainer.score += gameContainer.streak;
+                                        gameContainer.totalRings++;
+                                        root.sfxPass.play();
+
                                         if (gameContainer.score > gameContainer.bestScore) {
                                             gameContainer.bestScore = gameContainer.score;
+                                            gameContainer.saveStat("bestScore", gameContainer.bestScore);
                                         }
+                                        gameContainer.saveStat("totalRings", gameContainer.totalRings);
                                     }
                                 }
                             }
@@ -221,7 +510,6 @@ MainView {
 
                     gameContainer.ballY = nextY;
 
-                    // Keep camera anchored near platform during bounce, accelerate downward tracking during fall
                     var targetCamera = gameContainer.ballY;
                     if (gameContainer.ballVy < 0) {
                         gameContainer.cameraY += (targetCamera - gameContainer.cameraY) * 0.08;
@@ -231,12 +519,24 @@ MainView {
 
                     gameContainer.squash += (1.0 - gameContainer.squash) * 0.18;
 
+                    // Update particle physics
+                    for (var p = gameContainer.particles.length - 1; p >= 0; p--) {
+                        var pt = gameContainer.particles[p];
+                        pt.x += pt.vx * dt;
+                        pt.y += pt.vy * dt;
+                        pt.z += pt.vz * dt;
+                        pt.vy += gameContainer.gravity * 0.45 * dt;
+                        pt.alpha -= dt * 1.5;
+                        if (pt.alpha <= 0) {
+                            gameContainer.particles.splice(p, 1);
+                        }
+                    }
+
                     var lastRing = gameContainer.rings[gameContainer.rings.length - 1];
                     if (lastRing.y < gameContainer.ballY + gameContainer.height + gameContainer.ringSpacing * 3) {
                         gameContainer.generateRing();
                     }
 
-                    // Prune off-screen rings to prevent unbounded array growth
                     while (gameContainer.rings.length > 0 &&
                            gameContainer.rings[0].y < gameContainer.ballY - gameContainer.height - gameContainer.ringSpacing) {
                         gameContainer.rings.shift();
@@ -246,7 +546,6 @@ MainView {
                 }
             }
 
-            // Pseudo-3D Canvas rendering
             Canvas {
                 id: gameCanvas
                 anchors.fill: parent
@@ -259,20 +558,23 @@ MainView {
 
                     ctx.clearRect(0, 0, w, h);
 
+                    var theme = gameContainer.getTheme(gameContainer.currentLevel);
+
+                    // Dynamic background
                     var bgGrad = ctx.createLinearGradient(0, 0, 0, h);
-                    bgGrad.addColorStop(0.0, "#192026");
-                    bgGrad.addColorStop(1.0, "#0e1317");
+                    bgGrad.addColorStop(0.0, theme.bgTop);
+                    bgGrad.addColorStop(1.0, theme.bgBottom);
                     ctx.fillStyle = bgGrad;
                     ctx.fillRect(0, 0, w, h);
 
+                    // Central column cylinder
                     var poleGrad = ctx.createLinearGradient(
                         centerX - gameContainer.poleRadius, 0,
                         centerX + gameContainer.poleRadius, 0
                     );
-                    poleGrad.addColorStop(0.0, "#2c3440");
-                    poleGrad.addColorStop(0.35, "#525f6e");
-                    poleGrad.addColorStop(0.7, "#3b444f");
-                    poleGrad.addColorStop(1.0, "#1c2128");
+                    poleGrad.addColorStop(0.0, theme.pole1);
+                    poleGrad.addColorStop(0.35, theme.pole2);
+                    poleGrad.addColorStop(1.0, theme.pole3);
                     ctx.fillStyle = poleGrad;
                     ctx.fillRect(
                         centerX - gameContainer.poleRadius,
@@ -290,8 +592,11 @@ MainView {
                     var tilt = gameContainer.tiltRatio;
                     var rHeight = gameContainer.ringHeight;
 
+                    // Render rings
                     for (var r = 0; r < gameContainer.rings.length; r++) {
                         var ring = gameContainer.rings[r];
+                        if (ring.broken) continue;
+
                         var ringScreenY = bScreenY + (ring.y - camY);
 
                         if (ringScreenY < -rSpacing || ringScreenY > h + rSpacing) {
@@ -304,14 +609,13 @@ MainView {
                                 continue;
                             }
 
-                            var topColor = (segType === 0) ? "#00b4d8" : "#ff4757";
-                            var sideColor = (segType === 0) ? "#0077b6" : "#b71523";
+                            var topColor = ring.isGoal ? "#ffd700" : ((segType === 0) ? theme.topSafe : theme.topHazard);
+                            var sideColor = ring.isGoal ? "#cca300" : ((segType === 0) ? theme.sideSafe : theme.sideHazard);
 
                             var startAngle = gameContainer.towerAngle + seg * (Math.PI / 4.0);
                             var endAngle = startAngle + (Math.PI / 4.0);
 
-                            // Extrude 3D rim for front-facing segments (sin > 0)
-                            ctx.beginPath();
+                            // Extrude front 3D rim
                             var samples = 6;
                             var topPoints = [];
                             var bottomPoints = [];
@@ -343,6 +647,7 @@ MainView {
                                 ctx.fill();
                             }
 
+                            // Render platform face
                             ctx.save();
                             ctx.translate(centerX, ringScreenY);
                             ctx.scale(1.0, tilt);
@@ -361,10 +666,33 @@ MainView {
 
                             ctx.restore();
                         }
+
+                        // Render platform paint splats
+                        if (ring.splats.length > 0) {
+                            for (var sp = 0; sp < ring.splats.length; sp++) {
+                                var splat = ring.splats[sp];
+                                var splatAngle = gameContainer.towerAngle + splat.angle;
+                                var midR = (outR + inR) / 2.0;
+                                var sx = centerX + midR * Math.cos(splatAngle);
+                                var sy = ringScreenY + midR * Math.sin(splatAngle) * tilt;
+
+                                ctx.save();
+                                ctx.translate(sx, sy);
+                                ctx.scale(1.0, tilt);
+                                ctx.beginPath();
+                                ctx.arc(0, 0, splat.radius, 0, Math.PI * 2.0);
+                                ctx.fillStyle = theme.ballMid;
+                                ctx.globalAlpha = 0.7;
+                                ctx.fill();
+                                ctx.restore();
+                            }
+                        }
                     }
 
+                    // Platform drop shadow
                     for (var sr = 0; sr < gameContainer.rings.length; sr++) {
                         var targetRing = gameContainer.rings[sr];
+                        if (targetRing.broken) continue;
                         if (targetRing.y >= bY) {
                             var dist = targetRing.y - bY;
                             if (dist < rSpacing * 1.6) {
@@ -385,9 +713,42 @@ MainView {
                         }
                     }
 
+                    // Motion trail behind the ball
                     var bRadius = gameContainer.ballRadius;
+                    for (var tr = 0; tr < gameContainer.ballTrail.length; tr++) {
+                        var trItem = gameContainer.ballTrail[tr];
+                        if (trItem.alpha <= 0) continue;
+                        var trailScreenY = bScreenY + (trItem.y - camY);
+                        var trailRadius = bRadius * (0.4 + 0.5 * (tr / gameContainer.ballTrail.length));
+
+                        ctx.save();
+                        ctx.translate(centerX, trailScreenY);
+                        ctx.beginPath();
+                        ctx.arc(0, 0, trailRadius, 0, Math.PI * 2.0);
+                        ctx.fillStyle = trItem.isSuper ? "#ff793f" : theme.ballMid;
+                        ctx.globalAlpha = trItem.alpha * 0.5;
+                        ctx.fill();
+                        ctx.restore();
+                    }
+
                     var actualBallScreenY = bScreenY + (gameContainer.ballY - camY);
 
+                    // Super fall flame aura
+                    if (gameContainer.isSuperFall) {
+                        ctx.save();
+                        ctx.translate(centerX, actualBallScreenY);
+                        ctx.beginPath();
+                        ctx.arc(0, 0, bRadius * 1.8, 0, Math.PI * 2.0);
+                        var flameGrad = ctx.createRadialGradient(0, 0, bRadius * 0.5, 0, 0, bRadius * 1.8);
+                        flameGrad.addColorStop(0.0, "rgba(255, 218, 121, 0.9)");
+                        flameGrad.addColorStop(0.5, "rgba(255, 121, 63, 0.6)");
+                        flameGrad.addColorStop(1.0, "rgba(255, 56, 56, 0.0)");
+                        ctx.fillStyle = flameGrad;
+                        ctx.fill();
+                        ctx.restore();
+                    }
+
+                    // Ball rendering with squash-and-stretch
                     ctx.save();
                     ctx.translate(centerX, actualBallScreenY);
                     ctx.scale(1.0 / Math.sqrt(gameContainer.squash), gameContainer.squash);
@@ -400,49 +761,117 @@ MainView {
                         0,
                         bRadius
                     );
-                    ballGrad.addColorStop(0.0, "#fff5cc");
-                    ballGrad.addColorStop(0.3, "#ffd166");
-                    ballGrad.addColorStop(0.75, "#f77f00");
-                    ballGrad.addColorStop(1.0, "#d62828");
+                    ballGrad.addColorStop(0.0, theme.ballLight);
+                    ballGrad.addColorStop(0.35, theme.ballMid);
+                    ballGrad.addColorStop(1.0, theme.ballDark);
 
                     ctx.beginPath();
                     ctx.arc(0, 0, bRadius, 0, Math.PI * 2.0);
                     ctx.fillStyle = ballGrad;
                     ctx.fill();
                     ctx.restore();
-                }
-            }
 
-            MouseArea {
-                id: dragArea
-                anchors.fill: parent
-                property real lastX: 0
+                    // Render active 3D particles
+                    for (var ptIdx = 0; ptIdx < gameContainer.particles.length; ptIdx++) {
+                        var particle = gameContainer.particles[ptIdx];
+                        var partScreenY = bScreenY + (particle.y - camY) + particle.z * tilt;
+                        var partScreenX = centerX + particle.x;
 
-                onPressed: {
-                    lastX = mouse.x;
-                }
-
-                onPositionChanged: {
-                    if (pressed && !gameContainer.gameOver) {
-                        var dx = mouse.x - lastX;
-                        // Dragging right rotates the cylinder face to the right
-                        gameContainer.towerAngle -= dx * 0.012;
-                        lastX = mouse.x;
-                        gameCanvas.requestPaint();
+                        ctx.save();
+                        ctx.translate(partScreenX, partScreenY);
+                        ctx.beginPath();
+                        ctx.arc(0, 0, particle.size, 0, Math.PI * 2.0);
+                        ctx.fillStyle = particle.color;
+                        ctx.globalAlpha = Math.max(0, particle.alpha);
+                        ctx.fill();
+                        ctx.restore();
                     }
                 }
             }
 
+            // Touch & Drag handler with velocity tracking for inertial fling
+            MouseArea {
+                id: dragArea
+                anchors.fill: parent
+
+                onPressed: {
+                    gameContainer.isDragging = true;
+                    gameContainer.angularVelocity = 0.0;
+                    gameContainer.lastDragX = mouse.x;
+                    gameContainer.lastDragTime = Date.now();
+                }
+
+                onPositionChanged: {
+                    if (pressed && !gameContainer.gameOver && !gameContainer.isPaused) {
+                        var now = Date.now();
+                        var elapsed = Math.max(1, now - gameContainer.lastDragTime);
+                        var dx = mouse.x - gameContainer.lastDragX;
+
+                        gameContainer.towerAngle -= dx * 0.012;
+                        gameContainer.angularVelocity = -(dx / elapsed) * 0.16;
+
+                        gameContainer.lastDragX = mouse.x;
+                        gameContainer.lastDragTime = now;
+                        gameCanvas.requestPaint();
+                    }
+                }
+
+                onReleased: {
+                    gameContainer.isDragging = false;
+                }
+                onCanceled: {
+                    gameContainer.isDragging = false;
+                }
+            }
+
+            // HUD: Level progress, Score, and Combos
             Column {
                 anchors.top: parent.top
-                anchors.topMargin: units.gu(2)
+                anchors.topMargin: units.gu(1.5)
                 anchors.horizontalCenter: parent.horizontalCenter
-                spacing: units.gu(0.3)
+                width: Math.min(parent.width - units.gu(4), units.gu(36))
+                spacing: units.gu(0.6)
+
+                // Level progression bar
+                Row {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    spacing: units.gu(1.2)
+
+                    Label {
+                        text: i18n.tr("Lvl %1").arg(gameContainer.currentLevel)
+                        font.pixelSize: units.gu(1.6)
+                        font.weight: Font.DemiBold
+                        color: "#FFFFFF"
+                        anchors.verticalCenter: parent.verticalCenter
+                    }
+
+                    Rectangle {
+                        width: units.gu(20)
+                        height: units.gu(0.8)
+                        radius: units.gu(0.4)
+                        color: "#2a3440"
+                        anchors.verticalCenter: parent.verticalCenter
+
+                        Rectangle {
+                            width: parent.width * Math.min(1.0, Math.max(0.0, gameContainer.levelProgress))
+                            height: parent.height
+                            radius: parent.radius
+                            color: "#00d2d3"
+                        }
+                    }
+
+                    Label {
+                        text: i18n.tr("Lvl %1").arg(gameContainer.currentLevel + 1)
+                        font.pixelSize: units.gu(1.6)
+                        color: "#8fa3b5"
+                        anchors.verticalCenter: parent.verticalCenter
+                    }
+                }
 
                 Label {
                     anchors.horizontalCenter: parent.horizontalCenter
                     text: gameContainer.score.toString()
-                    font.pixelSize: units.gu(5)
+                    font.pixelSize: units.gu(4.8)
                     font.weight: Font.Bold
                     color: "#FFFFFF"
                 }
@@ -450,37 +879,37 @@ MainView {
                 Label {
                     anchors.horizontalCenter: parent.horizontalCenter
                     text: i18n.tr("BEST: %1").arg(gameContainer.bestScore)
-                    font.pixelSize: units.gu(1.8)
+                    font.pixelSize: units.gu(1.6)
                     color: "#8fa3b5"
                     visible: gameContainer.bestScore > 0
                 }
 
                 Label {
                     anchors.horizontalCenter: parent.horizontalCenter
-                    text: i18n.tr("COMBO x%1").arg(gameContainer.streak)
+                    text: gameContainer.isSuperFall ? i18n.tr("FIREBALL SMASH!") : i18n.tr("COMBO x%1").arg(gameContainer.streak)
                     font.pixelSize: units.gu(1.8)
-                    font.weight: Font.DemiBold
-                    color: "#ffd166"
-                    visible: gameContainer.streak > 1
+                    font.weight: Font.Bold
+                    color: gameContainer.isSuperFall ? "#ff9f43" : "#ffd166"
+                    visible: gameContainer.streak > 1 || gameContainer.isSuperFall
                 }
             }
 
+            // In-Game Pause Overlay
             Rectangle {
-                id: gameOverModal
+                id: pauseModal
                 anchors.fill: parent
                 color: "#D90A0E12"
-                visible: gameContainer.gameOver
+                visible: gameContainer.isPaused && !gameContainer.gameOver
 
                 MouseArea {
                     anchors.fill: parent
-                    // Intercept touches from game canvas
                     onClicked: {}
                 }
 
                 Rectangle {
                     anchors.centerIn: parent
-                    width: Math.min(parent.width - units.gu(4), units.gu(34))
-                    height: units.gu(26)
+                    width: Math.min(parent.width - units.gu(4), units.gu(32))
+                    height: units.gu(30)
                     radius: units.gu(1.5)
                     color: "#1c2228"
                     border.color: "#2f3842"
@@ -489,7 +918,90 @@ MainView {
                     Column {
                         anchors.centerIn: parent
                         width: parent.width - units.gu(4)
-                        spacing: units.gu(1.6)
+                        spacing: units.gu(1.4)
+
+                        Label {
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            text: i18n.tr("PAUSED")
+                            font.pixelSize: units.gu(3.0)
+                            font.weight: Font.Bold
+                            color: "#FFFFFF"
+                        }
+
+                        Button {
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            text: i18n.tr("Resume")
+                            color: "#00b4d8"
+                            width: units.gu(20)
+                            height: units.gu(4.2)
+                            onClicked: {
+                                gameContainer.isPaused = false;
+                            }
+                        }
+
+                        Button {
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            text: i18n.tr("Restart")
+                            color: "#3b444f"
+                            width: units.gu(20)
+                            height: units.gu(4.2)
+                            onClicked: {
+                                gameContainer.initGame();
+                            }
+                        }
+
+                        Button {
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            text: gameContainer.soundEnabled ? i18n.tr("Sound: ON") : i18n.tr("Sound: OFF")
+                            color: gameContainer.soundEnabled ? "#2ed573" : "#57606f"
+                            width: units.gu(20)
+                            height: units.gu(3.8)
+                            onClicked: {
+                                gameContainer.soundEnabled = !gameContainer.soundEnabled;
+                                gameContainer.saveStat("soundEnabled", gameContainer.soundEnabled ? "1" : "0");
+                            }
+                        }
+
+                        Button {
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            text: gameContainer.hapticsEnabled ? i18n.tr("Vibration: ON") : i18n.tr("Vibration: OFF")
+                            color: gameContainer.hapticsEnabled ? "#2ed573" : "#57606f"
+                            width: units.gu(20)
+                            height: units.gu(3.8)
+                            onClicked: {
+                                gameContainer.hapticsEnabled = !gameContainer.hapticsEnabled;
+                                gameContainer.saveStat("hapticsEnabled", gameContainer.hapticsEnabled ? "1" : "0");
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Game Over Overlay
+            Rectangle {
+                id: gameOverModal
+                anchors.fill: parent
+                color: "#D90A0E12"
+                visible: gameContainer.gameOver
+
+                MouseArea {
+                    anchors.fill: parent
+                    onClicked: {}
+                }
+
+                Rectangle {
+                    anchors.centerIn: parent
+                    width: Math.min(parent.width - units.gu(4), units.gu(34))
+                    height: units.gu(30)
+                    radius: units.gu(1.5)
+                    color: "#1c2228"
+                    border.color: "#2f3842"
+                    border.width: units.gu(0.15)
+
+                    Column {
+                        anchors.centerIn: parent
+                        width: parent.width - units.gu(4)
+                        spacing: units.gu(1.4)
 
                         Label {
                             anchors.horizontalCenter: parent.horizontalCenter
@@ -511,6 +1023,13 @@ MainView {
                             text: i18n.tr("Best: %1").arg(gameContainer.bestScore)
                             font.pixelSize: units.gu(1.8)
                             color: "#8fa3b5"
+                        }
+
+                        Label {
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            text: i18n.tr("Reached Level %1").arg(gameContainer.currentLevel)
+                            font.pixelSize: units.gu(1.6)
+                            color: "#00d2d3"
                         }
 
                         Button {
