@@ -35,6 +35,7 @@ function saveStat(key, val) {
     try {
         var db = getDatabase();
         db.transaction(function(tx) {
+            tx.executeSql('CREATE TABLE IF NOT EXISTS kv(k TEXT UNIQUE, v TEXT)');
             tx.executeSql('INSERT OR REPLACE INTO kv VALUES(?, ?)', [key, val.toString()]);
         });
     } catch (e) {}
