@@ -55,6 +55,21 @@ MainView {
         effect: ThemeEffect.Press
     }
 
+    function playSound(type) {
+        if (!gameContainer.soundEnabled) return;
+        try {
+            if (type === "bounce") {
+                sfxBounce.play();
+            } else if (type === "pass") {
+                sfxPass.play();
+            } else if (type === "smash") {
+                sfxSmash.play();
+            } else if (type === "gameover") {
+                sfxGameOver.play();
+            }
+        } catch (err) {}
+    }
+
     function triggerHaptic(strong) {
         if (!gameContainer.hapticsEnabled) return;
         try {
@@ -447,7 +462,7 @@ MainView {
                                 if (gameContainer.isSuperFall && segType !== 1) {
                                     ring.segments[segmentIdx] = 0;
                                     gameContainer.spawnParticles(0, ring.y, 28, "#ff9f43", 1.8);
-                                    root.sfxSmash.play();
+                                    root.playSound("smash");
                                     root.triggerHaptic(true);
 
                                     gameContainer.score += 25;
@@ -474,7 +489,7 @@ MainView {
                                     gameContainer.squash = 0.65;
                                     nextY = ring.y;
 
-                                    root.sfxBounce.play();
+                                    root.playSound("bounce");
                                     root.triggerHaptic(false);
 
                                     // Record platform paint splat
@@ -499,7 +514,7 @@ MainView {
                                     gameContainer.ballVy = 0;
                                     gameContainer.gameOver = true;
                                     gameContainer.isSuperFall = false;
-                                    root.sfxGameOver.play();
+                                    root.playSound("gameover");
                                     root.triggerHaptic(true);
                                     gameContainer.spawnParticles(0, ring.y, 24, "#ff4757", 1.4);
 
@@ -515,7 +530,7 @@ MainView {
                                         gameContainer.streak++;
                                         gameContainer.score += gameContainer.streak;
                                         gameContainer.totalRings++;
-                                        root.sfxPass.play();
+                                        root.playSound("pass");
 
                                         if (gameContainer.score > gameContainer.bestScore) {
                                             gameContainer.bestScore = gameContainer.score;
