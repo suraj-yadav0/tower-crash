@@ -12,7 +12,10 @@ function loadStats() {
         soundEnabled: true,
         hapticsEnabled: true,
         speedMode: 1,
-        themeMode: 0
+        themeMode: 0,
+        highestLevelReached: 1,
+        unlockedCheckpoints: [1],
+        selectedCheckpoint: 1
     };
 
     try {
@@ -28,9 +31,27 @@ function loadStats() {
                 else if (row.k === "hapticsEnabled") stats.hapticsEnabled = (row.v !== "0");
                 else if (row.k === "speedMode") stats.speedMode = parseInt(row.v) || 1;
                 else if (row.k === "themeMode") stats.themeMode = parseInt(row.v) || 0;
+                else if (row.k === "highestLevelReached") stats.highestLevelReached = Math.max(1, parseInt(row.v) || 1);
+                else if (row.k === "selectedCheckpoint") stats.selectedCheckpoint = Math.max(1, parseInt(row.v) || 1);
+                else if (row.k === "unlockedCheckpoints") {
+                    try {
+                        var parsed = JSON.parse(row.v);
+                        if (Array.isArray(parsed) && parsed.length > 0) {
+                            stats.unlockedCheckpoints = parsed;
+                        }
+                    } catch (err) {}
+                }
             }
         });
     } catch (e) {}
+
+    // Unlock checkpoints up to highest level reached
+    for (var lvl = 1; lvl <= stats.highestLevelReached; lvl += 5) {
+        if (stats.unlockedCheckpoints.indexOf(lvl) === -1) {
+            stats.unlockedCheckpoints.push(lvl);
+        }
+    }
+    stats.unlockedCheckpoints.sort(function(a, b) { return a - b; });
 
     return stats;
 }
@@ -44,3 +65,18 @@ function saveStat(key, val) {
         });
     } catch (e) {}
 }
+
+function saveHighestLevel(level) {
+    saveStat("highestLevelReached", Math.max(1, parseInt(level) || 1));
+}
+
+function saveUnlockedCheckpoints(checkpoints) {
+    if (Array.isArray(checkpoints)) {
+        saveStat("unlockedCheckpoints", JSON.stringify(checkpoints));
+    }
+}
+
+function saveSelectedCheckpoint(level) {
+    saveStat("selectedCheckpoint", Math.max(1, parseInt(level) || 1));
+}
+

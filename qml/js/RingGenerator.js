@@ -14,17 +14,18 @@ function createRing(index, ringSpacing, prevRing) {
     var posInLevel = index % levelRings;
     var isGoal = (index > 0 && (index + 1) % levelRings === 0);
 
-    if (index === 0) {
-        // Starting ring: player starts bouncing on slot 2 (front center).
-        // Provide a wide, generous 3-segment opening at slots 5, 6, 7 (opposite side).
-        // Zero hazards.
+    if (index === 0 || posInLevel === 0) {
+        // Starting ring of run or checkpoint level: ensure slot 2 is safe ground.
+        // Keep front landing zone (slots 1, 2, 3) solid and clear of hazards.
         segments[1] = 0;
         segments[2] = 0;
         segments[3] = 0;
-        segments[5] = 1;
-        segments[6] = 1;
-        segments[7] = 1;
-        lastGapStart = 5;
+        var initialGap = (level <= 2) ? 3 : ((level <= 5) ? 2 : 1);
+        var gapStart = 5;
+        for (var g = 0; g < initialGap; g++) {
+            segments[(gapStart + g) % 8] = 1;
+        }
+        lastGapStart = gapStart;
     } else if (isGoal) {
         // Goal platform at the end of each level: all segments safe.
         for (var s = 0; s < 8; s++) {

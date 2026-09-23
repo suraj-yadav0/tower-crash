@@ -172,6 +172,53 @@ MainView {
             property string bannerText: ""
             property real bannerOpacity: 0.0
 
+            property int highestLevelReached: 1
+            property var unlockedCheckpoints: [1]
+            property int selectedCheckpoint: 1
+
+            onCurrentLevelChanged: {
+                if (currentLevel > highestLevelReached) {
+                    highestLevelReached = currentLevel;
+                    Storage.saveHighestLevel(highestLevelReached);
+                }
+                if (isCheckpointLevel(currentLevel)) {
+                    unlockCheckpoint(currentLevel);
+                }
+            }
+
+            function isCheckpointLevel(lvl) {
+                return lvl === 1 || (lvl > 1 && (lvl - 1) % 5 === 0);
+            }
+
+            function getNearestCheckpoint(lvl) {
+                var nearest = 1;
+                for (var i = 0; i < unlockedCheckpoints.length; i++) {
+                    var cp = unlockedCheckpoints[i];
+                    if (cp <= lvl && cp > nearest) {
+                        nearest = cp;
+                    }
+                }
+                return nearest;
+            }
+
+            function unlockCheckpoint(lvl) {
+                if (!isCheckpointLevel(lvl)) return;
+                var list = unlockedCheckpoints.slice();
+                if (list.indexOf(lvl) === -1) {
+                    list.push(lvl);
+                    list.sort(function(a, b) { return a - b; });
+                    unlockedCheckpoints = list;
+                    Storage.saveUnlockedCheckpoints(unlockedCheckpoints);
+                }
+            }
+
+            function startFromCheckpoint(checkpointLevel) {
+                var validCheckpoint = Math.max(1, checkpointLevel || selectedCheckpoint || 1);
+                selectedCheckpoint = validCheckpoint;
+                Storage.saveSelectedCheckpoint(selectedCheckpoint);
+                initGame(validCheckpoint);
+            }
+
             function spawnParticles(x, y, count, color, speedMultiplier) {
                 var mult = speedMultiplier || 1.0;
                 var midR = (outerRadius + innerRadius) / 2.0;
@@ -218,7 +265,8 @@ MainView {
                 rings.push(RingGen.createRing(nextRingIndex++, ringSpacing, prevRing));
             }
 
-            function initGame() {
+            function initGame(checkpointLevel) {
+                var startLvl = checkpointLevel || 1;
                 score = 0;
                 streak = 0;
                 towerAngle = 0.0;
@@ -227,7 +275,6 @@ MainView {
                 rings = [];
                 particles = [];
                 ballTrail = [];
-                nextRingIndex = 0;
                 squash = 1.0;
                 squashVelocity = 0.0;
                 isSuperFall = false;
@@ -235,13 +282,16 @@ MainView {
                 bannerOpacity = 0.0;
                 RingGen.resetGenerator();
 
+                var startIndex = (startLvl - 1) * levelRings;
+                nextRingIndex = startIndex;
+
                 for (var i = 0; i < 14; i++) {
                     generateRing();
                 }
 
-                ballY = ringSpacing - units.gu(5.0);
+                ballY = (startIndex + 1) * ringSpacing - units.gu(5.0);
                 ballVy = 0.0;
-                cameraY = ringSpacing;
+                cameraY = (startIndex + 1) * ringSpacing;
                 gameOver = false;
                 isPaused = false;
                 isSettingsOpen = false;
@@ -251,13 +301,13 @@ MainView {
             }
 
             function startGame() {
-                initGame();
+                startFromCheckpoint(selectedCheckpoint);
                 isWelcomeOpen = false;
                 soundManager.play("bounce");
             }
 
             function goToMainMenu() {
-                initGame();
+                initGame(selectedCheckpoint);
                 isWelcomeOpen = true;
             }
 
@@ -275,8 +325,11 @@ MainView {
                 hapticsEnabled = stats.hapticsEnabled;
                 speedMode = stats.speedMode;
                 themeMode = (stats.themeMode !== undefined) ? stats.themeMode : 0;
+                highestLevelReached = stats.highestLevelReached;
+                unlockedCheckpoints = stats.unlockedCheckpoints;
+                selectedCheckpoint = stats.selectedCheckpoint;
                 isWelcomeOpen = true;
-                initGame();
+                initGame(selectedCheckpoint);
             }
 
             Keys.onLeftPressed: {
@@ -419,6 +472,15 @@ MainView {
 
                                     gameContainer.bannerText = i18n.tr("LEVEL %1 COMPLETE!").arg(gameContainer.currentLevel);
                                     gameContainer.bannerOpacity = 1.0;
+
+                                    var nextLvl = gameContainer.currentLevel + 1;
+                                    if (nextLvl > gameContainer.highestLevelReached) {
+                                        gameContainer.highestLevelReached = nextLvl;
+                                        Storage.saveHighestLevel(nextLvl);
+                                    }
+                                    if (gameContainer.isCheckpointLevel(nextLvl)) {
+                                        gameContainer.unlockCheckpoint(nextLvl);
+                                    }
 
                                     if (gameContainer.score > gameContainer.bestScore) {
                                         gameContainer.bestScore = gameContainer.score;
