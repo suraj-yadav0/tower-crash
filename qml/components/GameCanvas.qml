@@ -32,22 +32,6 @@ Canvas {
         ctx.fillStyle = bgGrad;
         ctx.fillRect(0, 0, w, h);
 
-        // Central column cylinder
-        var poleGrad = ctx.createLinearGradient(
-            centerX - game.poleRadius, 0,
-            centerX + game.poleRadius, 0
-        );
-        poleGrad.addColorStop(0.0, theme.pole1);
-        poleGrad.addColorStop(0.35, theme.pole2);
-        poleGrad.addColorStop(1.0, theme.pole3);
-        ctx.fillStyle = poleGrad;
-        ctx.fillRect(
-            centerX - game.poleRadius,
-            0,
-            game.poleRadius * 2,
-            h
-        );
-
         var rSpacing = game.ringSpacing;
         var bY = game.ballY;
         var camY = game.cameraY;
@@ -57,6 +41,173 @@ Canvas {
         var tilt = game.tiltRatio;
         var rHeight = game.ringHeight;
         var midR = (outR + inR) / 2.0;
+
+        function drawParticle(pt) {
+            var partScreenY = bScreenY + (pt.y - camY) + (pt.z || 0) * tilt;
+            var partScreenX = centerX + pt.x;
+
+            if (pt.kind === "shockwave") {
+                ctx.save();
+                ctx.translate(partScreenX, partScreenY);
+                ctx.scale(1.0, tilt);
+                ctx.beginPath();
+                ctx.arc(0, 0, pt.radius, 0, Math.PI * 2.0);
+                ctx.strokeStyle = pt.color;
+                ctx.lineWidth = pt.thickness || units.gu(0.4);
+                ctx.globalAlpha = Math.max(0, pt.alpha);
+                ctx.stroke();
+                ctx.restore();
+            } else if (pt.kind === "dust") {
+                ctx.save();
+                ctx.translate(partScreenX, partScreenY);
+                ctx.beginPath();
+                ctx.arc(0, 0, pt.size, 0, Math.PI * 2.0);
+                ctx.fillStyle = pt.color;
+                ctx.globalAlpha = Math.max(0, pt.alpha * 0.45);
+                ctx.fill();
+                ctx.restore();
+            } else if (pt.kind === "spark") {
+                ctx.save();
+                ctx.translate(partScreenX, partScreenY);
+                ctx.beginPath();
+                ctx.arc(0, 0, pt.size, 0, Math.PI * 2.0);
+                ctx.fillStyle = pt.color;
+                ctx.globalAlpha = Math.max(0, pt.alpha);
+                ctx.fill();
+                ctx.restore();
+            } else if (pt.kind === "chunk" || pt.kind === "shard") {
+                var cosPitch = Math.cos(pt.rotX || 0);
+                var cosYaw = Math.cos(pt.rotY || 0);
+                var facing = cosPitch * cosYaw;
+                var pw = (pt.width || units.gu(1.2)) * Math.max(0.2, Math.abs(cosYaw));
+                var ph = (pt.height || units.gu(1.0)) * Math.max(0.2, Math.abs(cosPitch));
+                var pDepth = (pt.depth || units.gu(0.4));
+
+                ctx.save();
+                ctx.translate(partScreenX, partScreenY);
+                ctx.rotate(pt.rotZ || 0);
+                ctx.globalAlpha = Math.max(0, pt.alpha);
+
+                // Exposed fracture side edge (extruded depth facet)
+                ctx.fillStyle = pt.edgeColor || "#222428";
+                ctx.beginPath();
+                ctx.moveTo(-pw * 0.5, ph * 0.5);
+                ctx.lineTo(pw * 0.5, ph * 0.5);
+                ctx.lineTo(pw * 0.5, ph * 0.5 + pDepth * tilt);
+                ctx.lineTo(-pw * 0.5, ph * 0.5 + pDepth * tilt);
+                ctx.closePath();
+                ctx.fill();
+
+                // Top lit surface facet with curved arc geometry for chunks
+                ctx.fillStyle = facing >= 0 ? (pt.topColor || "#F5F3EF") : (pt.edgeColor || "#222428");
+                ctx.beginPath();
+                if (pt.kind === "chunk") {
+                    ctx.moveTo(-pw * 0.5, -ph * 0.4);
+                    ctx.quadraticCurveTo(0, -ph * 0.68, pw * 0.5, -ph * 0.5);
+                    ctx.lineTo(pw * 0.45, ph * 0.5);
+                    ctx.quadraticCurveTo(0, ph * 0.32, -pw * 0.4, ph * 0.45);
+                } else {
+                    ctx.moveTo(-pw * 0.5, -ph * 0.5);
+                    ctx.lineTo(pw * 0.5, -ph * 0.2);
+                    ctx.lineTo(0, ph * 0.5);
+                }
+                ctx.closePath();
+                ctx.fill();
+
+                // Specular gleam on crystalline/golden shards
+                if (pt.specular && facing > 0.25) {
+                    ctx.fillStyle = "rgba(255, 255, 255, 0.55)";
+                    ctx.beginPath();
+                    ctx.moveTo(-pw * 0.2, -ph * 0.3);
+                    ctx.lineTo(pw * 0.25, -ph * 0.1);
+                    ctx.lineTo(0, ph * 0.1);
+                    ctx.closePath();
+                    ctx.fill();
+                }
+
+                ctx.restore();
+            } else {
+                ctx.save();
+                ctx.translate(partScreenX, partScreenY);
+                ctx.beginPath();
+                ctx.arc(0, 0, pt.size || units.gu(0.4), 0, Math.PI * 2.0);
+                ctx.fillStyle = pt.color;
+                ctx.globalAlpha = Math.max(0, pt.alpha);
+                ctx.fill();
+                ctx.restore();
+            }
+        }
+
+        // Tier 1: Render background 3D particles (behind central column and platforms)
+        if (game.particles && game.particles.length > 0) {
+            for (var bp = 0; bp < game.particles.length; bp++) {
+                var bPt = game.particles[bp];
+                if ((bPt.z || 0) < 0) {
+                    drawParticle(bPt);
+                }
+            }
+        }
+
+        // Central column cylinder with depth-aware shading and ambient occlusion
+        var pLeft = centerX - game.poleRadius;
+        var pRight = centerX + game.poleRadius;
+        var pWidth = game.poleRadius * 2.0;
+
+        var poleGrad = ctx.createLinearGradient(pLeft, 0, pRight, 0);
+        var specOffset = Math.sin(game.towerAngle * 0.5) * 0.05;
+        var specPos = Math.max(0.20, Math.min(0.42, 0.28 + specOffset));
+
+        poleGrad.addColorStop(0.00, theme.pole1);
+        poleGrad.addColorStop(Math.max(0.08, specPos - 0.14), theme.pole2);
+        poleGrad.addColorStop(specPos, theme.pole3 || "#D0D2D6");
+        poleGrad.addColorStop(Math.min(0.58, specPos + 0.16), theme.pole2);
+        poleGrad.addColorStop(0.85, theme.pole2);
+        poleGrad.addColorStop(1.00, theme.pole1);
+
+        ctx.fillStyle = poleGrad;
+        ctx.fillRect(pLeft, 0, pWidth, h);
+
+        // Specular highlight band along the cylindrical axis
+        var specWidth = game.poleRadius * 0.28;
+        var specX = pLeft + pWidth * specPos - specWidth * 0.5;
+        var specGrad = ctx.createLinearGradient(specX, 0, specX + specWidth, 0);
+        specGrad.addColorStop(0.0, "rgba(255, 255, 255, 0.0)");
+        specGrad.addColorStop(0.5, "rgba(255, 255, 255, 0.15)");
+        specGrad.addColorStop(1.0, "rgba(255, 255, 255, 0.0)");
+        ctx.fillStyle = specGrad;
+        ctx.fillRect(specX, 0, specWidth, h);
+
+        // Ambient occlusion contact shadows and socket bevels where platforms intersect the pole
+        for (var aoR = 0; aoR < game.rings.length; aoR++) {
+            var aoRing = game.rings[aoR];
+            if (aoRing.broken) continue;
+            var aoRingScreenY = bScreenY + (aoRing.y - camY) + (aoRing.recoil || 0);
+            if (aoRingScreenY < -rSpacing || aoRingScreenY > h + rSpacing) continue;
+
+            var topAoH = units.gu(0.7);
+            var topAoGrad = ctx.createLinearGradient(0, aoRingScreenY - topAoH, 0, aoRingScreenY);
+            topAoGrad.addColorStop(0.0, "rgba(0, 0, 0, 0.0)");
+            topAoGrad.addColorStop(1.0, "rgba(0, 0, 0, 0.35)");
+            ctx.fillStyle = topAoGrad;
+            ctx.fillRect(pLeft, aoRingScreenY - topAoH, pWidth, topAoH);
+
+            var botAoH = units.gu(1.1);
+            var botAoGrad = ctx.createLinearGradient(0, aoRingScreenY + rHeight, 0, aoRingScreenY + rHeight + botAoH);
+            botAoGrad.addColorStop(0.0, "rgba(0, 0, 0, 0.45)");
+            botAoGrad.addColorStop(1.0, "rgba(0, 0, 0, 0.0)");
+            ctx.fillStyle = botAoGrad;
+            ctx.fillRect(pLeft, aoRingScreenY + rHeight, pWidth, botAoH);
+
+            ctx.save();
+            ctx.translate(centerX, aoRingScreenY);
+            ctx.scale(1.0, tilt);
+            ctx.beginPath();
+            ctx.arc(0, 0, game.poleRadius + units.gu(0.12), Math.PI, 0, false);
+            ctx.lineWidth = units.gu(0.25);
+            ctx.strokeStyle = "rgba(0, 0, 0, 0.30)";
+            ctx.stroke();
+            ctx.restore();
+        }
 
         // Render platforms
         for (var r = 0; r < game.rings.length; r++) {
@@ -307,101 +458,13 @@ Canvas {
 
         ctx.restore();
 
-        // Render active 3D particles and realistic fragment shards
-        for (var ptIdx = 0; ptIdx < game.particles.length; ptIdx++) {
-            var pt = game.particles[ptIdx];
-            var partScreenY = bScreenY + (pt.y - camY) + (pt.z || 0) * tilt;
-            var partScreenX = centerX + pt.x;
-
-            if (pt.kind === "shockwave") {
-                ctx.save();
-                ctx.translate(partScreenX, partScreenY);
-                ctx.scale(1.0, tilt);
-                ctx.beginPath();
-                ctx.arc(0, 0, pt.radius, 0, Math.PI * 2.0);
-                ctx.strokeStyle = pt.color;
-                ctx.lineWidth = pt.thickness || units.gu(0.4);
-                ctx.globalAlpha = Math.max(0, pt.alpha);
-                ctx.stroke();
-                ctx.restore();
-            } else if (pt.kind === "dust") {
-                ctx.save();
-                ctx.translate(partScreenX, partScreenY);
-                ctx.beginPath();
-                ctx.arc(0, 0, pt.size, 0, Math.PI * 2.0);
-                ctx.fillStyle = pt.color;
-                ctx.globalAlpha = Math.max(0, pt.alpha * 0.45);
-                ctx.fill();
-                ctx.restore();
-            } else if (pt.kind === "spark") {
-                ctx.save();
-                ctx.translate(partScreenX, partScreenY);
-                ctx.beginPath();
-                ctx.arc(0, 0, pt.size, 0, Math.PI * 2.0);
-                ctx.fillStyle = pt.color;
-                ctx.globalAlpha = Math.max(0, pt.alpha);
-                ctx.fill();
-                ctx.restore();
-            } else if (pt.kind === "chunk" || pt.kind === "shard") {
-                var cosPitch = Math.cos(pt.rotX || 0);
-                var cosYaw = Math.cos(pt.rotY || 0);
-                var facing = cosPitch * cosYaw;
-                var pw = (pt.width || units.gu(1.2)) * Math.max(0.2, Math.abs(cosYaw));
-                var ph = (pt.height || units.gu(1.0)) * Math.max(0.2, Math.abs(cosPitch));
-                var pDepth = (pt.depth || units.gu(0.4));
-
-                ctx.save();
-                ctx.translate(partScreenX, partScreenY);
-                ctx.rotate(pt.rotZ || 0);
-                ctx.globalAlpha = Math.max(0, pt.alpha);
-
-                // Exposed fracture side edge (extruded depth facet)
-                ctx.fillStyle = pt.edgeColor || "#222428";
-                ctx.beginPath();
-                ctx.moveTo(-pw * 0.5, ph * 0.5);
-                ctx.lineTo(pw * 0.5, ph * 0.5);
-                ctx.lineTo(pw * 0.5, ph * 0.5 + pDepth * tilt);
-                ctx.lineTo(-pw * 0.5, ph * 0.5 + pDepth * tilt);
-                ctx.closePath();
-                ctx.fill();
-
-                // Top lit surface facet
-                ctx.fillStyle = facing >= 0 ? (pt.topColor || "#F5F3EF") : (pt.edgeColor || "#222428");
-                ctx.beginPath();
-                if (pt.kind === "chunk") {
-                    ctx.moveTo(-pw * 0.5, -ph * 0.4);
-                    ctx.lineTo(pw * 0.5, -ph * 0.5);
-                    ctx.lineTo(pw * 0.45, ph * 0.5);
-                    ctx.lineTo(-pw * 0.4, ph * 0.45);
-                } else {
-                    ctx.moveTo(-pw * 0.5, -ph * 0.5);
-                    ctx.lineTo(pw * 0.5, -ph * 0.2);
-                    ctx.lineTo(0, ph * 0.5);
+        // Tier 2: Render foreground 3D particles (in front of central column and platforms)
+        if (game.particles && game.particles.length > 0) {
+            for (var fp = 0; fp < game.particles.length; fp++) {
+                var fPt = game.particles[fp];
+                if ((fPt.z || 0) >= 0) {
+                    drawParticle(fPt);
                 }
-                ctx.closePath();
-                ctx.fill();
-
-                // Specular gleam on crystalline/golden shards
-                if (pt.specular && facing > 0.25) {
-                    ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
-                    ctx.beginPath();
-                    ctx.moveTo(-pw * 0.2, -ph * 0.3);
-                    ctx.lineTo(pw * 0.25, -ph * 0.1);
-                    ctx.lineTo(0, ph * 0.1);
-                    ctx.closePath();
-                    ctx.fill();
-                }
-
-                ctx.restore();
-            } else {
-                ctx.save();
-                ctx.translate(partScreenX, partScreenY);
-                ctx.beginPath();
-                ctx.arc(0, 0, pt.size || units.gu(0.4), 0, Math.PI * 2.0);
-                ctx.fillStyle = pt.color;
-                ctx.globalAlpha = Math.max(0, pt.alpha);
-                ctx.fill();
-                ctx.restore();
             }
         }
     }

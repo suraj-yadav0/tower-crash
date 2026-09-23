@@ -1044,6 +1044,46 @@ MainView {
                             pt.vx *= Math.pow(0.86, dt);
                             pt.vz *= Math.pow(0.86, dt);
 
+                            // Central cylindrical pole collision and tangential surface rolling
+                            var distFromPole = Math.sqrt(pt.x * pt.x + pt.z * pt.z);
+                            var pThickness = (pt.kind === "chunk") ? (pt.depth || units.gu(0.7)) * 0.5 :
+                                             ((pt.kind === "shard") ? (pt.depth || units.gu(0.4)) * 0.5 : (pt.size || units.gu(0.3)) * 0.5);
+                            var minDistance = gameContainer.poleRadius + pThickness;
+
+                            if (distFromPole < minDistance) {
+                                var nx = distFromPole > 0.0001 ? (pt.x / distFromPole) : 1.0;
+                                var nz = distFromPole > 0.0001 ? (pt.z / distFromPole) : 0.0;
+
+                                pt.x = nx * minDistance;
+                                pt.z = nz * minDistance;
+
+                                var vRadial = (pt.vx || 0) * nx + (pt.vz || 0) * nz;
+                                if (vRadial < 0) {
+                                    var tx = (pt.vx || 0) - nx * vRadial;
+                                    var tz = (pt.vz || 0) - nz * vRadial;
+
+                                    var restitution = (pt.kind === "chunk") ? 0.35 : 0.48;
+                                    var bounceV = -vRadial * restitution;
+
+                                    // Tangential rolling along curved cylinder surface
+                                    var rollFriction = 0.94;
+                                    pt.vx = tx * rollFriction + nx * bounceV;
+                                    pt.vz = tz * rollFriction + nz * bounceV;
+
+                                    // Sliding friction down the pole
+                                    pt.vy *= 0.94;
+
+                                    // Impart rolling spin around pole axis
+                                    var tangentSpeed = tx * (-nz) + tz * nx;
+                                    if (pt.vrotY !== undefined) {
+                                        pt.vrotY = pt.vrotY * 0.8 + (tangentSpeed / minDistance) * 3.5;
+                                    }
+                                    if (pt.vrotZ !== undefined) {
+                                        pt.vrotZ = pt.vrotZ * 0.85 + tangentSpeed * 1.8;
+                                    }
+                                }
+                            }
+
                             if (pt.vrotX) pt.rotX = (pt.rotX || 0) + pt.vrotX * dt;
                             if (pt.vrotY) pt.rotY = (pt.rotY || 0) + pt.vrotY * dt;
                             if (pt.vrotZ) pt.rotZ = (pt.rotZ || 0) + pt.vrotZ * dt;
