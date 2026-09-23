@@ -57,54 +57,24 @@ Item {
         } catch (e) {}
     }
 
-    function playPass(streak) {
+    function playRoundCleared() {
         if (!soundEnabled || !multimediaLoader.item) return;
         try {
-            multimediaLoader.item.playPass(streak);
-        } catch (e) {}
-    }
-
-    function playSmash(streak) {
-        if (!soundEnabled || !multimediaLoader.item) return;
-        try {
-            multimediaLoader.item.playSmash(streak);
-        } catch (e) {}
-    }
-
-    function playGameOver() {
-        if (!soundEnabled || !multimediaLoader.item) return;
-        try {
-            multimediaLoader.item.playGameOver();
+            multimediaLoader.item.playRoundCleared();
         } catch (e) {}
     }
 
     function playFanfare() {
-        if (!soundEnabled || !multimediaLoader.item) return;
-        try {
-            multimediaLoader.item.playFanfare();
-        } catch (e) {}
+        playRoundCleared();
     }
 
-    function playWhoosh() {
-        if (!soundEnabled || !multimediaLoader.item) return;
-        try {
-            multimediaLoader.item.playWhoosh();
-        } catch (e) {}
-    }
-
-    function stopWhoosh() {
-        if (!multimediaLoader.item) return;
-        try {
-            multimediaLoader.item.stopWhoosh();
-        } catch (e) {}
-    }
-
-    function playClick() {
-        if (!soundEnabled || !multimediaLoader.item) return;
-        try {
-            multimediaLoader.item.playClick();
-        } catch (e) {}
-    }
+    // No-op compatibility methods
+    function playPass(streak) {}
+    function playSmash(streak) {}
+    function playGameOver() {}
+    function playWhoosh() {}
+    function stopWhoosh() {}
+    function playClick() {}
 
     function stopAll() {
         if (!multimediaLoader.item) return;
@@ -116,12 +86,7 @@ Item {
     function play(type) {
         if (!soundEnabled) return;
         if (type === "bounce") playBounce(0.6);
-        else if (type === "pass") playPass(0);
-        else if (type === "smash") playSmash(0);
-        else if (type === "gameover") playGameOver();
-        else if (type === "fanfare") playFanfare();
-        else if (type === "whoosh") playWhoosh();
-        else if (type === "click") playClick();
+        else if (type === "fanfare" || type === "roundCleared") playRoundCleared();
     }
 
     function haptic(heavy) {
@@ -133,7 +98,6 @@ Item {
     }
 
     function buttonHaptic() {
-        playClick();
         if (!hapticsEnabled) return;
         try {
             themeHaptic.start();

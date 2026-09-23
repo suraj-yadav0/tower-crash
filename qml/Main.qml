@@ -124,16 +124,6 @@ MainView {
             property int stageClearNextCheckpoint: 1
             property bool stageClearIsGrand: false
 
-            onGameOverChanged: {
-                if (gameOver) soundManager.stopWhoosh();
-            }
-            onIsWelcomeOpenChanged: {
-                if (isWelcomeOpen) soundManager.stopWhoosh();
-            }
-            onIsStageClearOpenChanged: {
-                if (isStageClearOpen) soundManager.stopWhoosh();
-            }
-
             property bool soundEnabled: true
             property bool hapticsEnabled: true
             property int themeMode: 0
@@ -152,13 +142,6 @@ MainView {
             property real squash: 1.0
             property real squashVelocity: 0.0
             property bool isSuperFall: false
-            onIsSuperFallChanged: {
-                if (isSuperFall && !isPaused && !gameOver && !isWelcomeOpen && !isStageClearOpen) {
-                    soundManager.playWhoosh();
-                } else {
-                    soundManager.stopWhoosh();
-                }
-            }
 
             property real ringSpacing: units.gu(26)
             property real outerRadius: units.gu(20)
@@ -543,7 +526,6 @@ MainView {
                 if (!isPaused) {
                     lastPhysicsTime = 0.0;
                 } else {
-                    soundManager.stopWhoosh();
                     if (activePlayTimeAccumulator > 0.0) {
                         Storage.recordPlayTime(activePlayTimeAccumulator);
                         activePlayTimeAccumulator = 0.0;
@@ -833,7 +815,6 @@ MainView {
                                 if (gameContainer.isSuperFall && segType !== 1) {
                                     ring.broken = true;
                                     gameContainer.spawnShatterDebris(ring.y, false, false, gameContainer.currentTheme, true);
-                                    soundManager.playSmash(gameContainer.streak);
                                     soundManager.haptic(true);
 
                                     gameContainer.score += 25;
@@ -872,10 +853,8 @@ MainView {
                                     if (segType === 3) {
                                         ring.segments[segmentIdx] = 1;
                                         gameContainer.spawnSegmentShatter(ring.y, relAngle, gameContainer.currentTheme.topSafe, gameContainer.currentTheme.sideSafe);
-                                        soundManager.playSmash(1);
-                                    } else {
-                                        soundManager.playBounce(normSpeed);
                                     }
+                                    soundManager.playBounce(normSpeed);
                                     soundManager.haptic(false);
 
                                     ring.recoil = units.gu(0.55);
@@ -922,7 +901,6 @@ MainView {
                                     gameContainer.activePlatformY = ring.y;
                                     gameContainer.cameraY = ring.y;
                                     gameContainer.isSuperFall = false;
-                                    soundManager.playGameOver();
                                     soundManager.haptic(true);
                                     gameContainer.spawnParticles(0, ring.y, 24, gameContainer.currentTheme.topHazard, 1.4);
 
@@ -946,7 +924,6 @@ MainView {
                                         gameContainer.streak++;
                                         gameContainer.score += gameContainer.streak;
                                         gameContainer.totalRings++;
-                                        soundManager.playPass(gameContainer.streak);
 
                                         if (gameContainer.streak >= 3) {
                                              soundManager.haptic(true);

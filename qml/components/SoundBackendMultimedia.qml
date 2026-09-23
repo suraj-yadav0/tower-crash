@@ -14,60 +14,10 @@ Item {
     }
 
     SoundEffect {
-        id: sfxPass
-        source: Qt.resolvedUrl("../../assets/sounds/pass.wav")
-        muted: !backend.soundEnabled
-        volume: 0.85
-    }
-
-    SoundEffect {
-        id: sfxSmash
-        source: Qt.resolvedUrl("../../assets/sounds/smash.wav")
-        muted: !backend.soundEnabled
-        volume: 0.9
-    }
-
-    SoundEffect {
-        id: sfxGameOver
-        source: Qt.resolvedUrl("../../assets/sounds/gameover.wav")
-        muted: !backend.soundEnabled
-        volume: 0.95
-    }
-
-    SoundEffect {
-        id: sfxFanfare
+        id: sfxRoundCleared
         source: Qt.resolvedUrl("../../assets/sounds/fanfare.wav")
         muted: !backend.soundEnabled
         volume: 0.95
-    }
-
-    SoundEffect {
-        id: sfxClick
-        source: Qt.resolvedUrl("../../assets/sounds/click.wav")
-        muted: !backend.soundEnabled
-        volume: 0.65
-    }
-
-    SoundEffect {
-        id: sfxWhoosh
-        source: Qt.resolvedUrl("../../assets/sounds/whoosh.wav")
-        muted: !backend.soundEnabled
-        volume: 0.75
-        loops: SoundEffect.Infinite
-    }
-
-    Audio {
-        id: audioPass
-        source: Qt.resolvedUrl("../../assets/sounds/pass.wav")
-        muted: !backend.soundEnabled
-        volume: 0.85
-    }
-
-    Audio {
-        id: audioSmash
-        source: Qt.resolvedUrl("../../assets/sounds/smash.wav")
-        muted: !backend.soundEnabled
-        volume: 0.9
     }
 
     onSoundEnabledChanged: {
@@ -89,84 +39,29 @@ Item {
         }
     }
 
-    function playPass(streak) {
+    function playRoundCleared() {
         if (!soundEnabled) return;
-        var s = (streak !== undefined && streak !== null) ? Number(streak) : 0;
-        if (isNaN(s)) s = 0;
-        var pitch = Math.min(1.85, Math.pow(1.059463, Math.min(12, s)));
-
         try {
-            audioPass.playbackRate = pitch;
-            audioPass.seek(0);
-            audioPass.play();
-        } catch (e) {
-            try { sfxPass.play(); } catch (e2) {}
-        }
-    }
-
-    function playSmash(streak) {
-        if (!soundEnabled) return;
-        var s = (streak !== undefined && streak !== null) ? Number(streak) : 0;
-        if (isNaN(s)) s = 0;
-        var pitch = Math.min(1.5, Math.pow(1.04, Math.min(10, s)));
-
-        try {
-            audioSmash.playbackRate = pitch;
-            audioSmash.seek(0);
-            audioSmash.play();
-        } catch (e) {
-            try { sfxSmash.play(); } catch (e2) {}
-        }
-    }
-
-    function playGameOver() {
-        if (!soundEnabled) return;
-        stopWhoosh();
-        try {
-            sfxGameOver.play();
+            sfxRoundCleared.play();
         } catch (e) {}
     }
 
     function playFanfare() {
-        if (!soundEnabled) return;
-        try {
-            sfxFanfare.play();
-        } catch (e) {}
+        playRoundCleared();
     }
 
-    function playWhoosh() {
-        if (!soundEnabled) return;
-        try {
-            if (!sfxWhoosh.playing) {
-                sfxWhoosh.play();
-            }
-        } catch (e) {}
-    }
-
-    function stopWhoosh() {
-        try {
-            sfxWhoosh.stop();
-        } catch (e) {}
-    }
-
-    function playClick() {
-        if (!soundEnabled) return;
-        try {
-            sfxClick.play();
-        } catch (e) {}
-    }
+    // Unused sound methods kept as clean no-ops for compatibility
+    function playPass(streak) {}
+    function playSmash(streak) {}
+    function playGameOver() {}
+    function playWhoosh() {}
+    function stopWhoosh() {}
+    function playClick() {}
 
     function stopAll() {
         try {
             sfxBounce.stop();
-            sfxPass.stop();
-            sfxSmash.stop();
-            sfxGameOver.stop();
-            sfxFanfare.stop();
-            sfxWhoosh.stop();
-            sfxClick.stop();
-            audioPass.stop();
-            audioSmash.stop();
+            sfxRoundCleared.stop();
         } catch (e) {}
     }
 }
