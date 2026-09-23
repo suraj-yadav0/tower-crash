@@ -7,10 +7,12 @@ Rectangle {
     property bool soundEnabled: true
     property bool hapticsEnabled: true
     property int speedMode: 1
+    property int currentCheckpoint: 1
     property var theme: null
 
     signal resumeRequested()
     signal restartRequested()
+    signal restartCheckpointRequested()
     signal mainMenuRequested()
     signal toggleSoundRequested()
     signal toggleHapticsRequested()
@@ -155,17 +157,17 @@ Rectangle {
                     }
                 }
 
-                // Secondary CTA: Restart Level
+                // Secondary CTA: Restart from Checkpoint
                 Rectangle {
-                    id: restartBtn
+                    id: restartCheckpointBtn
                     anchors.horizontalCenter: parent.horizontalCenter
                     width: parent.width
                     height: units.gu(4.4)
                     radius: units.gu(2.2)
-                    color: restartMouse.pressed ? "#1E2024" : (root.theme ? root.theme.cardOuter : "#141517")
+                    color: restartCpMouse.pressed ? "#1E2024" : (root.theme ? root.theme.cardOuter : "#141517")
                     border.color: root.theme ? root.theme.cardBorder : "#2A2C30"
                     border.width: units.gu(0.12)
-                    scale: restartMouse.pressed ? 0.95 : 1.0
+                    scale: restartCpMouse.pressed ? 0.95 : 1.0
 
                     Behavior on scale {
                         NumberAnimation { duration: 120; easing.type: Easing.OutQuad }
@@ -173,14 +175,48 @@ Rectangle {
 
                     Label {
                         anchors.centerIn: parent
-                        text: i18n.tr("Restart Stage")
+                        text: (root.currentCheckpoint > 1)
+                              ? i18n.tr("Restart Checkpoint (L%1)").arg(root.currentCheckpoint)
+                              : i18n.tr("Restart Stage")
                         font.pixelSize: units.gu(1.45)
                         font.weight: Font.DemiBold
                         color: "#D6D5D2"
                     }
 
                     MouseArea {
-                        id: restartMouse
+                        id: restartCpMouse
+                        anchors.fill: parent
+                        onClicked: root.restartCheckpointRequested()
+                    }
+                }
+
+                // Tertiary CTA: Restart from Level 1 (visible when past checkpoint 1)
+                Rectangle {
+                    id: restartFromBeginningBtn
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    width: parent.width
+                    height: units.gu(4.4)
+                    radius: units.gu(2.2)
+                    visible: root.currentCheckpoint > 1
+                    color: restartBeginMouse.pressed ? "#1E2024" : (root.theme ? root.theme.cardOuter : "#141517")
+                    border.color: root.theme ? root.theme.cardBorder : "#2A2C30"
+                    border.width: units.gu(0.12)
+                    scale: restartBeginMouse.pressed ? 0.95 : 1.0
+
+                    Behavior on scale {
+                        NumberAnimation { duration: 120; easing.type: Easing.OutQuad }
+                    }
+
+                    Label {
+                        anchors.centerIn: parent
+                        text: i18n.tr("Restart from Stage 1")
+                        font.pixelSize: units.gu(1.45)
+                        font.weight: Font.DemiBold
+                        color: "#848890"
+                    }
+
+                    MouseArea {
+                        id: restartBeginMouse
                         anchors.fill: parent
                         onClicked: root.restartRequested()
                     }

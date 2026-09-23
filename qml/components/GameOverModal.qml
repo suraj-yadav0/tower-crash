@@ -7,9 +7,11 @@ Rectangle {
     property int score: 0
     property int bestScore: 0
     property int levelReached: 1
+    property int checkpointLevel: 1
     property var theme: null
 
     signal restartRequested()
+    signal continueCheckpointRequested()
     signal mainMenuRequested()
 
     anchors.fill: parent
@@ -208,17 +210,17 @@ Rectangle {
                     }
                 }
 
-                // Primary Action: Play Again
+                // Primary Action: Continue from Checkpoint (if available) or Re-enter Tower
                 Rectangle {
-                    id: playAgainBtn
+                    id: primaryActionBtn
                     anchors.horizontalCenter: parent.horizontalCenter
                     width: parent.width
                     height: units.gu(5.0)
                     radius: units.gu(2.5)
-                    color: playAgainMouse.pressed
+                    color: primaryMouse.pressed
                            ? (root.theme ? root.theme.accentHover : "#BF8419")
                            : (root.theme ? root.theme.accent : "#D99B26")
-                    scale: playAgainMouse.pressed ? 0.95 : 1.0
+                    scale: primaryMouse.pressed ? 0.95 : 1.0
 
                     Behavior on scale {
                         NumberAnimation { duration: 120; easing.type: Easing.OutQuad }
@@ -228,7 +230,9 @@ Rectangle {
                         anchors.left: parent.left
                         anchors.leftMargin: units.gu(2.6)
                         anchors.verticalCenter: parent.verticalCenter
-                        text: i18n.tr("Re-enter Tower")
+                        text: (root.checkpointLevel > 1)
+                              ? i18n.tr("Continue (Stage %1)").arg(root.checkpointLevel)
+                              : i18n.tr("Re-enter Tower")
                         font.pixelSize: units.gu(1.6)
                         font.weight: Font.Bold
                         color: root.theme ? root.theme.accentText : "#0B0C0D"
@@ -267,13 +271,51 @@ Rectangle {
                     }
 
                     MouseArea {
-                        id: playAgainMouse
+                        id: primaryMouse
+                        anchors.fill: parent
+                        onClicked: {
+                            if (root.checkpointLevel > 1) {
+                                root.continueCheckpointRequested();
+                            } else {
+                                root.restartRequested();
+                            }
+                        }
+                    }
+                }
+
+                // Secondary Action: Restart from Level 1 (only when checkpoint is active)
+                Rectangle {
+                    id: restartFromBeginningBtn
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    width: parent.width
+                    height: units.gu(4.4)
+                    radius: units.gu(2.2)
+                    visible: root.checkpointLevel > 1
+                    color: restartBeginMouse.pressed ? "#1E2024" : (root.theme ? root.theme.cardOuter : "#141517")
+                    border.color: root.theme ? root.theme.cardBorder : "#2A2C30"
+                    border.width: units.gu(0.12)
+                    scale: restartBeginMouse.pressed ? 0.95 : 1.0
+
+                    Behavior on scale {
+                        NumberAnimation { duration: 120; easing.type: Easing.OutQuad }
+                    }
+
+                    Label {
+                        anchors.centerIn: parent
+                        text: i18n.tr("Restart from Stage 1")
+                        font.pixelSize: units.gu(1.45)
+                        font.weight: Font.DemiBold
+                        color: "#D6D5D2"
+                    }
+
+                    MouseArea {
+                        id: restartBeginMouse
                         anchors.fill: parent
                         onClicked: root.restartRequested()
                     }
                 }
 
-                // Secondary CTA: Main Menu
+                // Tertiary CTA: Main Menu
                 Rectangle {
                     id: menuBtn
                     anchors.horizontalCenter: parent.horizontalCenter

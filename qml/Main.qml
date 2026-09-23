@@ -759,8 +759,15 @@ MainView {
                 bestScore: gameContainer.bestScore
                 totalRings: gameContainer.totalRings
                 speedMode: gameContainer.speedMode
+                selectedCheckpoint: gameContainer.selectedCheckpoint
+                unlockedCheckpoints: gameContainer.unlockedCheckpoints
                 theme: gameContainer.currentTheme
                 themeName: Themes.getThemeName(gameContainer.themeMode, gameContainer.currentLevel)
+                onCheckpointSelected: {
+                    soundManager.buttonHaptic();
+                    gameContainer.selectedCheckpoint = checkpoint;
+                    Storage.saveSelectedCheckpoint(checkpoint);
+                }
                 onPlayRequested: {
                     soundManager.buttonHaptic();
                     gameContainer.startGame();
@@ -788,14 +795,21 @@ MainView {
                 soundEnabled: gameContainer.soundEnabled
                 hapticsEnabled: gameContainer.hapticsEnabled
                 speedMode: gameContainer.speedMode
+                currentCheckpoint: gameContainer.getNearestCheckpoint(gameContainer.currentLevel)
                 theme: gameContainer.currentTheme
                 onResumeRequested: {
                     soundManager.buttonHaptic();
                     gameContainer.isPaused = false;
                 }
+                onRestartCheckpointRequested: {
+                    soundManager.buttonHaptic();
+                    gameContainer.startFromCheckpoint(gameContainer.getNearestCheckpoint(gameContainer.currentLevel));
+                    soundManager.play("bounce");
+                }
                 onRestartRequested: {
                     soundManager.buttonHaptic();
-                    gameContainer.startGame();
+                    gameContainer.startFromCheckpoint(1);
+                    soundManager.play("bounce");
                 }
                 onMainMenuRequested: {
                     soundManager.buttonHaptic();
@@ -862,10 +876,17 @@ MainView {
                 score: gameContainer.score
                 bestScore: gameContainer.bestScore
                 levelReached: gameContainer.currentLevel
+                checkpointLevel: gameContainer.getNearestCheckpoint(gameContainer.currentLevel)
                 theme: gameContainer.currentTheme
+                onContinueCheckpointRequested: {
+                    soundManager.buttonHaptic();
+                    gameContainer.startFromCheckpoint(gameContainer.getNearestCheckpoint(gameContainer.currentLevel));
+                    soundManager.play("bounce");
+                }
                 onRestartRequested: {
                     soundManager.buttonHaptic();
-                    gameContainer.startGame();
+                    gameContainer.startFromCheckpoint(1);
+                    soundManager.play("bounce");
                 }
                 onMainMenuRequested: {
                     soundManager.buttonHaptic();

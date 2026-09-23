@@ -7,11 +7,14 @@ Rectangle {
     property int bestScore: 0
     property int totalRings: 0
     property int speedMode: 1
+    property int selectedCheckpoint: 1
+    property var unlockedCheckpoints: [1]
     property bool showingHowToPlay: false
     property var theme: null
     property string themeName: ""
 
     signal playRequested()
+    signal checkpointSelected(int checkpoint)
     signal settingsRequested()
     signal themeCycleRequested()
     signal speedCycleRequested()
@@ -106,6 +109,139 @@ Rectangle {
                         font.pixelSize: units.gu(1.05)
                         font.weight: Font.DemiBold
                         color: "#848890"
+                    }
+                }
+
+                // Checkpoint Selector Bento Card
+                Rectangle {
+                    id: checkpointSelector
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    width: parent.width
+                    height: units.gu(4.4)
+                    radius: units.gu(1.4)
+                    color: root.theme ? root.theme.cardOuter : "#141517"
+                    border.color: root.theme ? root.theme.cardBorder : "#2A2C30"
+                    border.width: units.gu(0.1)
+
+                    Row {
+                        anchors.fill: parent
+
+                        // Previous Checkpoint Arrow Button
+                        Rectangle {
+                            id: prevCpBtn
+                            width: units.gu(4.4)
+                            height: parent.height
+                            color: prevCpMouse.pressed ? "#1E2024" : "transparent"
+                            radius: units.gu(1.4)
+                            opacity: (root.unlockedCheckpoints && root.unlockedCheckpoints.indexOf(root.selectedCheckpoint) > 0) ? 1.0 : 0.25
+
+                            Canvas {
+                                id: prevArrowCanvas
+                                anchors.centerIn: parent
+                                width: units.gu(1.2)
+                                height: units.gu(1.2)
+                                onPaint: {
+                                    var ctx = getContext("2d");
+                                    ctx.clearRect(0, 0, width, height);
+                                    ctx.fillStyle = root.theme ? root.theme.accent : "#D99B26";
+                                    ctx.beginPath();
+                                    ctx.moveTo(width * 0.75, height * 0.15);
+                                    ctx.lineTo(width * 0.25, height * 0.5);
+                                    ctx.lineTo(width * 0.75, height * 0.85);
+                                    ctx.closePath();
+                                    ctx.fill();
+                                }
+                                Connections {
+                                    target: root
+                                    onThemeChanged: prevArrowCanvas.requestPaint()
+                                }
+                            }
+
+                            MouseArea {
+                                id: prevCpMouse
+                                anchors.fill: parent
+                                enabled: root.unlockedCheckpoints && root.unlockedCheckpoints.indexOf(root.selectedCheckpoint) > 0
+                                onClicked: {
+                                    var idx = root.unlockedCheckpoints.indexOf(root.selectedCheckpoint);
+                                    if (idx > 0) {
+                                        root.checkpointSelected(root.unlockedCheckpoints[idx - 1]);
+                                    }
+                                }
+                            }
+                        }
+
+                        // Center Label: Stage and Subtitle
+                        Item {
+                            width: parent.width - units.gu(8.8)
+                            height: parent.height
+
+                            Column {
+                                anchors.centerIn: parent
+                                spacing: units.gu(0.1)
+
+                                Label {
+                                    anchors.horizontalCenter: parent.horizontalCenter
+                                    text: i18n.tr("START: STAGE %1").arg(root.selectedCheckpoint)
+                                    font.pixelSize: units.gu(1.3)
+                                    font.weight: Font.Black
+                                    color: root.theme ? root.theme.accent : "#D99B26"
+                                }
+
+                                Label {
+                                    anchors.horizontalCenter: parent.horizontalCenter
+                                    text: (root.selectedCheckpoint === 1)
+                                          ? i18n.tr("Initial Descent")
+                                          : i18n.tr("Unlocked Checkpoint")
+                                    font.pixelSize: units.gu(0.85)
+                                    font.weight: Font.DemiBold
+                                    color: "#848890"
+                                }
+                            }
+                        }
+
+                        // Next Checkpoint Arrow Button
+                        Rectangle {
+                            id: nextCpBtn
+                            width: units.gu(4.4)
+                            height: parent.height
+                            color: nextCpMouse.pressed ? "#1E2024" : "transparent"
+                            radius: units.gu(1.4)
+                            opacity: (root.unlockedCheckpoints && root.unlockedCheckpoints.indexOf(root.selectedCheckpoint) < root.unlockedCheckpoints.length - 1) ? 1.0 : 0.25
+
+                            Canvas {
+                                id: nextArrowCanvas
+                                anchors.centerIn: parent
+                                width: units.gu(1.2)
+                                height: units.gu(1.2)
+                                onPaint: {
+                                    var ctx = getContext("2d");
+                                    ctx.clearRect(0, 0, width, height);
+                                    ctx.fillStyle = root.theme ? root.theme.accent : "#D99B26";
+                                    ctx.beginPath();
+                                    ctx.moveTo(width * 0.25, height * 0.15);
+                                    ctx.lineTo(width * 0.75, height * 0.5);
+                                    ctx.lineTo(width * 0.25, height * 0.85);
+                                    ctx.closePath();
+                                    ctx.fill();
+                                }
+                                Connections {
+                                    target: root
+                                    onThemeChanged: nextArrowCanvas.requestPaint()
+                                }
+                            }
+
+                            MouseArea {
+                                id: nextCpMouse
+                                anchors.fill: parent
+                                enabled: root.unlockedCheckpoints && root.unlockedCheckpoints.indexOf(root.selectedCheckpoint) < root.unlockedCheckpoints.length - 1
+                                onClicked: {
+                                    var idx = root.unlockedCheckpoints.indexOf(root.selectedCheckpoint);
+                                    if (idx >= 0 && idx < root.unlockedCheckpoints.length - 1) {
+                                        root.checkpointSelected(root.unlockedCheckpoints[idx + 1]);
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
 
