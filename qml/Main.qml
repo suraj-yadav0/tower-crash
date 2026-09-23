@@ -778,12 +778,11 @@ MainView {
                                     gameContainer.squashVelocity = (1.0 - gameContainer.squash) * 40.0;
                                     nextY = ring.y;
 
-                                    var nextLvl = gameContainer.currentLevel + 1;
                                     if (nextLvl > gameContainer.highestLevelReached) {
                                         gameContainer.highestLevelReached = nextLvl;
                                         Storage.saveHighestLevel(nextLvl);
                                     }
-                                    if (gameContainer.isCheckpointLevel(nextLvl)) {
+                                    if (isCp) {
                                         gameContainer.unlockCheckpoint(nextLvl);
                                     }
 
@@ -797,16 +796,18 @@ MainView {
                                     }
                                     Storage.flushPendingWrites();
 
-                                    gameContainer.stageClearStage = gameContainer.currentLevel;
-                                    gameContainer.stageClearBonus = earned;
-                                    gameContainer.stageClearStreak = currentStreak;
-                                    gameContainer.stageClearIsCheckpoint = isCp;
-                                    gameContainer.stageClearNextCheckpoint = nextLvl;
-                                    gameContainer.stageClearIsGrand = isGrand;
-                                    gameContainer.milestoneRingY = ring.y;
-                                    gameContainer.isStageClearCelebrating = true;
-                                    gameContainer.isStageClearOpen = false;
-                                    stageClearIntermissionTimer.restart();
+                                    if (isCp || isGrand) {
+                                        gameContainer.stageClearStage = gameContainer.currentLevel;
+                                        gameContainer.stageClearBonus = earned;
+                                        gameContainer.stageClearStreak = currentStreak;
+                                        gameContainer.stageClearIsCheckpoint = isCp;
+                                        gameContainer.stageClearNextCheckpoint = nextLvl;
+                                        gameContainer.stageClearIsGrand = isGrand;
+                                        gameContainer.milestoneRingY = ring.y;
+                                        gameContainer.isStageClearCelebrating = true;
+                                        gameContainer.isStageClearOpen = false;
+                                        stageClearIntermissionTimer.restart();
+                                    }
                                     gameCanvas.requestPaint();
                                     break;
                                 }
@@ -1368,6 +1369,7 @@ MainView {
                         bonusPoints: gameContainer.stageClearBonus
                         streak: gameContainer.stageClearStreak
                         isCheckpoint: gameContainer.stageClearIsCheckpoint
+                        nextCheckpoint: gameContainer.stageClearNextCheckpoint
                         checkpointLevel: gameContainer.getNearestCheckpoint(gameContainer.stageClearStage)
                         isGrandVictory: gameContainer.stageClearIsGrand
                         theme: gameContainer.currentTheme
