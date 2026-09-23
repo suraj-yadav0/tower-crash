@@ -43,9 +43,9 @@ MainView {
                 Action {
                     iconName: gameContainer.isPaused ? "media-playback-start" : "media-playback-pause"
                     text: gameContainer.isPaused ? i18n.tr("Resume") : i18n.tr("Pause")
-                    visible: !gameContainer.isWelcomeOpen && !gameContainer.isStageClearOpen
+                    visible: !gameContainer.isWelcomeOpen && !gameContainer.isStageClearOpen && !gameContainer.isStageClearCelebrating
                     onTriggered: {
-                        if (!gameContainer.gameOver && !gameContainer.isStageClearOpen) {
+                        if (!gameContainer.gameOver && !gameContainer.isStageClearOpen && !gameContainer.isStageClearCelebrating) {
                             soundManager.buttonHaptic();
                             gameContainer.isPaused = !gameContainer.isPaused;
                         }
@@ -58,7 +58,7 @@ MainView {
                     onTriggered: {
                         soundManager.buttonHaptic();
                         gameContainer.wasPausedBeforeSettings = gameContainer.isPaused;
-                        if (!gameContainer.gameOver && !gameContainer.isWelcomeOpen && !gameContainer.isStageClearOpen) {
+                        if (!gameContainer.gameOver && !gameContainer.isWelcomeOpen && !gameContainer.isStageClearOpen && !gameContainer.isStageClearCelebrating) {
                             gameContainer.isPaused = true;
                         }
                         gameContainer.isSettingsOpen = true;
@@ -115,6 +115,8 @@ MainView {
             property bool wasPausedBeforeSettings: false
             property bool isWelcomeOpen: true
             property bool isStageClearOpen: false
+            property bool isStageClearCelebrating: false
+            property real milestoneRingY: 0.0
             property int stageClearStage: 1
             property int stageClearBonus: 100
             property int stageClearStreak: 0
@@ -476,11 +478,15 @@ MainView {
                 isSettingsOpen = false;
                 wasPausedBeforeSettings = false;
                 isStageClearOpen = false;
+                isStageClearCelebrating = false;
+                stageClearIntermissionTimer.stop();
                 lastPhysicsTime = 0.0;
                 gameCanvas.requestPaint();
             }
 
             function continueDescent() {
+                stageClearIntermissionTimer.stop();
+                isStageClearCelebrating = false;
                 isStageClearOpen = false;
                 streak = 0;
                 isSuperFall = false;
@@ -503,6 +509,8 @@ MainView {
             }
 
             function goToMainMenu() {
+                stageClearIntermissionTimer.stop();
+                isStageClearCelebrating = false;
                 if (activePlayTimeAccumulator > 0.0) {
                     Storage.recordPlayTime(activePlayTimeAccumulator);
                     activePlayTimeAccumulator = 0.0;
@@ -540,13 +548,13 @@ MainView {
             }
 
             Keys.onLeftPressed: {
-                if (!gameOver && !isPaused && !isSettingsOpen && !isWelcomeOpen && !isStageClearOpen) {
+                if (!gameOver && !isPaused && !isSettingsOpen && !isWelcomeOpen && !isStageClearOpen && !isStageClearCelebrating) {
                     towerAngle += 0.12;
                     gameCanvas.requestPaint();
                 }
             }
             Keys.onRightPressed: {
-                if (!gameOver && !isPaused && !isSettingsOpen && !isWelcomeOpen && !isStageClearOpen) {
+                if (!gameOver && !isPaused && !isSettingsOpen && !isWelcomeOpen && !isStageClearOpen && !isStageClearCelebrating) {
                     towerAngle -= 0.12;
                     gameCanvas.requestPaint();
                 }
@@ -557,6 +565,16 @@ MainView {
                     return;
                 }
                 if (isSettingsOpen) {
+                    return;
+                }
+                if (isStageClearCelebrating) {
+                    stageClearIntermissionTimer.stop();
+                    isStageClearCelebrating = false;
+                    ballY = milestoneRingY;
+                    ballVy = 0.0;
+                    cameraY = milestoneRingY;
+                    isStageClearOpen = true;
+                    gameCanvas.requestPaint();
                     return;
                 }
                 if (isStageClearOpen) {
@@ -593,6 +611,22 @@ MainView {
             }
 
             Timer {
+                id: stageClearIntermissionTimer
+                interval: 1000
+                repeat: false
+                onTriggered: {
+                    if (!gameContainer.gameOver && !gameContainer.isWelcomeOpen && !gameContainer.isPaused) {
+                        gameContainer.isStageClearCelebrating = false;
+                        gameContainer.ballY = gameContainer.milestoneRingY;
+                        gameContainer.ballVy = 0.0;
+                        gameContainer.cameraY = gameContainer.milestoneRingY;
+                        gameContainer.isStageClearOpen = true;
+                        gameCanvas.requestPaint();
+                    }
+                }
+            }
+
+            Timer {
                 id: physicsTimer
                 interval: 16
                 repeat: true
@@ -617,6 +651,9 @@ MainView {
                     gameContainer.lastPhysicsTime = now;
 
                     var dt = Math.min(0.040, Math.max(0.008, elapsedSec));
+                    if (gameContainer.isStageClearCelebrating) {
+                        dt *= 0.38;
+                    }
                     var prevY = gameContainer.ballY;
 
                     gameContainer.activePlayTimeAccumulator += dt;
@@ -642,6 +679,10 @@ MainView {
                     gameContainer.isSuperFall = (gameContainer.streak >= 3 && gameContainer.ballVy > gameContainer.gravity * 0.35);
 
                     var nextY = gameContainer.ballY + gameContainer.ballVy * dt;
+                    if (gameContainer.isStageClearCelebrating && gameContainer.ballVy > 0 && nextY >= gameContainer.milestoneRingY) {
+                        nextY = gameContainer.milestoneRingY;
+                        gameContainer.ballVy = 0.0;
+                    }
 
                     if (gameContainer.ballVy > 0) {
                         gameContainer.ballTrail.push({
@@ -663,7 +704,7 @@ MainView {
                         gameContainer.bannerOpacity = Math.max(0.0, gameContainer.bannerOpacity - dt * 0.6);
                     }
 
-                    if (gameContainer.ballVy > 0) {
+                    if (gameContainer.ballVy > 0 && !gameContainer.isStageClearCelebrating) {
                         for (var i = 0; i < gameContainer.rings.length; i++) {
                             var ring = gameContainer.rings[i];
                             if (ring.broken) continue;
@@ -726,7 +767,7 @@ MainView {
                                     Storage.queueStat("totalRingsSmashed", gameContainer.totalRings);
 
                                     gameContainer.ballY = ring.y;
-                                    gameContainer.ballVy = 0.0;
+                                    gameContainer.ballVy = -gameContainer.bounceSpeed * speedScale * 0.95;
                                     gameContainer.cameraY = ring.y;
                                     gameContainer.squash = 0.45;
                                     gameContainer.squashVelocity = (1.0 - gameContainer.squash) * 40.0;
@@ -757,7 +798,10 @@ MainView {
                                     gameContainer.stageClearIsCheckpoint = isCp;
                                     gameContainer.stageClearNextCheckpoint = nextLvl;
                                     gameContainer.stageClearIsGrand = isGrand;
-                                    gameContainer.isStageClearOpen = true;
+                                    gameContainer.milestoneRingY = ring.y;
+                                    gameContainer.isStageClearCelebrating = true;
+                                    gameContainer.isStageClearOpen = false;
+                                    stageClearIntermissionTimer.restart();
                                     gameCanvas.requestPaint();
                                     break;
                                 }
@@ -1011,7 +1055,7 @@ MainView {
             MouseArea {
                 id: dragArea
                 anchors.fill: parent
-                enabled: !gameContainer.gameOver && !gameContainer.isPaused && !gameContainer.isSettingsOpen && !gameContainer.isWelcomeOpen && !gameContainer.isStageClearOpen
+                enabled: !gameContainer.gameOver && !gameContainer.isPaused && !gameContainer.isSettingsOpen && !gameContainer.isWelcomeOpen && !gameContainer.isStageClearOpen && !gameContainer.isStageClearCelebrating
 
                 onPressed: {
                     gameContainer.isDragging = true;
@@ -1021,7 +1065,7 @@ MainView {
                 }
 
                 onPositionChanged: {
-                    if (pressed && !gameContainer.gameOver && !gameContainer.isPaused && !gameContainer.isSettingsOpen && !gameContainer.isWelcomeOpen && !gameContainer.isStageClearOpen) {
+                    if (pressed && !gameContainer.gameOver && !gameContainer.isPaused && !gameContainer.isSettingsOpen && !gameContainer.isWelcomeOpen && !gameContainer.isStageClearOpen && !gameContainer.isStageClearCelebrating) {
                         var now = Date.now();
                         var elapsed = Math.max(1, now - gameContainer.lastDragTime);
                         var dx = mouse.x - gameContainer.lastDragX;
