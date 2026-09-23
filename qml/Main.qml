@@ -124,6 +124,19 @@ MainView {
             property int stageClearNextCheckpoint: 1
             property bool stageClearIsGrand: false
 
+            onIsPausedChanged: {
+                if (isPaused) soundManager.stopWhoosh();
+            }
+            onGameOverChanged: {
+                if (gameOver) soundManager.stopWhoosh();
+            }
+            onIsWelcomeOpenChanged: {
+                if (isWelcomeOpen) soundManager.stopWhoosh();
+            }
+            onIsStageClearOpenChanged: {
+                if (isStageClearOpen) soundManager.stopWhoosh();
+            }
+
             property bool soundEnabled: true
             property bool hapticsEnabled: true
             property int themeMode: 0
@@ -142,6 +155,13 @@ MainView {
             property real squash: 1.0
             property real squashVelocity: 0.0
             property bool isSuperFall: false
+            onIsSuperFallChanged: {
+                if (isSuperFall && !isPaused && !gameOver && !isWelcomeOpen && !isStageClearOpen) {
+                    soundManager.playWhoosh();
+                } else {
+                    soundManager.stopWhoosh();
+                }
+            }
 
             property real ringSpacing: units.gu(26)
             property real outerRadius: units.gu(20)
@@ -759,7 +779,7 @@ MainView {
                                         soundManager.haptic(true);
                                     }
                                     gameContainer.bannerOpacity = 1.0;
-                                    soundManager.play("smash");
+                                    soundManager.playFanfare();
 
                                     var earned = isGrand ? 1000 : (isZone ? 250 : (isCp ? 150 : 100));
                                     var currentStreak = gameContainer.streak;
@@ -815,7 +835,7 @@ MainView {
                                 if (gameContainer.isSuperFall && segType !== 1) {
                                     ring.broken = true;
                                     gameContainer.spawnShatterDebris(ring.y, false, false, gameContainer.currentTheme, true);
-                                    soundManager.play("smash");
+                                    soundManager.playSmash(gameContainer.streak);
                                     soundManager.haptic(true);
 
                                     gameContainer.score += 25;
@@ -840,6 +860,8 @@ MainView {
                                 }
 
                                 if (segType === 0 || segType === 3) {
+                                    var impactSpeed = Math.abs(gameContainer.ballVy);
+                                    var normSpeed = (gameContainer.maxFallSpeed > 0) ? Math.min(1.0, impactSpeed / gameContainer.maxFallSpeed) : 0.6;
                                     gameContainer.ballY = ring.y;
                                     gameContainer.ballVy = -gameContainer.bounceSpeed * speedScale;
                                     gameContainer.activePlatformY = ring.y;
@@ -852,9 +874,9 @@ MainView {
                                     if (segType === 3) {
                                         ring.segments[segmentIdx] = 1;
                                         gameContainer.spawnSegmentShatter(ring.y, relAngle, gameContainer.currentTheme.topSafe, gameContainer.currentTheme.sideSafe);
-                                        soundManager.play("smash");
+                                        soundManager.playSmash(1);
                                     } else {
-                                        soundManager.play("bounce");
+                                        soundManager.playBounce(normSpeed);
                                     }
                                     soundManager.haptic(false);
 
@@ -902,7 +924,7 @@ MainView {
                                     gameContainer.activePlatformY = ring.y;
                                     gameContainer.cameraY = ring.y;
                                     gameContainer.isSuperFall = false;
-                                    soundManager.play("gameover");
+                                    soundManager.playGameOver();
                                     soundManager.haptic(true);
                                     gameContainer.spawnParticles(0, ring.y, 24, gameContainer.currentTheme.topHazard, 1.4);
 
@@ -926,7 +948,7 @@ MainView {
                                         gameContainer.streak++;
                                         gameContainer.score += gameContainer.streak;
                                         gameContainer.totalRings++;
-                                        soundManager.play("pass");
+                                        soundManager.playPass(gameContainer.streak);
 
                                         if (gameContainer.streak >= 3) {
                                              soundManager.haptic(true);
@@ -1216,6 +1238,12 @@ MainView {
                             gameContainer.speedMode = (gameContainer.speedMode + 1) % 3;
                             Storage.saveStat("speedMode", gameContainer.speedMode.toString());
                         }
+                        onHowToPlayRequested: {
+                            soundManager.buttonHaptic();
+                        }
+                        onCloseHowToPlayRequested: {
+                            soundManager.buttonHaptic();
+                        }
                     }
                 }
             }
@@ -1242,12 +1270,10 @@ MainView {
                         onRestartCheckpointRequested: {
                             soundManager.buttonHaptic();
                             gameContainer.startFromCheckpoint(gameContainer.getNearestCheckpoint(gameContainer.currentLevel));
-                            soundManager.play("bounce");
                         }
                         onRestartRequested: {
                             soundManager.buttonHaptic();
                             gameContainer.startFromCheckpoint(1);
-                            soundManager.play("bounce");
                         }
                         onMainMenuRequested: {
                             soundManager.buttonHaptic();
@@ -1339,12 +1365,10 @@ MainView {
                         onContinueCheckpointRequested: {
                             soundManager.buttonHaptic();
                             gameContainer.startFromCheckpoint(gameContainer.getNearestCheckpoint(gameContainer.currentLevel));
-                            soundManager.play("bounce");
                         }
                         onRestartRequested: {
                             soundManager.buttonHaptic();
                             gameContainer.startFromCheckpoint(1);
-                            soundManager.play("bounce");
                         }
                         onMainMenuRequested: {
                             soundManager.buttonHaptic();
@@ -1374,6 +1398,7 @@ MainView {
                         isGrandVictory: gameContainer.stageClearIsGrand
                         theme: gameContainer.currentTheme
                         onContinueRequested: {
+                            soundManager.buttonHaptic();
                             if (gameContainer.stageClearIsGrand) {
                                 gameContainer.goToMainMenu();
                             } else {
@@ -1384,13 +1409,11 @@ MainView {
                             soundManager.buttonHaptic();
                             gameContainer.isStageClearOpen = false;
                             gameContainer.startFromCheckpoint(gameContainer.getNearestCheckpoint(gameContainer.stageClearStage));
-                            soundManager.play("bounce");
                         }
                         onRestartStageOneRequested: {
                             soundManager.buttonHaptic();
                             gameContainer.isStageClearOpen = false;
                             gameContainer.startFromCheckpoint(1);
-                            soundManager.play("bounce");
                         }
                         onMainMenuRequested: {
                             soundManager.buttonHaptic();

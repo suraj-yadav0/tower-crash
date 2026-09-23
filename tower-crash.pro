@@ -11,7 +11,9 @@ QML_FILES += \
     qml/components/SettingsModal.qml \
     qml/components/WelcomeScreen.qml \
     qml/components/GameOverModal.qml \
+    qml/components/StageClearModal.qml \
     qml/components/SoundManager.qml \
+    qml/components/SoundBackendMultimedia.qml \
     qml/js/Themes.js \
     qml/js/Storage.js \
     qml/js/RingGenerator.js

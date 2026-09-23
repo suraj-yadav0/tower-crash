@@ -1,5 +1,4 @@
 import QtQuick 2.9
-import QtMultimedia 5.0
 import QtFeedback 5.0
 
 Item {
@@ -8,28 +7,15 @@ Item {
     property bool soundEnabled: true
     property bool hapticsEnabled: true
 
-    SoundEffect {
-        id: sfxBounce
-        source: "../../assets/sounds/bounce.wav"
-        muted: !root.soundEnabled
-    }
-
-    SoundEffect {
-        id: sfxPass
-        source: "../../assets/sounds/pass.wav"
-        muted: !root.soundEnabled
-    }
-
-    SoundEffect {
-        id: sfxSmash
-        source: "../../assets/sounds/smash.wav"
-        muted: !root.soundEnabled
-    }
-
-    SoundEffect {
-        id: sfxGameOver
-        source: "../../assets/sounds/gameover.wav"
-        muted: !root.soundEnabled
+    Loader {
+        id: multimediaLoader
+        asynchronous: false
+        source: "SoundBackendMultimedia.qml"
+        onLoaded: {
+            if (item) {
+                item.soundEnabled = Qt.binding(function() { return root.soundEnabled; });
+            }
+        }
     }
 
     HapticsEffect {
@@ -49,14 +35,93 @@ Item {
         effect: ThemeEffect.Press
     }
 
+    Timer {
+        id: dualHapticTimer
+        interval: 120
+        repeat: false
+        onTriggered: {
+            try { hapticHeavy.start(); } catch (e) {}
+        }
+    }
+
+    onSoundEnabledChanged: {
+        if (!soundEnabled && multimediaLoader.item) {
+            try { multimediaLoader.item.stopAll(); } catch (e) {}
+        }
+    }
+
+    function playBounce(velocityNorm) {
+        if (!soundEnabled || !multimediaLoader.item) return;
+        try {
+            multimediaLoader.item.playBounce(velocityNorm);
+        } catch (e) {}
+    }
+
+    function playPass(streak) {
+        if (!soundEnabled || !multimediaLoader.item) return;
+        try {
+            multimediaLoader.item.playPass(streak);
+        } catch (e) {}
+    }
+
+    function playSmash(streak) {
+        if (!soundEnabled || !multimediaLoader.item) return;
+        try {
+            multimediaLoader.item.playSmash(streak);
+        } catch (e) {}
+    }
+
+    function playGameOver() {
+        if (!soundEnabled || !multimediaLoader.item) return;
+        try {
+            multimediaLoader.item.playGameOver();
+        } catch (e) {}
+    }
+
+    function playFanfare() {
+        if (!soundEnabled || !multimediaLoader.item) return;
+        try {
+            multimediaLoader.item.playFanfare();
+        } catch (e) {}
+    }
+
+    function playWhoosh() {
+        if (!soundEnabled || !multimediaLoader.item) return;
+        try {
+            multimediaLoader.item.playWhoosh();
+        } catch (e) {}
+    }
+
+    function stopWhoosh() {
+        if (!multimediaLoader.item) return;
+        try {
+            multimediaLoader.item.stopWhoosh();
+        } catch (e) {}
+    }
+
+    function playClick() {
+        if (!soundEnabled || !multimediaLoader.item) return;
+        try {
+            multimediaLoader.item.playClick();
+        } catch (e) {}
+    }
+
+    function stopAll() {
+        if (!multimediaLoader.item) return;
+        try {
+            multimediaLoader.item.stopAll();
+        } catch (e) {}
+    }
+
     function play(type) {
         if (!soundEnabled) return;
-        try {
-            if (type === "bounce") sfxBounce.play();
-            else if (type === "pass") sfxPass.play();
-            else if (type === "smash") sfxSmash.play();
-            else if (type === "gameover") sfxGameOver.play();
-        } catch (e) {}
+        if (type === "bounce") playBounce(0.6);
+        else if (type === "pass") playPass(0);
+        else if (type === "smash") playSmash(0);
+        else if (type === "gameover") playGameOver();
+        else if (type === "fanfare") playFanfare();
+        else if (type === "whoosh") playWhoosh();
+        else if (type === "click") playClick();
     }
 
     function haptic(heavy) {
@@ -68,19 +133,11 @@ Item {
     }
 
     function buttonHaptic() {
+        playClick();
         if (!hapticsEnabled) return;
         try {
             themeHaptic.start();
         } catch (e) {}
-    }
-
-    Timer {
-        id: dualHapticTimer
-        interval: 120
-        repeat: false
-        onTriggered: {
-            try { hapticHeavy.start(); } catch (e) {}
-        }
     }
 
     function milestoneHaptic() {

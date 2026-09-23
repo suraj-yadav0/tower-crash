@@ -18,6 +18,8 @@ Rectangle {
     signal settingsRequested()
     signal themeCycleRequested()
     signal speedCycleRequested()
+    signal howToPlayRequested()
+    signal closeHowToPlayRequested()
 
     anchors.fill: parent
     color: "#E608090A"
@@ -365,7 +367,10 @@ Rectangle {
                         MouseArea {
                             id: guideMouse
                             anchors.fill: parent
-                            onClicked: root.showingHowToPlay = true
+                            onClicked: {
+                                root.showingHowToPlay = true;
+                                root.howToPlayRequested();
+                            }
                         }
                     }
                 }
@@ -711,7 +716,10 @@ Rectangle {
                     MouseArea {
                         id: backMouse
                         anchors.fill: parent
-                        onClicked: root.showingHowToPlay = false
+                        onClicked: {
+                            root.showingHowToPlay = false;
+                            root.closeHowToPlayRequested();
+                        }
                     }
                 }
             }
