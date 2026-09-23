@@ -73,4 +73,21 @@ Item {
             themeHaptic.start();
         } catch (e) {}
     }
+
+    Timer {
+        id: dualHapticTimer
+        interval: 120
+        repeat: false
+        onTriggered: {
+            try { hapticHeavy.start(); } catch (e) {}
+        }
+    }
+
+    function milestoneHaptic() {
+        if (!hapticsEnabled) return;
+        try {
+            hapticHeavy.start();
+            dualHapticTimer.start();
+        } catch (e) {}
+    }
 }

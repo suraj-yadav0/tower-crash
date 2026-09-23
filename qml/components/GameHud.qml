@@ -12,6 +12,9 @@ Column {
     property bool isSuperFall: false
     property var theme: null
 
+    property int checkpointIndex: Math.floor((currentLevel - 1) / 5) + 1
+    property int stageInCheckpoint: ((currentLevel - 1) % 5) + 1
+
     width: units.gu(36)
     spacing: units.gu(0.45)
 
@@ -89,6 +92,26 @@ Column {
                     color: "#848890"
                 }
             }
+        }
+    }
+
+    // Checkpoint Stage Tracker Pill
+    Rectangle {
+        anchors.horizontalCenter: parent.horizontalCenter
+        width: cpStageLabel.width + units.gu(1.8)
+        height: units.gu(1.8)
+        radius: units.gu(0.9)
+        color: root.theme ? root.theme.cardInner : "#0D0E0F"
+        border.color: root.theme ? root.theme.cardBorder : "#2A2C30"
+        border.width: units.gu(0.08)
+
+        Label {
+            id: cpStageLabel
+            anchors.centerIn: parent
+            text: i18n.tr("CP %1 • STAGE %2/5").arg(root.checkpointIndex).arg(root.stageInCheckpoint)
+            font.pixelSize: units.gu(0.85)
+            font.weight: Font.Bold
+            color: root.theme ? root.theme.accent : "#D99B26"
         }
     }
 

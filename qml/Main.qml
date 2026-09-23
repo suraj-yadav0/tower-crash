@@ -170,6 +170,8 @@ MainView {
                 return Math.min(1.0, Math.max(0.0, depthInLevel / levelRings));
             }
             property string bannerText: ""
+            property bool bannerIsCheckpoint: false
+            property bool bannerIsZone: false
             property real bannerOpacity: 0.0
 
             property int highestLevelReached: 1
@@ -279,6 +281,8 @@ MainView {
                 squashVelocity = 0.0;
                 isSuperFall = false;
                 bannerText = "";
+                bannerIsCheckpoint = false;
+                bannerIsZone = false;
                 bannerOpacity = 0.0;
                 RingGen.resetGenerator();
 
@@ -455,21 +459,41 @@ MainView {
                                 if (ring.isGoal) {
                                     ring.broken = true;
                                     var isGrand = ring.isGrandGoal || (gameContainer.currentLevel >= 100);
+                                    var nextLvl = gameContainer.currentLevel + 1;
+                                    var isZone = (nextLvl % 10 === 1 && nextLvl > 1);
+                                    var isCp = gameContainer.isCheckpointLevel(nextLvl);
+
+                                    gameContainer.bannerIsCheckpoint = isCp;
+                                    gameContainer.bannerIsZone = isZone;
+
                                     if (isGrand) {
                                         gameContainer.spawnParticles(0, ring.y, 80, "#ffd700", 2.8);
                                         gameContainer.spawnParticles(0, ring.y, 50, "#ffffff", 2.2);
                                         gameContainer.score += 1000;
                                         gameContainer.bannerText = i18n.tr("TOWER CONQUERED! 100 LEVELS COMPLETE!");
                                         Storage.saveStat("gameCleared", "1");
+                                        soundManager.milestoneHaptic();
+                                    } else if (isZone) {
+                                        gameContainer.spawnParticles(0, ring.y, 60, gameContainer.currentTheme.accent, 2.4);
+                                        gameContainer.spawnParticles(0, ring.y, 35, "#ffffff", 2.0);
+                                        gameContainer.score += 250;
+                                        gameContainer.bannerText = i18n.tr("ZONE %1 ENTERED!").arg(Math.floor((nextLvl - 1) / 10) + 1);
+                                        soundManager.milestoneHaptic();
+                                    } else if (isCp) {
+                                        gameContainer.spawnParticles(0, ring.y, 50, "#ffd700", 2.2);
+                                        gameContainer.spawnParticles(0, ring.y, 30, "#ffffff", 1.8);
+                                        gameContainer.score += 150;
+                                        gameContainer.bannerText = i18n.tr("CHECKPOINT STAGE %1!").arg(nextLvl);
+                                        soundManager.milestoneHaptic();
                                     } else {
                                         gameContainer.spawnParticles(0, ring.y, 45, "#ffd700", 2.2);
                                         gameContainer.spawnParticles(0, ring.y, 25, "#ffffff", 1.8);
                                         gameContainer.score += 100;
                                         gameContainer.bannerText = i18n.tr("LEVEL %1 COMPLETE!").arg(gameContainer.currentLevel);
+                                        soundManager.haptic(true);
                                     }
                                     gameContainer.bannerOpacity = 1.0;
                                     soundManager.play("smash");
-                                    soundManager.haptic(true);
 
                                     gameContainer.streak = 0;
                                     gameContainer.isSuperFall = false;
@@ -772,6 +796,8 @@ MainView {
 
             MilestoneBanner {
                 text: gameContainer.bannerText
+                isCheckpoint: gameContainer.bannerIsCheckpoint
+                isZoneTransition: gameContainer.bannerIsZone
                 bannerOpacity: gameContainer.bannerOpacity
                 theme: gameContainer.currentTheme
             }

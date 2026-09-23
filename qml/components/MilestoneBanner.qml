@@ -5,6 +5,8 @@ Item {
     id: root
 
     property string text: ""
+    property bool isCheckpoint: false
+    property bool isZoneTransition: false
     property real bannerOpacity: 0.0
     property var theme: null
 
@@ -21,8 +23,8 @@ Item {
         width: innerCore.width + units.gu(1.2)
         height: innerCore.height + units.gu(1.2)
         radius: units.gu(2.4)
-        color: root.theme ? root.theme.accentBg : "#261E10"
-        border.color: root.theme ? root.theme.accent : "#D99B26"
+        color: root.isCheckpoint ? "#2E2308" : (root.theme ? root.theme.accentBg : "#261E10")
+        border.color: root.isCheckpoint ? "#FFD700" : (root.isZoneTransition ? "#84B6D8" : (root.theme ? root.theme.accent : "#D99B26"))
         border.width: units.gu(0.15)
         scale: Math.min(1.0, 0.85 + 0.15 * root.bannerOpacity)
 
@@ -46,15 +48,19 @@ Item {
                     width: stageTag.width + units.gu(1.6)
                     height: units.gu(1.8)
                     radius: units.gu(0.9)
-                    color: root.theme ? root.theme.accentBg : "#261E10"
+                    color: root.isCheckpoint ? "#332608" : (root.isZoneTransition ? "#1A2228" : (root.theme ? root.theme.accentBg : "#261E10"))
+                    border.color: root.isCheckpoint ? "#FFD700" : (root.isZoneTransition ? "#84B6D8" : (root.theme ? root.theme.accentBorder : "#544020"))
+                    border.width: units.gu(0.08)
 
                     Label {
                         id: stageTag
                         anchors.centerIn: parent
-                        text: i18n.tr("STAGE COMPLETED")
+                        text: root.isZoneTransition
+                              ? i18n.tr("NEW ZONE REACHED")
+                              : (root.isCheckpoint ? i18n.tr("CHECKPOINT UNLOCKED") : i18n.tr("STAGE COMPLETED"))
                         font.pixelSize: units.gu(1.0)
                         font.weight: Font.Bold
-                        color: root.theme ? root.theme.accent : "#D99B26"
+                        color: root.isCheckpoint ? "#FFD700" : (root.isZoneTransition ? "#84B6D8" : (root.theme ? root.theme.accent : "#D99B26"))
                     }
                 }
 
