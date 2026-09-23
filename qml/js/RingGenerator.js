@@ -13,6 +13,7 @@ function createRing(index, ringSpacing, prevRing) {
     var level = Math.floor(index / levelRings) + 1;
     var posInLevel = index % levelRings;
     var isGoal = (index > 0 && (index + 1) % levelRings === 0);
+    var isGrandGoal = isGoal && (level >= 100);
 
     if (index === 0 || posInLevel === 0) {
         // Starting ring of run or checkpoint level: ensure slot 2 is safe ground.
@@ -33,48 +34,76 @@ function createRing(index, ringSpacing, prevRing) {
         }
         lastGapStart = (lastGapStart + 1) % 8;
     } else {
-        // Progressive difficulty calculation based on level and position in level.
+        // Progressive difficulty calculation across 10 distinct 10-level Zones
         var gapWidth = 2;
         var hazardCount = 0;
         var maxOffset = 1;
 
-        if (level === 1) {
-            // Level 1: Gentle introduction.
-            // Rings 1 to 6: 3-segment wide opening (135 degrees), 0 hazards.
-            // Rings 7 to 18: 2-segment opening (90 degrees), 1 hazard placed opposite.
-            if (posInLevel <= 6) {
-                gapWidth = 3;
-                hazardCount = 0;
+        if (level <= 10) {
+            // Zone 1 (Levels 1-10): Foundations & Flow
+            // Wide openings (2-3 segments), 0-1 hazards placed far from landing zones.
+            if (level <= 5) {
+                gapWidth = (posInLevel <= 6 || Math.random() < 0.5) ? 3 : 2;
+                hazardCount = (posInLevel <= 8) ? 0 : (Math.random() < 0.6 ? 0 : 1);
                 maxOffset = 1;
             } else {
-                gapWidth = 2;
-                hazardCount = 1;
+                gapWidth = (Math.random() < 0.4) ? 3 : 2;
+                hazardCount = (Math.random() < 0.5) ? 1 : 0;
                 maxOffset = 1;
             }
-        } else if (level === 2) {
-            // Level 2: Finding flow.
-            // 2-segment opening, 1 to 2 hazards placed away from landing zone.
+        } else if (level <= 20) {
+            // Zone 2 (Levels 11-20): Rhythmic Descent
+            // 2-segment openings, 1-2 hazards per ring.
             gapWidth = 2;
-            hazardCount = (posInLevel < 10) ? 1 : (Math.random() < 0.5 ? 1 : 2);
+            hazardCount = (Math.random() < 0.5) ? 1 : 2;
             maxOffset = 2;
-        } else if (level === 3) {
-            // Level 3: Intermediate challenge.
-            // Alternating 2-segment and 1-segment openings, 2 hazards.
-            gapWidth = (Math.random() < 0.65) ? 2 : 1;
+        } else if (level <= 30) {
+            // Zone 3 (Levels 21-30): Precision Navigation
+            // 1-2 segment openings, 2 hazards per ring.
+            gapWidth = (Math.random() < 0.5) ? 2 : 1;
             hazardCount = 2;
+            maxOffset = 2;
+        } else if (level <= 40) {
+            // Zone 4 (Levels 31-40): Sector Shifts
+            // 1-segment openings standard, 2-3 hazards per ring.
+            gapWidth = (Math.random() < 0.2) ? 2 : 1;
+            hazardCount = (Math.random() < 0.5) ? 2 : 3;
             maxOffset = 3;
-        } else if (level === 4) {
-            // Level 4: Advanced descent.
-            // Mostly 1-segment openings, 2 to 3 hazards.
-            gapWidth = (Math.random() < 0.35) ? 2 : 1;
-            hazardCount = (Math.random() < 0.4) ? 2 : 3;
-            maxOffset = 3;
-        } else {
-            // Level 5+: Master tier.
-            // Narrow 1-segment openings, 3 to 4 hazards.
+        } else if (level <= 50) {
+            // Zone 5 (Levels 41-50): Midpoint Gauntlet
+            // Strict 1-segment gaps, 3 hazards per ring.
             gapWidth = 1;
-            var extraHazards = Math.min(1, Math.floor((level - 5) / 2));
-            hazardCount = Math.min(4, 3 + extraHazards);
+            hazardCount = 3;
+            maxOffset = 3;
+        } else if (level <= 60) {
+            // Zone 6 (Levels 51-60): Narrow Margins
+            // 1-segment gaps with 3 to 4 hazards.
+            gapWidth = 1;
+            hazardCount = (Math.random() < 0.6) ? 3 : 4;
+            maxOffset = 3;
+        } else if (level <= 70) {
+            // Zone 7 (Levels 61-70): Apex Velocity
+            // 3-4 hazards per ring with tight hazard placement flanking gap slots.
+            gapWidth = 1;
+            hazardCount = (Math.random() < 0.5) ? 3 : 4;
+            maxOffset = 4;
+        } else if (level <= 80) {
+            // Zone 8 (Levels 71-80): Complex Labyrinth
+            // 4 hazards per ring (50% coverage).
+            gapWidth = 1;
+            hazardCount = 4;
+            maxOffset = 4;
+        } else if (level <= 90) {
+            // Zone 9 (Levels 81-90): Grandmaster Trial
+            // 4 to 5 hazards per ring. Minimal safe landing surface.
+            gapWidth = 1;
+            hazardCount = (Math.random() < 0.5) ? 4 : 5;
+            maxOffset = 4;
+        } else {
+            // Zone 10 (Levels 91-100): Tower Summit
+            // Apex challenge leading to Level 100 finale.
+            gapWidth = 1;
+            hazardCount = (Math.random() < 0.4) ? 4 : 5;
             maxOffset = 4;
         }
 
@@ -133,14 +162,28 @@ function createRing(index, ringSpacing, prevRing) {
             var hazardCandidates = [];
             var gapCenter = (newGapStart + Math.floor(gapWidth / 2)) % 8;
 
-            for (var dist = 4; dist >= 1; dist--) {
-                var s1 = (gapCenter + dist) % 8;
-                var s2 = (gapCenter - dist + 8) % 8;
-                if (!protectedSlots[s1] && segments[s1] === 0 && hazardCandidates.indexOf(s1) === -1) {
-                    hazardCandidates.push(s1);
+            if (level >= 61 && level <= 70) {
+                // Zone 7: Flank the gap directly
+                for (var fDist = 1; fDist <= 4; fDist++) {
+                    var fs1 = (gapCenter + fDist) % 8;
+                    var fs2 = (gapCenter - fDist + 8) % 8;
+                    if (!protectedSlots[fs1] && segments[fs1] === 0 && hazardCandidates.indexOf(fs1) === -1) {
+                        hazardCandidates.push(fs1);
+                    }
+                    if (!protectedSlots[fs2] && segments[fs2] === 0 && hazardCandidates.indexOf(fs2) === -1) {
+                        hazardCandidates.push(fs2);
+                    }
                 }
-                if (!protectedSlots[s2] && segments[s2] === 0 && hazardCandidates.indexOf(s2) === -1) {
-                    hazardCandidates.push(s2);
+            } else {
+                for (var dist = 4; dist >= 1; dist--) {
+                    var s1 = (gapCenter + dist) % 8;
+                    var s2 = (gapCenter - dist + 8) % 8;
+                    if (!protectedSlots[s1] && segments[s1] === 0 && hazardCandidates.indexOf(s1) === -1) {
+                        hazardCandidates.push(s1);
+                    }
+                    if (!protectedSlots[s2] && segments[s2] === 0 && hazardCandidates.indexOf(s2) === -1) {
+                        hazardCandidates.push(s2);
+                    }
                 }
             }
 
@@ -175,6 +218,7 @@ function createRing(index, ringSpacing, prevRing) {
         passed: false,
         broken: false,
         isGoal: isGoal,
+        isGrandGoal: isGrandGoal,
         goalAwarded: false,
         recoil: 0.0,
         recoilVelocity: 0.0,

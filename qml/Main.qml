@@ -453,12 +453,23 @@ MainView {
 
                                 if (ring.isGoal) {
                                     ring.broken = true;
-                                    gameContainer.spawnParticles(0, ring.y, 45, "#ffd700", 2.2);
-                                    gameContainer.spawnParticles(0, ring.y, 25, "#ffffff", 1.8);
+                                    var isGrand = ring.isGrandGoal || (gameContainer.currentLevel >= 100);
+                                    if (isGrand) {
+                                        gameContainer.spawnParticles(0, ring.y, 80, "#ffd700", 2.8);
+                                        gameContainer.spawnParticles(0, ring.y, 50, "#ffffff", 2.2);
+                                        gameContainer.score += 1000;
+                                        gameContainer.bannerText = i18n.tr("TOWER CONQUERED! 100 LEVELS COMPLETE!");
+                                        Storage.saveStat("gameCleared", "1");
+                                    } else {
+                                        gameContainer.spawnParticles(0, ring.y, 45, "#ffd700", 2.2);
+                                        gameContainer.spawnParticles(0, ring.y, 25, "#ffffff", 1.8);
+                                        gameContainer.score += 100;
+                                        gameContainer.bannerText = i18n.tr("LEVEL %1 COMPLETE!").arg(gameContainer.currentLevel);
+                                    }
+                                    gameContainer.bannerOpacity = 1.0;
                                     soundManager.play("smash");
                                     soundManager.haptic(true);
 
-                                    gameContainer.score += 100;
                                     gameContainer.streak = 0;
                                     gameContainer.isSuperFall = false;
                                     gameContainer.totalRings++;
@@ -469,9 +480,6 @@ MainView {
                                     gameContainer.squash = 0.45;
                                     gameContainer.squashVelocity = (1.0 - gameContainer.squash) * 40.0;
                                     nextY = ring.y;
-
-                                    gameContainer.bannerText = i18n.tr("LEVEL %1 COMPLETE!").arg(gameContainer.currentLevel);
-                                    gameContainer.bannerOpacity = 1.0;
 
                                     var nextLvl = gameContainer.currentLevel + 1;
                                     if (nextLvl > gameContainer.highestLevelReached) {
