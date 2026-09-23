@@ -11,6 +11,7 @@ Canvas {
     Connections {
         target: game
         onCurrentThemeChanged: root.requestPaint()
+        onThemeTransitionProgressChanged: root.requestPaint()
     }
 
     onPaint: {
@@ -25,9 +26,25 @@ Canvas {
 
         var theme = (game && game.currentTheme) ? game.currentTheme : Themes.getTheme(game ? game.currentLevel : 1);
 
+        var bgTopClr = theme.bgTop;
+        var bgBotClr = theme.bgBottom;
+        var pole1Clr = theme.pole1;
+        var pole2Clr = theme.pole2;
+        var pole3Clr = theme.pole3;
+
+        if (game && game.previousTheme && game.themeTransitionProgress < 1.0) {
+            var tProg = game.themeTransitionProgress;
+            var prevT = game.previousTheme;
+            bgTopClr = Themes.lerpColor(prevT.bgTop, theme.bgTop, tProg);
+            bgBotClr = Themes.lerpColor(prevT.bgBottom, theme.bgBottom, tProg);
+            pole1Clr = Themes.lerpColor(prevT.pole1, theme.pole1, tProg);
+            pole2Clr = Themes.lerpColor(prevT.pole2, theme.pole2, tProg);
+            pole3Clr = Themes.lerpColor(prevT.pole3, theme.pole3, tProg);
+        }
+
         var bgGrad = ctx.createLinearGradient(0, 0, 0, h);
-        bgGrad.addColorStop(0.0, theme.bgTop);
-        bgGrad.addColorStop(1.0, theme.bgBottom);
+        bgGrad.addColorStop(0.0, bgTopClr);
+        bgGrad.addColorStop(1.0, bgBotClr);
         ctx.fillStyle = bgGrad;
         ctx.fillRect(0, 0, w, h);
 
@@ -315,6 +332,48 @@ Canvas {
             }
         }
 
+        function drawMotionIndicator(ringScreenY, midAngle, rotSpeed, isOsc) {
+            ctx.save();
+            ctx.translate(centerX, ringScreenY);
+            ctx.scale(1.0, tilt);
+
+            var mx = midR * Math.cos(midAngle);
+            var my = midR * Math.sin(midAngle);
+            var tangAngle = midAngle + Math.PI / 2.0;
+
+            ctx.translate(mx, my);
+            ctx.rotate(tangAngle);
+
+            ctx.strokeStyle = "rgba(255, 255, 255, 0.50)";
+            ctx.lineWidth = units.gu(0.20);
+            ctx.lineCap = "round";
+            ctx.lineJoin = "round";
+
+            var size = units.gu(0.42);
+            var wing = units.gu(0.36);
+
+            if (isOsc) {
+                ctx.beginPath();
+                ctx.moveTo(-size + wing, -wing);
+                ctx.lineTo(-size, 0);
+                ctx.lineTo(-size + wing, wing);
+
+                ctx.moveTo(size - wing, -wing);
+                ctx.lineTo(size, 0);
+                ctx.lineTo(size - wing, wing);
+                ctx.stroke();
+            } else {
+                var dir = rotSpeed > 0 ? 1 : -1;
+                ctx.beginPath();
+                ctx.moveTo(-dir * wing, -wing);
+                ctx.lineTo(dir * size, 0);
+                ctx.lineTo(-dir * wing, wing);
+                ctx.stroke();
+            }
+
+            ctx.restore();
+        }
+
         for (var r1 = 0; r1 < game.rings.length; r1++) {
             var ring1 = game.rings[r1];
             if (ring1.broken) continue;
@@ -356,10 +415,10 @@ Canvas {
         var pWidth = game.poleRadius * 2.0;
 
         var poleGrad = ctx.createLinearGradient(pLeft, 0, pRight, 0);
-        poleGrad.addColorStop(0.00, theme.pole1);
-        poleGrad.addColorStop(0.32, theme.pole2);
-        poleGrad.addColorStop(0.72, theme.pole2);
-        poleGrad.addColorStop(1.00, theme.pole1);
+        poleGrad.addColorStop(0.00, pole1Clr);
+        poleGrad.addColorStop(0.32, pole2Clr);
+        poleGrad.addColorStop(0.72, pole2Clr);
+        poleGrad.addColorStop(1.00, pole1Clr);
 
         ctx.fillStyle = poleGrad;
         ctx.fillRect(pLeft, 0, pWidth, h);
@@ -417,6 +476,11 @@ Canvas {
                     }
 
                     drawTopFace(r2ScreenY, startAngle2, endAngle2, topColor2);
+
+                    var midAngle2 = (startAngle2 + endAngle2) * 0.5;
+                    if ((ring2.rotationSpeed !== 0 || ring2.isOscillating) && Math.sin(midAngle2) > 0.15) {
+                        drawMotionIndicator(r2ScreenY, midAngle2, ring2.rotationSpeed, ring2.isOscillating);
+                    }
                 }
             }
 

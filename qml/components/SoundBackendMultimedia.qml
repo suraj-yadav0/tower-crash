@@ -5,19 +5,20 @@ Item {
     id: backend
 
     property bool soundEnabled: true
+    property real masterVolume: 0.85
 
     SoundEffect {
         id: sfxBounce
         source: Qt.resolvedUrl("../../assets/sounds/bounce.wav")
         muted: !backend.soundEnabled
-        volume: 0.85
+        volume: backend.masterVolume
     }
 
     SoundEffect {
         id: sfxRoundCleared
         source: Qt.resolvedUrl("../../assets/sounds/fanfare.wav")
         muted: !backend.soundEnabled
-        volume: 0.95
+        volume: backend.masterVolume * 0.95
     }
 
     onSoundEnabledChanged: {
@@ -31,8 +32,8 @@ Item {
         try {
             var v = (velocityNorm !== undefined && velocityNorm !== null) ? Number(velocityNorm) : 0.6;
             if (isNaN(v)) v = 0.6;
-            var vol = Math.max(0.35, Math.min(1.0, 0.35 + 0.65 * v));
-            sfxBounce.volume = vol;
+            var vol = Math.max(0.2, Math.min(1.0, 0.35 + 0.65 * v)) * backend.masterVolume;
+            sfxBounce.volume = Math.max(0.0, Math.min(1.0, vol));
             sfxBounce.play();
         } catch (e) {
             try { sfxBounce.play(); } catch (e2) {}
@@ -42,6 +43,7 @@ Item {
     function playRoundCleared() {
         if (!soundEnabled) return;
         try {
+            sfxRoundCleared.volume = Math.max(0.0, Math.min(1.0, backend.masterVolume * 0.95));
             sfxRoundCleared.play();
         } catch (e) {}
     }

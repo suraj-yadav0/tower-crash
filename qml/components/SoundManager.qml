@@ -5,6 +5,7 @@ Item {
     id: root
 
     property bool soundEnabled: true
+    property real volume: 0.85
     property bool hapticsEnabled: true
 
     Loader {
@@ -14,6 +15,7 @@ Item {
         onLoaded: {
             if (item) {
                 item.soundEnabled = Qt.binding(function() { return root.soundEnabled; });
+                item.masterVolume = Qt.binding(function() { return root.volume; });
             }
         }
     }

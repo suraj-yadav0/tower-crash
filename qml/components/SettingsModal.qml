@@ -6,17 +6,21 @@ Rectangle {
     id: root
 
     property bool soundEnabled: true
+    property real soundVolume: 0.85
     property bool hapticsEnabled: true
     property int speedMode: 1
     property int themeMode: 0
+    property real touchSensitivityMultiplier: 1.0
     property int bestScore: 0
     property int totalRings: 0
     property var theme: null
 
     signal closeRequested()
     signal toggleSoundRequested()
+    signal volumeChanged(real newVolume)
     signal toggleHapticsRequested()
     signal speedModeSelected(int newMode)
+    signal touchSensitivitySelected(real newSensitivity)
     signal themeModeSelected(int newMode)
 
     anchors.fill: parent
@@ -33,7 +37,7 @@ Rectangle {
         id: outerShell
         anchors.centerIn: parent
         width: Math.min(parent.width - units.gu(4.0), units.gu(36))
-        height: innerCore.height + units.gu(2.0)
+        height: Math.min(parent.height - units.gu(3.0), innerCore.height + units.gu(2.0))
         radius: units.gu(2.0)
         color: root.theme ? root.theme.cardOuter : "#141517"
         border.color: root.theme ? root.theme.cardBorder : "#2A2C30"
@@ -52,17 +56,24 @@ Rectangle {
             id: innerCore
             anchors.centerIn: parent
             width: outerShell.width - units.gu(1.6)
-            height: modalContent.height + units.gu(3.2)
+            height: Math.min(outerShell.height - units.gu(1.6), modalContent.height + units.gu(2.8))
             radius: units.gu(1.6)
             color: root.theme ? root.theme.cardInner : "#0D0E0F"
             border.color: root.theme ? root.theme.cardBorder : "#222428"
             border.width: units.gu(0.1)
 
-            Column {
-                id: modalContent
-                anchors.centerIn: parent
-                width: parent.width - units.gu(4.0)
-                spacing: units.gu(1.2)
+            Flickable {
+                anchors.fill: parent
+                anchors.margins: units.gu(1.0)
+                contentWidth: width
+                contentHeight: modalContent.height
+                clip: true
+                boundsBehavior: Flickable.StopAtBounds
+
+                Column {
+                    id: modalContent
+                    width: parent.width
+                    spacing: units.gu(1.1)
 
                 // Eyebrow Tag
                 Rectangle {
@@ -297,6 +308,131 @@ Rectangle {
                     }
                 }
 
+                // Touch Sensitivity Card
+                Rectangle {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    width: parent.width
+                    height: units.gu(5.6)
+                    radius: units.gu(1.4)
+                    color: root.theme ? root.theme.cardOuter : "#141517"
+                    border.color: root.theme ? root.theme.cardBorder : "#2A2C30"
+                    border.width: units.gu(0.1)
+
+                    Column {
+                        anchors.centerIn: parent
+                        spacing: units.gu(0.5)
+
+                        Label {
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            text: i18n.tr("TOUCH SENSITIVITY")
+                            font.pixelSize: units.gu(0.95)
+                            font.weight: Font.Bold
+                            color: "#848890"
+                        }
+
+                        Row {
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            spacing: units.gu(0.6)
+
+                            Rectangle {
+                                width: units.gu(8.2)
+                                height: units.gu(2.7)
+                                radius: units.gu(1.35)
+                                color: Math.abs(root.touchSensitivityMultiplier - 0.75) < 0.05
+                                       ? (root.theme ? root.theme.accent : "#D99B26")
+                                       : (sensLowMouse.pressed ? "#1E2024" : (root.theme ? root.theme.cardInner : "#0D0E0F"))
+                                border.color: Math.abs(root.touchSensitivityMultiplier - 0.75) < 0.05
+                                              ? (root.theme ? root.theme.accent : "#D99B26")
+                                              : (root.theme ? root.theme.cardBorder : "#2A2C30")
+                                border.width: units.gu(0.1)
+                                scale: sensLowMouse.pressed ? 0.94 : 1.0
+
+                                Behavior on scale { NumberAnimation { duration: 100 } }
+
+                                Label {
+                                    anchors.centerIn: parent
+                                    text: i18n.tr("Low")
+                                    font.pixelSize: units.gu(1.15)
+                                    font.weight: Font.Bold
+                                    color: Math.abs(root.touchSensitivityMultiplier - 0.75) < 0.05
+                                           ? (root.theme ? root.theme.accentText : "#0B0C0D")
+                                           : "#8E929A"
+                                }
+
+                                MouseArea {
+                                    id: sensLowMouse
+                                    anchors.fill: parent
+                                    onClicked: root.touchSensitivitySelected(0.75)
+                                }
+                            }
+
+                            Rectangle {
+                                width: units.gu(8.2)
+                                height: units.gu(2.7)
+                                radius: units.gu(1.35)
+                                color: Math.abs(root.touchSensitivityMultiplier - 1.0) < 0.05
+                                       ? (root.theme ? root.theme.accent : "#D99B26")
+                                       : (sensNormMouse.pressed ? "#1E2024" : (root.theme ? root.theme.cardInner : "#0D0E0F"))
+                                border.color: Math.abs(root.touchSensitivityMultiplier - 1.0) < 0.05
+                                              ? (root.theme ? root.theme.accent : "#D99B26")
+                                              : (root.theme ? root.theme.cardBorder : "#2A2C30")
+                                border.width: units.gu(0.1)
+                                scale: sensNormMouse.pressed ? 0.94 : 1.0
+
+                                Behavior on scale { NumberAnimation { duration: 100 } }
+
+                                Label {
+                                    anchors.centerIn: parent
+                                    text: i18n.tr("Normal")
+                                    font.pixelSize: units.gu(1.15)
+                                    font.weight: Font.Bold
+                                    color: Math.abs(root.touchSensitivityMultiplier - 1.0) < 0.05
+                                           ? (root.theme ? root.theme.accentText : "#0B0C0D")
+                                           : "#8E929A"
+                                }
+
+                                MouseArea {
+                                    id: sensNormMouse
+                                    anchors.fill: parent
+                                    onClicked: root.touchSensitivitySelected(1.0)
+                                }
+                            }
+
+                            Rectangle {
+                                width: units.gu(8.2)
+                                height: units.gu(2.7)
+                                radius: units.gu(1.35)
+                                color: Math.abs(root.touchSensitivityMultiplier - 1.35) < 0.05
+                                       ? (root.theme ? root.theme.accent : "#D99B26")
+                                       : (sensHighMouse.pressed ? "#1E2024" : (root.theme ? root.theme.cardInner : "#0D0E0F"))
+                                border.color: Math.abs(root.touchSensitivityMultiplier - 1.35) < 0.05
+                                              ? (root.theme ? root.theme.accent : "#D99B26")
+                                              : (root.theme ? root.theme.cardBorder : "#2A2C30")
+                                border.width: units.gu(0.1)
+                                scale: sensHighMouse.pressed ? 0.94 : 1.0
+
+                                Behavior on scale { NumberAnimation { duration: 100 } }
+
+                                Label {
+                                    anchors.centerIn: parent
+                                    text: i18n.tr("High")
+                                    font.pixelSize: units.gu(1.15)
+                                    font.weight: Font.Bold
+                                    color: Math.abs(root.touchSensitivityMultiplier - 1.35) < 0.05
+                                           ? (root.theme ? root.theme.accentText : "#0B0C0D")
+                                           : "#8E929A"
+                                }
+
+                                MouseArea {
+                                    id: sensHighMouse
+                                    anchors.fill: parent
+                                    onClicked: root.touchSensitivitySelected(1.35)
+                                }
+                            }
+                        }
+                    }
+                }
+
                 // Audio & Haptics Toggles Row
                 Row {
                     anchors.horizontalCenter: parent.horizontalCenter
@@ -392,6 +528,76 @@ Rectangle {
                             id: hapticsToggleMouse
                             anchors.fill: parent
                             onClicked: root.toggleHapticsRequested()
+                        }
+                    }
+                }
+
+                // Sound Volume Card
+                Rectangle {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    width: parent.width
+                    height: units.gu(4.8)
+                    radius: units.gu(1.4)
+                    color: root.theme ? root.theme.cardOuter : "#141517"
+                    border.color: root.theme ? root.theme.cardBorder : "#2A2C30"
+                    border.width: units.gu(0.1)
+
+                    Column {
+                        anchors.centerIn: parent
+                        width: parent.width - units.gu(2.4)
+                        spacing: units.gu(0.4)
+
+                        Item {
+                            width: parent.width
+                            height: units.gu(1.5)
+
+                            Label {
+                                anchors.left: parent.left
+                                anchors.verticalCenter: parent.verticalCenter
+                                text: i18n.tr("SOUND VOLUME")
+                                font.pixelSize: units.gu(0.95)
+                                font.weight: Font.Bold
+                                color: "#848890"
+                            }
+
+                            Label {
+                                anchors.right: parent.right
+                                anchors.verticalCenter: parent.verticalCenter
+                                text: Math.round(root.soundVolume * 100) + "%"
+                                font.pixelSize: units.gu(0.95)
+                                font.weight: Font.Bold
+                                color: root.soundEnabled ? (root.theme ? root.theme.accent : "#D99B26") : "#555A64"
+                            }
+                        }
+
+                        Rectangle {
+                            id: volTrack
+                            width: parent.width
+                            height: units.gu(1.8)
+                            radius: units.gu(0.9)
+                            color: root.theme ? root.theme.cardInner : "#0D0E0F"
+                            border.color: root.theme ? root.theme.cardBorder : "#2A2C30"
+                            border.width: units.gu(0.08)
+                            clip: true
+
+                            Rectangle {
+                                width: Math.max(parent.radius * 2, parent.width * Math.max(0.0, Math.min(1.0, root.soundVolume)))
+                                height: parent.height
+                                radius: parent.radius
+                                color: root.soundEnabled ? (root.theme ? root.theme.accent : "#D99B26") : "#3A3D44"
+                                opacity: root.soundEnabled ? 1.0 : 0.4
+                            }
+
+                            MouseArea {
+                                anchors.fill: parent
+                                preventStealing: true
+                                function updateVol(mx) {
+                                    var fraction = Math.max(0.0, Math.min(1.0, mx / width));
+                                    root.volumeChanged(fraction);
+                                }
+                                onPressed: updateVol(mouse.x)
+                                onPositionChanged: if (pressed) updateVol(mouse.x)
+                            }
                         }
                     }
                 }
@@ -503,4 +709,5 @@ Rectangle {
             }
         }
     }
+}
 }

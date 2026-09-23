@@ -24,6 +24,7 @@ MainView {
     SoundManager {
         id: soundManager
         soundEnabled: gameContainer.soundEnabled
+        volume: gameContainer.soundVolume
         hapticsEnabled: gameContainer.hapticsEnabled
     }
 
@@ -125,11 +126,32 @@ MainView {
             property bool stageClearIsGrand: false
 
             property bool soundEnabled: true
+            property real soundVolume: 0.85
             property bool hapticsEnabled: true
+            property real touchSensitivityMultiplier: 1.0
             property int themeMode: 0
+            property var previousTheme: null
+            property real themeTransitionProgress: 1.0
             property var currentTheme: Themes.getTheme(themeMode, currentLevel)
             onCurrentThemeChanged: {
+                if (previousTheme && previousTheme.id !== currentTheme.id) {
+                    themeTransitionProgress = 0.0;
+                    themeTransitionAnim.restart();
+                } else {
+                    themeTransitionProgress = 1.0;
+                }
+                previousTheme = currentTheme;
                 gameCanvas.requestPaint();
+            }
+
+            NumberAnimation {
+                id: themeTransitionAnim
+                target: gameContainer
+                property: "themeTransitionProgress"
+                from: 0.0
+                to: 1.0
+                duration: 450
+                easing.type: Easing.InOutQuad
             }
 
             property real towerAngle: 0.0
@@ -559,9 +581,12 @@ MainView {
                 bestScore = stats.bestScore;
                 totalRings = stats.totalRings;
                 soundEnabled = stats.soundEnabled;
+                soundVolume = (stats.soundVolume !== undefined) ? stats.soundVolume : 0.85;
                 hapticsEnabled = stats.hapticsEnabled;
+                touchSensitivityMultiplier = (stats.touchSensitivityMultiplier !== undefined) ? stats.touchSensitivityMultiplier : 1.0;
                 speedMode = stats.speedMode;
                 themeMode = (stats.themeMode !== undefined) ? stats.themeMode : 0;
+                previousTheme = currentTheme;
                 highestLevelReached = stats.highestLevelReached;
                 unlockedCheckpoints = stats.unlockedCheckpoints;
                 selectedCheckpoint = stats.selectedCheckpoint;
@@ -1170,8 +1195,9 @@ MainView {
                         var elapsed = Math.max(1, now - gameContainer.lastDragTime);
                         var dx = mouse.x - gameContainer.lastDragX;
 
-                        gameContainer.towerAngle -= dx * 0.014;
-                        var fling = -(dx / elapsed) * 0.12;
+                        var sens = gameContainer.touchSensitivityMultiplier;
+                        gameContainer.towerAngle -= dx * 0.014 * sens;
+                        var fling = -(dx / elapsed) * 0.12 * sens;
                         gameContainer.angularVelocity = Math.max(-0.25, Math.min(0.25, fling));
 
                         gameContainer.lastDragX = mouse.x;
@@ -1324,9 +1350,11 @@ MainView {
                         anchors.fill: parent
                         visible: true
                         soundEnabled: gameContainer.soundEnabled
+                        soundVolume: gameContainer.soundVolume
                         hapticsEnabled: gameContainer.hapticsEnabled
                         speedMode: gameContainer.speedMode
                         themeMode: gameContainer.themeMode
+                        touchSensitivityMultiplier: gameContainer.touchSensitivityMultiplier
                         bestScore: gameContainer.bestScore
                         totalRings: gameContainer.totalRings
                         theme: gameContainer.currentTheme
@@ -1342,6 +1370,10 @@ MainView {
                             gameContainer.soundEnabled = !gameContainer.soundEnabled;
                             Storage.saveStat("soundEnabled", gameContainer.soundEnabled ? "1" : "0");
                         }
+                        onVolumeChanged: {
+                            gameContainer.soundVolume = newVolume;
+                            Storage.saveSoundVolume(newVolume);
+                        }
                         onToggleHapticsRequested: {
                             soundManager.buttonHaptic();
                             gameContainer.hapticsEnabled = !gameContainer.hapticsEnabled;
@@ -1351,6 +1383,11 @@ MainView {
                             soundManager.buttonHaptic();
                             gameContainer.speedMode = newMode;
                             Storage.saveStat("speedMode", newMode.toString());
+                        }
+                        onTouchSensitivitySelected: {
+                            soundManager.buttonHaptic();
+                            gameContainer.touchSensitivityMultiplier = newSensitivity;
+                            Storage.saveTouchSensitivity(newSensitivity);
                         }
                         onThemeModeSelected: {
                             soundManager.buttonHaptic();

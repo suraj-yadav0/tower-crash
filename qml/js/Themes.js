@@ -316,3 +316,24 @@ function getThemeName(themeMode, levelNum) {
     }
     return theme.name;
 }
+
+function lerpColor(c1, c2, t) {
+    if (!c1) return c2 || "#000000";
+    if (!c2) return c1 || "#000000";
+    if (t <= 0.0) return c1;
+    if (t >= 1.0) return c2;
+
+    var r1 = parseInt(c1.slice(1, 3), 16) || 0;
+    var g1 = parseInt(c1.slice(3, 5), 16) || 0;
+    var b1 = parseInt(c1.slice(5, 7), 16) || 0;
+
+    var r2 = parseInt(c2.slice(1, 3), 16) || 0;
+    var g2 = parseInt(c2.slice(3, 5), 16) || 0;
+    var b2 = parseInt(c2.slice(5, 7), 16) || 0;
+
+    var r = Math.round(r1 + (r2 - r1) * t);
+    var g = Math.round(g1 + (g2 - g1) * t);
+    var b = Math.round(b1 + (b2 - b1) * t);
+
+    return "rgb(" + r + "," + g + "," + b + ")";
+}

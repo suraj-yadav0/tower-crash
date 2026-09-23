@@ -33,6 +33,7 @@ function loadStats(forceReload) {
         gamesPlayedCount: 0,
         gameCleared: false,
         soundEnabled: true,
+        soundVolume: 0.85,
         hapticsEnabled: true,
         speedMode: 1,
         themeMode: 0,
@@ -60,6 +61,7 @@ function loadStats(forceReload) {
                 else if (k === "gamesPlayedCount") stats.gamesPlayedCount = parseInt(v) || 0;
                 else if (k === "gameCleared") stats.gameCleared = (v === "1");
                 else if (k === "soundEnabled") stats.soundEnabled = (v !== "0");
+                else if (k === "soundVolume") stats.soundVolume = (parseFloat(v) >= 0.0) ? Math.min(1.0, Math.max(0.0, parseFloat(v))) : 0.85;
                 else if (k === "hapticsEnabled") stats.hapticsEnabled = (v !== "0");
                 else if (k === "speedMode") stats.speedMode = parseInt(v) || 1;
                 else if (k === "themeMode") stats.themeMode = parseInt(v) || 0;
@@ -164,4 +166,14 @@ function recordStageCompleted(points) {
 function recordPlayTime(seconds) {
     var total = (getStat("totalPlayTimeSeconds", 0) || 0) + (seconds || 0);
     queueStat("totalPlayTimeSeconds", Math.round(total));
+}
+
+function saveSoundVolume(volume) {
+    var vol = Math.max(0.0, Math.min(1.0, parseFloat(volume) || 0.0));
+    saveStat("soundVolume", vol.toFixed(2));
+}
+
+function saveTouchSensitivity(multiplier) {
+    var mult = Math.max(0.4, Math.min(2.5, parseFloat(multiplier) || 1.0));
+    saveStat("touchSensitivityMultiplier", mult.toFixed(2));
 }
