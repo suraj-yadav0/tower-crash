@@ -138,6 +138,7 @@ MainView {
             property real ballY: 0.0
             property real ballVy: 0.0
             property real cameraY: 0.0
+            property real activePlatformY: 0.0
             property real squash: 1.0
             property real squashVelocity: 0.0
             property bool isSuperFall: false
@@ -473,6 +474,7 @@ MainView {
                 ballY = (startIndex + 1) * ringSpacing - units.gu(5.0);
                 ballVy = 0.0;
                 cameraY = (startIndex + 1) * ringSpacing;
+                activePlatformY = (startIndex + 1) * ringSpacing;
                 gameOver = false;
                 isPaused = false;
                 isSettingsOpen = false;
@@ -573,6 +575,7 @@ MainView {
                     ballY = milestoneRingY;
                     ballVy = 0.0;
                     cameraY = milestoneRingY;
+                    activePlatformY = milestoneRingY;
                     isStageClearOpen = true;
                     gameCanvas.requestPaint();
                     return;
@@ -620,6 +623,7 @@ MainView {
                         gameContainer.ballY = gameContainer.milestoneRingY;
                         gameContainer.ballVy = 0.0;
                         gameContainer.cameraY = gameContainer.milestoneRingY;
+                        gameContainer.activePlatformY = gameContainer.milestoneRingY;
                         gameContainer.isStageClearOpen = true;
                         gameCanvas.requestPaint();
                     }
@@ -769,6 +773,7 @@ MainView {
                                     gameContainer.ballY = ring.y;
                                     gameContainer.ballVy = -gameContainer.bounceSpeed * speedScale * 0.95;
                                     gameContainer.cameraY = ring.y;
+                                    gameContainer.activePlatformY = ring.y;
                                     gameContainer.squash = 0.45;
                                     gameContainer.squashVelocity = (1.0 - gameContainer.squash) * 40.0;
                                     nextY = ring.y;
@@ -821,6 +826,7 @@ MainView {
 
                                     gameContainer.ballY = ring.y;
                                     gameContainer.ballVy = -gameContainer.bounceSpeed * speedScale;
+                                    gameContainer.activePlatformY = ring.y;
                                     gameContainer.squash = 0.48;
                                     gameContainer.squashVelocity = (1.0 - gameContainer.squash) * 38.0;
                                     nextY = ring.y;
@@ -835,6 +841,7 @@ MainView {
                                 if (segType === 0 || segType === 3) {
                                     gameContainer.ballY = ring.y;
                                     gameContainer.ballVy = -gameContainer.bounceSpeed * speedScale;
+                                    gameContainer.activePlatformY = ring.y;
                                     gameContainer.streak = 0;
                                     gameContainer.isSuperFall = false;
                                     gameContainer.squash = 0.54;
@@ -891,6 +898,8 @@ MainView {
                                     gameContainer.ballY = ring.y;
                                     gameContainer.ballVy = 0;
                                     gameContainer.gameOver = true;
+                                    gameContainer.activePlatformY = ring.y;
+                                    gameContainer.cameraY = ring.y;
                                     gameContainer.isSuperFall = false;
                                     soundManager.play("gameover");
                                     soundManager.haptic(true);
@@ -910,6 +919,9 @@ MainView {
                                 } else if (segType === 1) {
                                     if (!ring.passed) {
                                         ring.passed = true;
+                                        if (gameContainer.activePlatformY < ring.y) {
+                                            gameContainer.activePlatformY = ring.y;
+                                        }
                                         gameContainer.streak++;
                                         gameContainer.score += gameContainer.streak;
                                         gameContainer.totalRings++;
@@ -937,13 +949,24 @@ MainView {
 
                     gameContainer.ballY = nextY;
 
-                    var targetCamera = gameContainer.ballY;
-                    if (gameContainer.ballVy < 0) {
-                        gameContainer.cameraY += (targetCamera - gameContainer.cameraY) * 0.12;
-                    } else {
-                        gameContainer.cameraY += (targetCamera - gameContainer.cameraY) * 0.32;
-                        if (gameContainer.ballY - gameContainer.cameraY > units.gu(5)) {
-                            gameContainer.cameraY = gameContainer.ballY - units.gu(5);
+                    var targetCamera = gameContainer.activePlatformY;
+                    if (gameContainer.ballY > gameContainer.activePlatformY) {
+                        targetCamera = gameContainer.ballY;
+                    }
+
+                    if (targetCamera > gameContainer.cameraY) {
+                        var camDiff = targetCamera - gameContainer.cameraY;
+                        if (camDiff < 0.001) {
+                            gameContainer.cameraY = targetCamera;
+                        } else {
+                            var followRate = gameContainer.isSuperFall ? 28.0 : 20.0;
+                            var camStep = camDiff * (1.0 - Math.exp(-followRate * dt));
+                            gameContainer.cameraY += camStep;
+
+                            var maxLag = units.gu(5.5);
+                            if (gameContainer.ballY - gameContainer.cameraY > maxLag) {
+                                gameContainer.cameraY = gameContainer.ballY - maxLag;
+                            }
                         }
                     }
 
