@@ -177,6 +177,7 @@ MainView {
             property int highestLevelReached: 1
             property var unlockedCheckpoints: [1]
             property int selectedCheckpoint: 1
+            property real activePlayTimeAccumulator: 0.0
 
             onCurrentLevelChanged: {
                 if (currentLevel > highestLevelReached) {
@@ -308,9 +309,15 @@ MainView {
                 startFromCheckpoint(selectedCheckpoint);
                 isWelcomeOpen = false;
                 soundManager.play("bounce");
+                Storage.recordGamePlayed();
             }
 
             function goToMainMenu() {
+                if (activePlayTimeAccumulator > 0.0) {
+                    Storage.recordPlayTime(activePlayTimeAccumulator);
+                    activePlayTimeAccumulator = 0.0;
+                }
+                Storage.flushPendingWrites();
                 initGame(selectedCheckpoint);
                 isWelcomeOpen = true;
             }
@@ -318,6 +325,12 @@ MainView {
             onIsPausedChanged: {
                 if (!isPaused) {
                     lastPhysicsTime = 0.0;
+                } else {
+                    if (activePlayTimeAccumulator > 0.0) {
+                        Storage.recordPlayTime(activePlayTimeAccumulator);
+                        activePlayTimeAccumulator = 0.0;
+                    }
+                    Storage.flushPendingWrites();
                 }
             }
 
@@ -399,6 +412,12 @@ MainView {
 
                     var dt = Math.min(0.040, Math.max(0.008, elapsedSec));
                     var prevY = gameContainer.ballY;
+
+                    gameContainer.activePlayTimeAccumulator += dt;
+                    if (gameContainer.activePlayTimeAccumulator >= 5.0) {
+                        Storage.recordPlayTime(gameContainer.activePlayTimeAccumulator);
+                        gameContainer.activePlayTimeAccumulator = 0.0;
+                    }
 
                     if (!gameContainer.isDragging && Math.abs(gameContainer.angularVelocity) > 0.0001) {
                         gameContainer.towerAngle += gameContainer.angularVelocity;
@@ -498,7 +517,10 @@ MainView {
                                     gameContainer.streak = 0;
                                     gameContainer.isSuperFall = false;
                                     gameContainer.totalRings++;
-                                    Storage.saveStat("totalRings", gameContainer.totalRings);
+                                    var earned = isGrand ? 1000 : (isZone ? 250 : (isCp ? 150 : 100));
+                                    Storage.recordStageCompleted(earned);
+                                    Storage.queueStat("totalRings", gameContainer.totalRings);
+                                    Storage.queueStat("totalRingsSmashed", gameContainer.totalRings);
 
                                     gameContainer.ballY = ring.y;
                                     gameContainer.ballVy = -gameContainer.bounceSpeed * speedScale * 1.1;
@@ -517,8 +539,9 @@ MainView {
 
                                     if (gameContainer.score > gameContainer.bestScore) {
                                         gameContainer.bestScore = gameContainer.score;
-                                        Storage.saveStat("bestScore", gameContainer.bestScore);
+                                        Storage.queueStat("bestScore", gameContainer.bestScore);
                                     }
+                                    Storage.flushPendingWrites();
                                     break;
                                 }
 
@@ -533,7 +556,8 @@ MainView {
                                     gameContainer.streak = 0;
                                     gameContainer.isSuperFall = false;
                                     gameContainer.totalRings++;
-                                    Storage.saveStat("totalRings", gameContainer.totalRings);
+                                    Storage.queueStat("totalRings", gameContainer.totalRings);
+                                    Storage.queueStat("totalRingsSmashed", gameContainer.totalRings);
 
                                     gameContainer.ballY = ring.y;
                                     gameContainer.ballVy = -gameContainer.bounceSpeed * speedScale;
@@ -543,7 +567,7 @@ MainView {
 
                                     if (gameContainer.score > gameContainer.bestScore) {
                                         gameContainer.bestScore = gameContainer.score;
-                                        Storage.saveStat("bestScore", gameContainer.bestScore);
+                                        Storage.queueStat("bestScore", gameContainer.bestScore);
                                     }
                                     break;
                                 }
@@ -614,8 +638,13 @@ MainView {
 
                                     if (gameContainer.score > gameContainer.bestScore) {
                                         gameContainer.bestScore = gameContainer.score;
-                                        Storage.saveStat("bestScore", gameContainer.bestScore);
+                                        Storage.queueStat("bestScore", gameContainer.bestScore);
                                     }
+                                    if (gameContainer.activePlayTimeAccumulator > 0.0) {
+                                        Storage.recordPlayTime(gameContainer.activePlayTimeAccumulator);
+                                        gameContainer.activePlayTimeAccumulator = 0.0;
+                                    }
+                                    Storage.flushPendingWrites();
                                     gameCanvas.requestPaint();
                                     return;
                                 } else if (segType === 1) {
@@ -627,17 +656,19 @@ MainView {
                                         soundManager.play("pass");
 
                                         if (gameContainer.streak >= 3) {
-                                            soundManager.haptic(true);
-                                            if (gameContainer.ballVy > gameContainer.gravity * 0.35) {
-                                                gameContainer.isSuperFall = true;
-                                            }
+                                             soundManager.haptic(true);
+                                             if (gameContainer.ballVy > gameContainer.gravity * 0.35) {
+                                                 gameContainer.isSuperFall = true;
+                                             }
                                         }
 
                                         if (gameContainer.score > gameContainer.bestScore) {
-                                            gameContainer.bestScore = gameContainer.score;
-                                            Storage.saveStat("bestScore", gameContainer.bestScore);
+                                             gameContainer.bestScore = gameContainer.score;
+                                             Storage.queueStat("bestScore", gameContainer.bestScore);
                                         }
-                                        Storage.saveStat("totalRings", gameContainer.totalRings);
+                                        Storage.queueStat("totalRings", gameContainer.totalRings);
+                                        Storage.queueStat("totalRingsSmashed", gameContainer.totalRings);
+                                        Storage.recordComboStreak(gameContainer.streak);
                                     }
                                 }
                             }

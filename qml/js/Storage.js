@@ -1,18 +1,42 @@
 .pragma library
 .import QtQuick.LocalStorage 2.0 as Sql
 
+var _cache = null;
+var _dirty = {};
+
 function getDatabase() {
-    return Sql.LocalStorage.openDatabaseSync("TowerCrashDB", "1.0", "Tower Crash Persistence", 100000);
+    var db = Sql.LocalStorage.openDatabaseSync("TowerCrashDB", "", "Tower Crash Persistence", 100000);
+    if (db.version === "" || db.version === "1.0") {
+        try {
+            db.changeVersion(db.version, "1.1", function(tx) {
+                tx.executeSql('CREATE TABLE IF NOT EXISTS kv(k TEXT UNIQUE, v TEXT)');
+            });
+        } catch (e) {
+            // Version already changed or changeVersion not supported
+        }
+    }
+    return db;
 }
 
-function loadStats() {
+function loadStats(forceReload) {
+    if (_cache && !forceReload) {
+        return _cache;
+    }
+
     var stats = {
         bestScore: 0,
         totalRings: 0,
+        lifetimeScore: 0,
+        maxComboStreak: 0,
+        completedStagesCount: 0,
+        totalPlayTimeSeconds: 0,
+        gamesPlayedCount: 0,
+        gameCleared: false,
         soundEnabled: true,
         hapticsEnabled: true,
         speedMode: 1,
         themeMode: 0,
+        touchSensitivityMultiplier: 1.0,
         highestLevelReached: 1,
         unlockedCheckpoints: [1],
         selectedCheckpoint: 1
@@ -25,17 +49,26 @@ function loadStats() {
             var rs = tx.executeSql('SELECT k, v FROM kv');
             for (var i = 0; i < rs.rows.length; i++) {
                 var row = rs.rows.item(i);
-                if (row.k === "bestScore") stats.bestScore = parseInt(row.v) || 0;
-                else if (row.k === "totalRings") stats.totalRings = parseInt(row.v) || 0;
-                else if (row.k === "soundEnabled") stats.soundEnabled = (row.v !== "0");
-                else if (row.k === "hapticsEnabled") stats.hapticsEnabled = (row.v !== "0");
-                else if (row.k === "speedMode") stats.speedMode = parseInt(row.v) || 1;
-                else if (row.k === "themeMode") stats.themeMode = parseInt(row.v) || 0;
-                else if (row.k === "highestLevelReached") stats.highestLevelReached = Math.max(1, parseInt(row.v) || 1);
-                else if (row.k === "selectedCheckpoint") stats.selectedCheckpoint = Math.max(1, parseInt(row.v) || 1);
-                else if (row.k === "unlockedCheckpoints") {
+                var k = row.k;
+                var v = row.v;
+                if (k === "bestScore") stats.bestScore = parseInt(v) || 0;
+                else if (k === "totalRings" || k === "totalRingsSmashed") stats.totalRings = parseInt(v) || 0;
+                else if (k === "lifetimeScore") stats.lifetimeScore = parseInt(v) || 0;
+                else if (k === "maxComboStreak") stats.maxComboStreak = parseInt(v) || 0;
+                else if (k === "completedStagesCount") stats.completedStagesCount = parseInt(v) || 0;
+                else if (k === "totalPlayTimeSeconds") stats.totalPlayTimeSeconds = parseInt(v) || 0;
+                else if (k === "gamesPlayedCount") stats.gamesPlayedCount = parseInt(v) || 0;
+                else if (k === "gameCleared") stats.gameCleared = (v === "1");
+                else if (k === "soundEnabled") stats.soundEnabled = (v !== "0");
+                else if (k === "hapticsEnabled") stats.hapticsEnabled = (v !== "0");
+                else if (k === "speedMode") stats.speedMode = parseInt(v) || 1;
+                else if (k === "themeMode") stats.themeMode = parseInt(v) || 0;
+                else if (k === "touchSensitivityMultiplier") stats.touchSensitivityMultiplier = parseFloat(v) || 1.0;
+                else if (k === "highestLevelReached") stats.highestLevelReached = Math.max(1, parseInt(v) || 1);
+                else if (k === "selectedCheckpoint") stats.selectedCheckpoint = Math.max(1, parseInt(v) || 1);
+                else if (k === "unlockedCheckpoints") {
                     try {
-                        var parsed = JSON.parse(row.v);
+                        var parsed = JSON.parse(v);
                         if (Array.isArray(parsed) && parsed.length > 0) {
                             stats.unlockedCheckpoints = parsed;
                         }
@@ -53,17 +86,44 @@ function loadStats() {
     }
     stats.unlockedCheckpoints.sort(function(a, b) { return a - b; });
 
+    _cache = stats;
     return stats;
 }
 
-function saveStat(key, val) {
+function flushPendingWrites() {
+    var keys = Object.keys(_dirty);
+    if (keys.length === 0) return;
     try {
         var db = getDatabase();
         db.transaction(function(tx) {
             tx.executeSql('CREATE TABLE IF NOT EXISTS kv(k TEXT UNIQUE, v TEXT)');
-            tx.executeSql('INSERT OR REPLACE INTO kv VALUES(?, ?)', [key, val.toString()]);
+            for (var i = 0; i < keys.length; i++) {
+                var k = keys[i];
+                tx.executeSql('INSERT OR REPLACE INTO kv VALUES(?, ?)', [k, _dirty[k].toString()]);
+            }
         });
+        _dirty = {};
     } catch (e) {}
+}
+
+function saveStat(key, val) {
+    if (!_cache) _cache = {};
+    _cache[key] = val;
+    _dirty[key] = val;
+    flushPendingWrites();
+}
+
+function queueStat(key, val) {
+    if (!_cache) _cache = {};
+    _cache[key] = val;
+    _dirty[key] = val;
+}
+
+function getStat(key, fallback) {
+    if (_cache && _cache[key] !== undefined) {
+        return _cache[key];
+    }
+    return fallback;
 }
 
 function saveHighestLevel(level) {
@@ -80,3 +140,27 @@ function saveSelectedCheckpoint(level) {
     saveStat("selectedCheckpoint", Math.max(1, parseInt(level) || 1));
 }
 
+function recordGamePlayed() {
+    var count = (getStat("gamesPlayedCount", 0) || 0) + 1;
+    saveStat("gamesPlayedCount", count);
+}
+
+function recordComboStreak(streak) {
+    var currentMax = getStat("maxComboStreak", 0) || 0;
+    if (streak > currentMax) {
+        saveStat("maxComboStreak", streak);
+    }
+}
+
+function recordStageCompleted(points) {
+    var stages = (getStat("completedStagesCount", 0) || 0) + 1;
+    var lifetime = (getStat("lifetimeScore", 0) || 0) + (points || 0);
+    queueStat("completedStagesCount", stages);
+    queueStat("lifetimeScore", lifetime);
+    flushPendingWrites();
+}
+
+function recordPlayTime(seconds) {
+    var total = (getStat("totalPlayTimeSeconds", 0) || 0) + (seconds || 0);
+    queueStat("totalPlayTimeSeconds", Math.round(total));
+}
