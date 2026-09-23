@@ -2,6 +2,33 @@
 
 var themeList = [
     {
+        id: "solar",
+        name: "Solar Gold",
+        previewColor: "#EAB308",
+        topSafe: "#EAB308",
+        sideSafe: "#A16207",
+        topHazard: "#8B5CF6",
+        sideHazard: "#6D28D9",
+        ballLight: "#FEFCE8",
+        ballMid: "#FDE047",
+        ballDark: "#CA8A04",
+        bgTop: "#171612",
+        bgBottom: "#0C0B08",
+        pole1: "#2B281E",
+        pole2: "#454030",
+        pole3: "#1D1B14",
+        goalTop: "#38BDF8",
+        goalSide: "#0284C7",
+        accent: "#EAB308",
+        accentHover: "#CA8A04",
+        accentText: "#0C0B08",
+        accentBg: "#272210",
+        accentBorder: "#52451C",
+        cardOuter: "#171511",
+        cardInner: "#0E0D0A",
+        cardBorder: "#2E2A20"
+    },
+    {
         id: "desert",
         name: "Desert Dune",
         previewColor: "#FB923C",
@@ -243,48 +270,21 @@ var themeList = [
         cardOuter: "#101714",
         cardInner: "#090E0C",
         cardBorder: "#202F28"
-    },
-    {
-        id: "solar",
-        name: "Solar Gold",
-        previewColor: "#EAB308",
-        topSafe: "#EAB308",
-        sideSafe: "#A16207",
-        topHazard: "#8B5CF6",
-        sideHazard: "#6D28D9",
-        ballLight: "#FEFCE8",
-        ballMid: "#FDE047",
-        ballDark: "#CA8A04",
-        bgTop: "#171612",
-        bgBottom: "#0C0B08",
-        pole1: "#2B281E",
-        pole2: "#454030",
-        pole3: "#1D1B14",
-        goalTop: "#38BDF8",
-        goalSide: "#0284C7",
-        accent: "#EAB308",
-        accentHover: "#CA8A04",
-        accentText: "#0C0B08",
-        accentBg: "#272210",
-        accentBorder: "#52451C",
-        cardOuter: "#171511",
-        cardInner: "#0E0D0A",
-        cardBorder: "#2E2A20"
     }
 ];
 
 var themeOptions = [
-    { id: 0, name: "Dynamic", previewColor: "#FB923C" },
-    { id: 1, name: "Desert", previewColor: "#FB923C" },
-    { id: 2, name: "Tactical", previewColor: "#D99B26" },
-    { id: 3, name: "Kyoto", previewColor: "#52B788" },
-    { id: 4, name: "Amethyst", previewColor: "#A855F7" },
-    { id: 5, name: "Lichen", previewColor: "#2DD4BF" },
-    { id: 6, name: "Braun", previewColor: "#E2E8F0" },
-    { id: 7, name: "Crimson", previewColor: "#F43F5E" },
-    { id: 8, name: "Cobalt", previewColor: "#38BDF8" },
-    { id: 9, name: "Emerald", previewColor: "#10B981" },
-    { id: 10, name: "Solar", previewColor: "#EAB308" }
+    { id: 0, name: "Dynamic", previewColor: "#EAB308" },
+    { id: 1, name: "Solar", previewColor: "#EAB308" },
+    { id: 2, name: "Desert", previewColor: "#FB923C" },
+    { id: 3, name: "Tactical", previewColor: "#D99B26" },
+    { id: 4, name: "Kyoto", previewColor: "#52B788" },
+    { id: 5, name: "Amethyst", previewColor: "#A855F7" },
+    { id: 6, name: "Lichen", previewColor: "#2DD4BF" },
+    { id: 7, name: "Braun", previewColor: "#E2E8F0" },
+    { id: 8, name: "Crimson", previewColor: "#F43F5E" },
+    { id: 9, name: "Cobalt", previewColor: "#38BDF8" },
+    { id: 10, name: "Emerald", previewColor: "#10B981" }
 ];
 
 function getCheckpointIndex(level) {
