@@ -9,7 +9,7 @@ Rectangle {
     property real soundVolume: 0.85
     property bool hapticsEnabled: true
     property int speedMode: 1
-    property int themeMode: 1
+    property int themeMode: 0
     property real touchSensitivityMultiplier: 1.0
     property int bestScore: 0
     property int totalRings: 0
@@ -35,7 +35,7 @@ Rectangle {
                 return Themes.themeOptions[i];
             }
         }
-        return Themes.themeOptions[1];
+        return Themes.themeOptions[0];
     }
 
     onVisibleChanged: {

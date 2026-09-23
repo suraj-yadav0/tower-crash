@@ -36,7 +36,7 @@ function loadStats(forceReload) {
         soundVolume: 0.85,
         hapticsEnabled: true,
         speedMode: 1,
-        themeMode: 1,
+        themeMode: 0,
         touchSensitivityMultiplier: 1.0,
         highestLevelReached: 1,
         unlockedCheckpoints: [1],
@@ -64,7 +64,7 @@ function loadStats(forceReload) {
                 else if (k === "soundVolume") stats.soundVolume = (parseFloat(v) >= 0.0) ? Math.min(1.0, Math.max(0.0, parseFloat(v))) : 0.85;
                 else if (k === "hapticsEnabled") stats.hapticsEnabled = (v !== "0");
                 else if (k === "speedMode") stats.speedMode = parseInt(v) || 1;
-                else if (k === "themeMode") stats.themeMode = !isNaN(parseInt(v)) ? parseInt(v) : 1;
+                else if (k === "themeMode") stats.themeMode = !isNaN(parseInt(v)) ? parseInt(v) : 0;
                 else if (k === "touchSensitivityMultiplier") stats.touchSensitivityMultiplier = parseFloat(v) || 1.0;
                 else if (k === "highestLevelReached") stats.highestLevelReached = Math.max(1, parseInt(v) || 1);
                 else if (k === "selectedCheckpoint") stats.selectedCheckpoint = Math.max(1, parseInt(v) || 1);

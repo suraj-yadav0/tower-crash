@@ -297,7 +297,7 @@ function getTheme(arg1, arg2) {
         return themeList[cpOnly % themeList.length];
     }
     var mode = parseInt(arg1);
-    if (isNaN(mode)) mode = 1;
+    if (isNaN(mode)) mode = 0;
     var level = parseInt(arg2) || 1;
     var cpIndex = getCheckpointIndex(level);
 
@@ -311,7 +311,7 @@ function getTheme(arg1, arg2) {
 
 function getThemeName(themeMode, levelNum) {
     var mode = parseInt(themeMode);
-    if (isNaN(mode)) mode = 1;
+    if (isNaN(mode)) mode = 0;
     var theme = getTheme(mode, levelNum);
     if (mode === 0) {
         return "Dynamic (" + theme.name + ")";

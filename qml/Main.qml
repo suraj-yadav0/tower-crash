@@ -129,7 +129,7 @@ MainView {
             property real soundVolume: 0.85
             property bool hapticsEnabled: true
             property real touchSensitivityMultiplier: 1.0
-            property int themeMode: 1
+            property int themeMode: 0
             property var previousTheme: null
             property real themeTransitionProgress: 1.0
             property var currentTheme: Themes.getTheme(themeMode, currentLevel)
@@ -585,7 +585,7 @@ MainView {
                 hapticsEnabled = stats.hapticsEnabled;
                 touchSensitivityMultiplier = (stats.touchSensitivityMultiplier !== undefined) ? stats.touchSensitivityMultiplier : 1.0;
                 speedMode = stats.speedMode;
-                themeMode = (stats.themeMode !== undefined) ? stats.themeMode : 1;
+                themeMode = (stats.themeMode !== undefined) ? stats.themeMode : 0;
                 previousTheme = currentTheme;
                 highestLevelReached = stats.highestLevelReached;
                 unlockedCheckpoints = stats.unlockedCheckpoints;
