@@ -270,6 +270,173 @@ MainView {
                 }
             }
 
+            function spawnShatterDebris(ringY, isGoal, isGrand, theme, isSuper) {
+                var midR = (outerRadius + innerRadius) / 2.0;
+                var topClr = isGoal ? (isGrand ? "#FFD700" : (theme.goalTop || "#E8C872")) : (isSuper ? theme.topSafe : theme.topSafe);
+                var edgeClr = isGoal ? (isGrand ? "#B8860B" : (theme.goalSide || "#B09242")) : (isSuper ? theme.sideSafe : theme.sideSafe);
+
+                particles.push({
+                    kind: "shockwave",
+                    x: 0,
+                    y: ringY,
+                    z: midR,
+                    vx: 0,
+                    vy: 0,
+                    vz: 0,
+                    radius: units.gu(1.5),
+                    maxRadius: outerRadius * 1.5,
+                    speed: units.gu(34.0),
+                    thickness: units.gu(0.45),
+                    color: isGoal ? (isGrand ? "#FFD700" : "#E8C872") : (isSuper ? "#FF793F" : theme.topSafe),
+                    alpha: 0.95,
+                    decay: 3.2
+                });
+
+                var chunkCount = isGrand ? 8 : 6;
+                for (var c = 0; c < chunkCount; c++) {
+                    var chunkAngle = (c / chunkCount) * Math.PI * 2.0 + (Math.random() - 0.5) * 0.35;
+                    var chunkR = midR + (Math.random() - 0.5) * units.gu(1.6);
+                    var radialSpeed = (units.gu(8) + Math.random() * units.gu(10)) * (isSuper ? 1.4 : 1.0);
+                    var cw = units.gu(1.8 + Math.random() * 1.2);
+                    var ch = units.gu(1.3 + Math.random() * 0.8);
+
+                    particles.push({
+                        kind: "chunk",
+                        x: Math.cos(chunkAngle) * chunkR,
+                        y: ringY,
+                        z: Math.sin(chunkAngle) * chunkR,
+                        vx: Math.cos(chunkAngle) * radialSpeed,
+                        vy: -units.gu(4 + Math.random() * 8) * (isSuper ? 1.3 : 1.0),
+                        vz: Math.sin(chunkAngle) * radialSpeed,
+                        rotX: Math.random() * Math.PI * 2.0,
+                        rotY: Math.random() * Math.PI * 2.0,
+                        rotZ: Math.random() * Math.PI * 2.0,
+                        vrotX: (Math.random() - 0.5) * 8.0,
+                        vrotY: (Math.random() - 0.5) * 9.0,
+                        vrotZ: (Math.random() - 0.5) * 8.0,
+                        width: cw,
+                        height: ch,
+                        depth: units.gu(0.7),
+                        topColor: topClr,
+                        edgeColor: edgeClr,
+                        specular: isGoal,
+                        alpha: 1.0,
+                        decay: 0.9
+                    });
+                }
+
+                var shardCount = isGrand ? 16 : 12;
+                for (var s = 0; s < shardCount; s++) {
+                    var shardAngle = Math.random() * Math.PI * 2.0;
+                    var shardR = innerRadius + Math.random() * (outerRadius - innerRadius);
+                    var shardSpeed = (units.gu(10) + Math.random() * units.gu(14)) * (isSuper ? 1.4 : 1.0);
+                    var sw = units.gu(0.9 + Math.random() * 0.8);
+                    var sh = units.gu(0.8 + Math.random() * 0.7);
+
+                    particles.push({
+                        kind: "shard",
+                        x: Math.cos(shardAngle) * shardR,
+                        y: ringY,
+                        z: Math.sin(shardAngle) * shardR,
+                        vx: Math.cos(shardAngle) * shardSpeed,
+                        vy: -units.gu(5 + Math.random() * 9),
+                        vz: Math.sin(shardAngle) * shardSpeed,
+                        rotX: Math.random() * Math.PI * 2.0,
+                        rotY: Math.random() * Math.PI * 2.0,
+                        rotZ: Math.random() * Math.PI * 2.0,
+                        vrotX: (Math.random() - 0.5) * 14.0,
+                        vrotY: (Math.random() - 0.5) * 16.0,
+                        vrotZ: (Math.random() - 0.5) * 14.0,
+                        width: sw,
+                        height: sh,
+                        depth: units.gu(0.4),
+                        topColor: topClr,
+                        edgeColor: edgeClr,
+                        specular: isGoal,
+                        alpha: 1.0,
+                        decay: 1.2
+                    });
+                }
+
+                var sparkCount = isGrand ? 16 : 10;
+                for (var sp = 0; sp < sparkCount; sp++) {
+                    var spAngle = Math.random() * Math.PI * 2.0;
+                    var spSpeed = units.gu(14) + Math.random() * units.gu(18);
+                    particles.push({
+                        kind: "spark",
+                        x: Math.cos(spAngle) * midR,
+                        y: ringY,
+                        z: Math.sin(spAngle) * midR,
+                        vx: Math.cos(spAngle) * spSpeed,
+                        vy: -units.gu(8 + Math.random() * 14),
+                        vz: Math.sin(spAngle) * spSpeed,
+                        size: units.gu(0.3 + Math.random() * 0.25),
+                        color: isGoal ? "#FFFFFF" : (isSuper ? "#FFEAA7" : topClr),
+                        alpha: 1.0,
+                        decay: 2.2
+                    });
+                }
+
+                for (var d = 0; d < 6; d++) {
+                    var dustAngle = Math.random() * Math.PI * 2.0;
+                    var dustR = midR + (Math.random() - 0.5) * units.gu(2.0);
+                    particles.push({
+                        kind: "dust",
+                        x: Math.cos(dustAngle) * dustR,
+                        y: ringY,
+                        z: Math.sin(dustAngle) * dustR,
+                        vx: Math.cos(dustAngle) * units.gu(3 + Math.random() * 4),
+                        vy: -units.gu(1.5 + Math.random() * 3),
+                        vz: Math.sin(dustAngle) * units.gu(3 + Math.random() * 4),
+                        size: units.gu(0.6),
+                        targetSize: units.gu(1.8 + Math.random() * 0.8),
+                        color: topClr,
+                        alpha: 0.65,
+                        decay: 1.6
+                    });
+                }
+
+                while (particles.length > 120) {
+                    particles.shift();
+                }
+            }
+
+            function spawnSegmentShatter(ringY, angle, topClr, edgeClr) {
+                var midR = (outerRadius + innerRadius) / 2.0;
+                for (var s = 0; s < 6; s++) {
+                    var shardAngle = angle + (Math.random() - 0.5) * 0.45;
+                    var radialSpeed = units.gu(7) + Math.random() * units.gu(10);
+                    var sw = units.gu(1.0 + Math.random() * 0.6);
+                    var sh = units.gu(0.8 + Math.random() * 0.6);
+                    particles.push({
+                        kind: "shard",
+                        x: Math.cos(shardAngle) * midR,
+                        y: ringY,
+                        z: Math.sin(shardAngle) * midR,
+                        vx: Math.cos(shardAngle) * radialSpeed,
+                        vy: -units.gu(4 + Math.random() * 6),
+                        vz: Math.sin(shardAngle) * radialSpeed,
+                        rotX: Math.random() * Math.PI * 2.0,
+                        rotY: Math.random() * Math.PI * 2.0,
+                        rotZ: Math.random() * Math.PI * 2.0,
+                        vrotX: (Math.random() - 0.5) * 12.0,
+                        vrotY: (Math.random() - 0.5) * 14.0,
+                        vrotZ: (Math.random() - 0.5) * 12.0,
+                        width: sw,
+                        height: sh,
+                        depth: units.gu(0.4),
+                        topColor: topClr,
+                        edgeColor: edgeClr,
+                        specular: false,
+                        alpha: 1.0,
+                        decay: 1.4
+                    });
+                }
+                while (particles.length > 120) {
+                    particles.shift();
+                }
+            }
+
             function generateRing() {
                 var prevRing = rings.length > 0 ? rings[rings.length - 1] : null;
                 rings.push(RingGen.createRing(nextRingIndex++, ringSpacing, prevRing));
@@ -525,27 +692,23 @@ MainView {
                                     gameContainer.bannerIsZone = isZone;
 
                                     if (isGrand) {
-                                        gameContainer.spawnParticles(0, ring.y, 80, "#ffd700", 2.8);
-                                        gameContainer.spawnParticles(0, ring.y, 50, "#ffffff", 2.2);
+                                        gameContainer.spawnShatterDebris(ring.y, true, true, gameContainer.currentTheme, false);
                                         gameContainer.score += 1000;
                                         gameContainer.bannerText = i18n.tr("TOWER CONQUERED! 100 LEVELS COMPLETE!");
                                         Storage.saveStat("gameCleared", "1");
                                         soundManager.milestoneHaptic();
                                     } else if (isZone) {
-                                        gameContainer.spawnParticles(0, ring.y, 60, gameContainer.currentTheme.accent, 2.4);
-                                        gameContainer.spawnParticles(0, ring.y, 35, "#ffffff", 2.0);
+                                        gameContainer.spawnShatterDebris(ring.y, true, false, gameContainer.currentTheme, false);
                                         gameContainer.score += 250;
                                         gameContainer.bannerText = i18n.tr("ZONE %1 ENTERED!").arg(Math.floor((nextLvl - 1) / 10) + 1);
                                         soundManager.milestoneHaptic();
                                     } else if (isCp) {
-                                        gameContainer.spawnParticles(0, ring.y, 50, "#ffd700", 2.2);
-                                        gameContainer.spawnParticles(0, ring.y, 30, "#ffffff", 1.8);
+                                        gameContainer.spawnShatterDebris(ring.y, true, false, gameContainer.currentTheme, false);
                                         gameContainer.score += 150;
                                         gameContainer.bannerText = i18n.tr("CHECKPOINT STAGE %1!").arg(nextLvl);
                                         soundManager.milestoneHaptic();
                                     } else {
-                                        gameContainer.spawnParticles(0, ring.y, 45, "#ffd700", 2.2);
-                                        gameContainer.spawnParticles(0, ring.y, 25, "#ffffff", 1.8);
+                                        gameContainer.spawnShatterDebris(ring.y, true, false, gameContainer.currentTheme, false);
                                         gameContainer.score += 100;
                                         gameContainer.bannerText = i18n.tr("LEVEL %1 COMPLETE!").arg(gameContainer.currentLevel);
                                         soundManager.haptic(true);
@@ -601,8 +764,7 @@ MainView {
 
                                 if (gameContainer.isSuperFall && segType !== 1) {
                                     ring.broken = true;
-                                    gameContainer.spawnParticles(0, ring.y, 35, gameContainer.currentTheme.topSafe, 2.0);
-                                    gameContainer.spawnParticles(0, ring.y, 15, gameContainer.currentTheme.ballMid, 1.6);
+                                    gameContainer.spawnShatterDebris(ring.y, false, false, gameContainer.currentTheme, true);
                                     soundManager.play("smash");
                                     soundManager.haptic(true);
 
@@ -637,7 +799,7 @@ MainView {
 
                                     if (segType === 3) {
                                         ring.segments[segmentIdx] = 1;
-                                        gameContainer.spawnParticles(0, ring.y, 16, gameContainer.currentTheme.topSafe, 1.4);
+                                        gameContainer.spawnSegmentShatter(ring.y, relAngle, gameContainer.currentTheme.topSafe, gameContainer.currentTheme.sideSafe);
                                         soundManager.play("smash");
                                     } else {
                                         soundManager.play("bounce");
@@ -800,12 +962,28 @@ MainView {
 
                     for (var p = gameContainer.particles.length - 1; p >= 0; p--) {
                         var pt = gameContainer.particles[p];
-                        pt.x += pt.vx * dt;
-                        pt.y += pt.vy * dt;
-                        pt.z += pt.vz * dt;
-                        pt.vy += gameContainer.gravity * 0.45 * dt;
-                        pt.alpha -= dt * 1.5;
-                        if (pt.alpha <= 0) {
+                        pt.x += (pt.vx || 0) * dt;
+                        pt.y += (pt.vy || 0) * dt;
+                        pt.z += (pt.vz || 0) * dt;
+
+                        if (pt.kind === "shockwave") {
+                            pt.radius += (pt.speed || units.gu(30.0)) * dt;
+                        } else if (pt.kind === "dust") {
+                            if (pt.size < pt.targetSize) {
+                                pt.size = Math.min(pt.targetSize, pt.size + dt * units.gu(4.0));
+                            }
+                        } else {
+                            pt.vy += gameContainer.gravity * 0.7 * dt;
+                            pt.vx *= Math.pow(0.86, dt);
+                            pt.vz *= Math.pow(0.86, dt);
+
+                            if (pt.vrotX) pt.rotX = (pt.rotX || 0) + pt.vrotX * dt;
+                            if (pt.vrotY) pt.rotY = (pt.rotY || 0) + pt.vrotY * dt;
+                            if (pt.vrotZ) pt.rotZ = (pt.rotZ || 0) + pt.vrotZ * dt;
+                        }
+
+                        pt.alpha -= dt * (pt.decay || 1.6);
+                        if (pt.alpha <= 0.01 || (pt.kind === "shockwave" && pt.radius >= pt.maxRadius)) {
                             gameContainer.particles.splice(p, 1);
                         }
                     }

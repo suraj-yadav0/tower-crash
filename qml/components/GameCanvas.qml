@@ -307,20 +307,102 @@ Canvas {
 
         ctx.restore();
 
-        // Render active 3D particles
+        // Render active 3D particles and realistic fragment shards
         for (var ptIdx = 0; ptIdx < game.particles.length; ptIdx++) {
-            var particle = game.particles[ptIdx];
-            var partScreenY = bScreenY + (particle.y - camY) + particle.z * tilt;
-            var partScreenX = centerX + particle.x;
+            var pt = game.particles[ptIdx];
+            var partScreenY = bScreenY + (pt.y - camY) + (pt.z || 0) * tilt;
+            var partScreenX = centerX + pt.x;
 
-            ctx.save();
-            ctx.translate(partScreenX, partScreenY);
-            ctx.beginPath();
-            ctx.arc(0, 0, particle.size, 0, Math.PI * 2.0);
-            ctx.fillStyle = particle.color;
-            ctx.globalAlpha = Math.max(0, particle.alpha);
-            ctx.fill();
-            ctx.restore();
+            if (pt.kind === "shockwave") {
+                ctx.save();
+                ctx.translate(partScreenX, partScreenY);
+                ctx.scale(1.0, tilt);
+                ctx.beginPath();
+                ctx.arc(0, 0, pt.radius, 0, Math.PI * 2.0);
+                ctx.strokeStyle = pt.color;
+                ctx.lineWidth = pt.thickness || units.gu(0.4);
+                ctx.globalAlpha = Math.max(0, pt.alpha);
+                ctx.stroke();
+                ctx.restore();
+            } else if (pt.kind === "dust") {
+                ctx.save();
+                ctx.translate(partScreenX, partScreenY);
+                ctx.beginPath();
+                ctx.arc(0, 0, pt.size, 0, Math.PI * 2.0);
+                ctx.fillStyle = pt.color;
+                ctx.globalAlpha = Math.max(0, pt.alpha * 0.45);
+                ctx.fill();
+                ctx.restore();
+            } else if (pt.kind === "spark") {
+                ctx.save();
+                ctx.translate(partScreenX, partScreenY);
+                ctx.beginPath();
+                ctx.arc(0, 0, pt.size, 0, Math.PI * 2.0);
+                ctx.fillStyle = pt.color;
+                ctx.globalAlpha = Math.max(0, pt.alpha);
+                ctx.fill();
+                ctx.restore();
+            } else if (pt.kind === "chunk" || pt.kind === "shard") {
+                var cosPitch = Math.cos(pt.rotX || 0);
+                var cosYaw = Math.cos(pt.rotY || 0);
+                var facing = cosPitch * cosYaw;
+                var pw = (pt.width || units.gu(1.2)) * Math.max(0.2, Math.abs(cosYaw));
+                var ph = (pt.height || units.gu(1.0)) * Math.max(0.2, Math.abs(cosPitch));
+                var pDepth = (pt.depth || units.gu(0.4));
+
+                ctx.save();
+                ctx.translate(partScreenX, partScreenY);
+                ctx.rotate(pt.rotZ || 0);
+                ctx.globalAlpha = Math.max(0, pt.alpha);
+
+                // Exposed fracture side edge (extruded depth facet)
+                ctx.fillStyle = pt.edgeColor || "#222428";
+                ctx.beginPath();
+                ctx.moveTo(-pw * 0.5, ph * 0.5);
+                ctx.lineTo(pw * 0.5, ph * 0.5);
+                ctx.lineTo(pw * 0.5, ph * 0.5 + pDepth * tilt);
+                ctx.lineTo(-pw * 0.5, ph * 0.5 + pDepth * tilt);
+                ctx.closePath();
+                ctx.fill();
+
+                // Top lit surface facet
+                ctx.fillStyle = facing >= 0 ? (pt.topColor || "#F5F3EF") : (pt.edgeColor || "#222428");
+                ctx.beginPath();
+                if (pt.kind === "chunk") {
+                    ctx.moveTo(-pw * 0.5, -ph * 0.4);
+                    ctx.lineTo(pw * 0.5, -ph * 0.5);
+                    ctx.lineTo(pw * 0.45, ph * 0.5);
+                    ctx.lineTo(-pw * 0.4, ph * 0.45);
+                } else {
+                    ctx.moveTo(-pw * 0.5, -ph * 0.5);
+                    ctx.lineTo(pw * 0.5, -ph * 0.2);
+                    ctx.lineTo(0, ph * 0.5);
+                }
+                ctx.closePath();
+                ctx.fill();
+
+                // Specular gleam on crystalline/golden shards
+                if (pt.specular && facing > 0.25) {
+                    ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
+                    ctx.beginPath();
+                    ctx.moveTo(-pw * 0.2, -ph * 0.3);
+                    ctx.lineTo(pw * 0.25, -ph * 0.1);
+                    ctx.lineTo(0, ph * 0.1);
+                    ctx.closePath();
+                    ctx.fill();
+                }
+
+                ctx.restore();
+            } else {
+                ctx.save();
+                ctx.translate(partScreenX, partScreenY);
+                ctx.beginPath();
+                ctx.arc(0, 0, pt.size || units.gu(0.4), 0, Math.PI * 2.0);
+                ctx.fillStyle = pt.color;
+                ctx.globalAlpha = Math.max(0, pt.alpha);
+                ctx.fill();
+                ctx.restore();
+            }
         }
     }
 }
