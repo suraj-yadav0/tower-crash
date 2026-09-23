@@ -386,11 +386,17 @@ MainView {
                 }
             }
 
+            onIsSettingsOpenChanged: {
+                if (!isSettingsOpen) {
+                    lastPhysicsTime = 0.0;
+                }
+            }
+
             Timer {
                 id: physicsTimer
                 interval: 16
                 repeat: true
-                running: true
+                running: (!gameContainer.isPaused && !gameContainer.isSettingsOpen && !gameContainer.gameOver)
 
                 onTriggered: {
                     if (gameContainer.isWelcomeOpen) {
@@ -779,6 +785,7 @@ MainView {
             MouseArea {
                 id: dragArea
                 anchors.fill: parent
+                enabled: !gameContainer.gameOver && !gameContainer.isPaused && !gameContainer.isSettingsOpen && !gameContainer.isWelcomeOpen
 
                 onPressed: {
                     gameContainer.isDragging = true;
@@ -833,143 +840,183 @@ MainView {
                 theme: gameContainer.currentTheme
             }
 
-            WelcomeScreen {
-                visible: gameContainer.isWelcomeOpen
-                bestScore: gameContainer.bestScore
-                totalRings: gameContainer.totalRings
-                speedMode: gameContainer.speedMode
-                selectedCheckpoint: gameContainer.selectedCheckpoint
-                unlockedCheckpoints: gameContainer.unlockedCheckpoints
-                theme: gameContainer.currentTheme
-                themeName: Themes.getThemeName(gameContainer.themeMode, gameContainer.currentLevel)
-                onCheckpointSelected: {
-                    soundManager.buttonHaptic();
-                    gameContainer.selectedCheckpoint = checkpoint;
-                    Storage.saveSelectedCheckpoint(checkpoint);
-                }
-                onPlayRequested: {
-                    soundManager.buttonHaptic();
-                    gameContainer.startGame();
-                }
-                onSettingsRequested: {
-                    soundManager.buttonHaptic();
-                    gameContainer.wasPausedBeforeSettings = false;
-                    gameContainer.isSettingsOpen = true;
-                }
-                onThemeCycleRequested: {
-                    soundManager.buttonHaptic();
-                    gameContainer.themeMode = (gameContainer.themeMode + 1) % Themes.themeOptions.length;
-                    Storage.saveStat("themeMode", gameContainer.themeMode.toString());
-                    gameCanvas.requestPaint();
-                }
-                onSpeedCycleRequested: {
-                    soundManager.buttonHaptic();
-                    gameContainer.speedMode = (gameContainer.speedMode + 1) % 3;
-                    Storage.saveStat("speedMode", gameContainer.speedMode.toString());
-                }
-            }
-
-            PauseModal {
-                visible: gameContainer.isPaused && !gameContainer.isSettingsOpen && !gameContainer.gameOver && !gameContainer.isWelcomeOpen
-                soundEnabled: gameContainer.soundEnabled
-                hapticsEnabled: gameContainer.hapticsEnabled
-                speedMode: gameContainer.speedMode
-                currentCheckpoint: gameContainer.getNearestCheckpoint(gameContainer.currentLevel)
-                theme: gameContainer.currentTheme
-                onResumeRequested: {
-                    soundManager.buttonHaptic();
-                    gameContainer.isPaused = false;
-                }
-                onRestartCheckpointRequested: {
-                    soundManager.buttonHaptic();
-                    gameContainer.startFromCheckpoint(gameContainer.getNearestCheckpoint(gameContainer.currentLevel));
-                    soundManager.play("bounce");
-                }
-                onRestartRequested: {
-                    soundManager.buttonHaptic();
-                    gameContainer.startFromCheckpoint(1);
-                    soundManager.play("bounce");
-                }
-                onMainMenuRequested: {
-                    soundManager.buttonHaptic();
-                    gameContainer.goToMainMenu();
-                }
-                onToggleSoundRequested: {
-                    soundManager.buttonHaptic();
-                    gameContainer.soundEnabled = !gameContainer.soundEnabled;
-                    Storage.saveStat("soundEnabled", gameContainer.soundEnabled ? "1" : "0");
-                }
-                onToggleHapticsRequested: {
-                    soundManager.buttonHaptic();
-                    gameContainer.hapticsEnabled = !gameContainer.hapticsEnabled;
-                    Storage.saveStat("hapticsEnabled", gameContainer.hapticsEnabled ? "1" : "0");
-                }
-                onSpeedModeSelected: {
-                    soundManager.buttonHaptic();
-                    gameContainer.speedMode = newMode;
-                    Storage.saveStat("speedMode", newMode.toString());
-                }
-            }
-
-            SettingsModal {
-                visible: gameContainer.isSettingsOpen
-                soundEnabled: gameContainer.soundEnabled
-                hapticsEnabled: gameContainer.hapticsEnabled
-                speedMode: gameContainer.speedMode
-                themeMode: gameContainer.themeMode
-                bestScore: gameContainer.bestScore
-                totalRings: gameContainer.totalRings
-                theme: gameContainer.currentTheme
-                onCloseRequested: {
-                    soundManager.buttonHaptic();
-                    gameContainer.isSettingsOpen = false;
-                    if (!gameContainer.wasPausedBeforeSettings && !gameContainer.gameOver && !gameContainer.isWelcomeOpen) {
-                        gameContainer.isPaused = false;
+            Loader {
+                id: welcomeScreenLoader
+                anchors.fill: parent
+                z: 150
+                active: gameContainer.isWelcomeOpen
+                visible: active
+                sourceComponent: Component {
+                    WelcomeScreen {
+                        anchors.fill: parent
+                        visible: true
+                        bestScore: gameContainer.bestScore
+                        totalRings: gameContainer.totalRings
+                        speedMode: gameContainer.speedMode
+                        selectedCheckpoint: gameContainer.selectedCheckpoint
+                        unlockedCheckpoints: gameContainer.unlockedCheckpoints
+                        theme: gameContainer.currentTheme
+                        themeName: Themes.getThemeName(gameContainer.themeMode, gameContainer.currentLevel)
+                        onCheckpointSelected: {
+                            soundManager.buttonHaptic();
+                            gameContainer.selectedCheckpoint = checkpoint;
+                            Storage.saveSelectedCheckpoint(checkpoint);
+                        }
+                        onPlayRequested: {
+                            soundManager.buttonHaptic();
+                            gameContainer.startGame();
+                        }
+                        onSettingsRequested: {
+                            soundManager.buttonHaptic();
+                            gameContainer.wasPausedBeforeSettings = false;
+                            gameContainer.isSettingsOpen = true;
+                        }
+                        onThemeCycleRequested: {
+                            soundManager.buttonHaptic();
+                            gameContainer.themeMode = (gameContainer.themeMode + 1) % Themes.themeOptions.length;
+                            Storage.saveStat("themeMode", gameContainer.themeMode.toString());
+                            gameCanvas.requestPaint();
+                        }
+                        onSpeedCycleRequested: {
+                            soundManager.buttonHaptic();
+                            gameContainer.speedMode = (gameContainer.speedMode + 1) % 3;
+                            Storage.saveStat("speedMode", gameContainer.speedMode.toString());
+                        }
                     }
                 }
-                onToggleSoundRequested: {
-                    soundManager.buttonHaptic();
-                    gameContainer.soundEnabled = !gameContainer.soundEnabled;
-                    Storage.saveStat("soundEnabled", gameContainer.soundEnabled ? "1" : "0");
-                }
-                onToggleHapticsRequested: {
-                    soundManager.buttonHaptic();
-                    gameContainer.hapticsEnabled = !gameContainer.hapticsEnabled;
-                    Storage.saveStat("hapticsEnabled", gameContainer.hapticsEnabled ? "1" : "0");
-                }
-                onSpeedModeSelected: {
-                    soundManager.buttonHaptic();
-                    gameContainer.speedMode = newMode;
-                    Storage.saveStat("speedMode", newMode.toString());
-                }
-                onThemeModeSelected: {
-                    soundManager.buttonHaptic();
-                    gameContainer.themeMode = newMode;
-                    Storage.saveStat("themeMode", newMode.toString());
-                    gameCanvas.requestPaint();
+            }
+
+            Loader {
+                id: pauseModalLoader
+                anchors.fill: parent
+                z: 200
+                active: gameContainer.isPaused && !gameContainer.isSettingsOpen && !gameContainer.gameOver && !gameContainer.isWelcomeOpen
+                visible: active
+                sourceComponent: Component {
+                    PauseModal {
+                        anchors.fill: parent
+                        visible: true
+                        soundEnabled: gameContainer.soundEnabled
+                        hapticsEnabled: gameContainer.hapticsEnabled
+                        speedMode: gameContainer.speedMode
+                        currentCheckpoint: gameContainer.getNearestCheckpoint(gameContainer.currentLevel)
+                        theme: gameContainer.currentTheme
+                        onResumeRequested: {
+                            soundManager.buttonHaptic();
+                            gameContainer.isPaused = false;
+                        }
+                        onRestartCheckpointRequested: {
+                            soundManager.buttonHaptic();
+                            gameContainer.startFromCheckpoint(gameContainer.getNearestCheckpoint(gameContainer.currentLevel));
+                            soundManager.play("bounce");
+                        }
+                        onRestartRequested: {
+                            soundManager.buttonHaptic();
+                            gameContainer.startFromCheckpoint(1);
+                            soundManager.play("bounce");
+                        }
+                        onMainMenuRequested: {
+                            soundManager.buttonHaptic();
+                            gameContainer.goToMainMenu();
+                        }
+                        onToggleSoundRequested: {
+                            soundManager.buttonHaptic();
+                            gameContainer.soundEnabled = !gameContainer.soundEnabled;
+                            Storage.saveStat("soundEnabled", gameContainer.soundEnabled ? "1" : "0");
+                        }
+                        onToggleHapticsRequested: {
+                            soundManager.buttonHaptic();
+                            gameContainer.hapticsEnabled = !gameContainer.hapticsEnabled;
+                            Storage.saveStat("hapticsEnabled", gameContainer.hapticsEnabled ? "1" : "0");
+                        }
+                        onSpeedModeSelected: {
+                            soundManager.buttonHaptic();
+                            gameContainer.speedMode = newMode;
+                            Storage.saveStat("speedMode", newMode.toString());
+                        }
+                    }
                 }
             }
 
-            GameOverModal {
-                visible: gameContainer.gameOver && !gameContainer.isSettingsOpen && !gameContainer.isWelcomeOpen
-                score: gameContainer.score
-                bestScore: gameContainer.bestScore
-                levelReached: gameContainer.currentLevel
-                checkpointLevel: gameContainer.getNearestCheckpoint(gameContainer.currentLevel)
-                theme: gameContainer.currentTheme
-                onContinueCheckpointRequested: {
-                    soundManager.buttonHaptic();
-                    gameContainer.startFromCheckpoint(gameContainer.getNearestCheckpoint(gameContainer.currentLevel));
-                    soundManager.play("bounce");
+            Loader {
+                id: settingsModalLoader
+                anchors.fill: parent
+                z: 250
+                active: gameContainer.isSettingsOpen
+                visible: active
+                sourceComponent: Component {
+                    SettingsModal {
+                        anchors.fill: parent
+                        visible: true
+                        soundEnabled: gameContainer.soundEnabled
+                        hapticsEnabled: gameContainer.hapticsEnabled
+                        speedMode: gameContainer.speedMode
+                        themeMode: gameContainer.themeMode
+                        bestScore: gameContainer.bestScore
+                        totalRings: gameContainer.totalRings
+                        theme: gameContainer.currentTheme
+                        onCloseRequested: {
+                            soundManager.buttonHaptic();
+                            gameContainer.isSettingsOpen = false;
+                            if (!gameContainer.wasPausedBeforeSettings && !gameContainer.gameOver && !gameContainer.isWelcomeOpen) {
+                                gameContainer.isPaused = false;
+                            }
+                        }
+                        onToggleSoundRequested: {
+                            soundManager.buttonHaptic();
+                            gameContainer.soundEnabled = !gameContainer.soundEnabled;
+                            Storage.saveStat("soundEnabled", gameContainer.soundEnabled ? "1" : "0");
+                        }
+                        onToggleHapticsRequested: {
+                            soundManager.buttonHaptic();
+                            gameContainer.hapticsEnabled = !gameContainer.hapticsEnabled;
+                            Storage.saveStat("hapticsEnabled", gameContainer.hapticsEnabled ? "1" : "0");
+                        }
+                        onSpeedModeSelected: {
+                            soundManager.buttonHaptic();
+                            gameContainer.speedMode = newMode;
+                            Storage.saveStat("speedMode", newMode.toString());
+                        }
+                        onThemeModeSelected: {
+                            soundManager.buttonHaptic();
+                            gameContainer.themeMode = newMode;
+                            Storage.saveStat("themeMode", newMode.toString());
+                            gameCanvas.requestPaint();
+                        }
+                    }
                 }
-                onRestartRequested: {
-                    soundManager.buttonHaptic();
-                    gameContainer.startFromCheckpoint(1);
-                    soundManager.play("bounce");
-                }
-                onMainMenuRequested: {
-                    soundManager.buttonHaptic();
-                    gameContainer.goToMainMenu();
+            }
+
+            Loader {
+                id: gameOverModalLoader
+                anchors.fill: parent
+                z: 200
+                active: gameContainer.gameOver && !gameContainer.isSettingsOpen && !gameContainer.isWelcomeOpen
+                visible: active
+                sourceComponent: Component {
+                    GameOverModal {
+                        anchors.fill: parent
+                        visible: true
+                        score: gameContainer.score
+                        bestScore: gameContainer.bestScore
+                        levelReached: gameContainer.currentLevel
+                        checkpointLevel: gameContainer.getNearestCheckpoint(gameContainer.currentLevel)
+                        theme: gameContainer.currentTheme
+                        onContinueCheckpointRequested: {
+                            soundManager.buttonHaptic();
+                            gameContainer.startFromCheckpoint(gameContainer.getNearestCheckpoint(gameContainer.currentLevel));
+                            soundManager.play("bounce");
+                        }
+                        onRestartRequested: {
+                            soundManager.buttonHaptic();
+                            gameContainer.startFromCheckpoint(1);
+                            soundManager.play("bounce");
+                        }
+                        onMainMenuRequested: {
+                            soundManager.buttonHaptic();
+                            gameContainer.goToMainMenu();
+                        }
+                    }
                 }
             }
         }
