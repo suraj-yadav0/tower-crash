@@ -294,7 +294,7 @@ Rectangle {
                             }
                             Connections {
                                 target: root
-                                onThemeChanged: continueIconCanvas.requestPaint()
+                                function onThemeChanged() { continueIconCanvas.requestPaint(); }
                             }
                         }
                     }

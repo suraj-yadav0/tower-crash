@@ -561,7 +561,7 @@ MainView {
 
             Connections {
                 target: Qt.application
-                onStateChanged: {
+                function onStateChanged() {
                     if (Qt.application.state !== Qt.ApplicationActive) {
                         if (!gameContainer.isWelcomeOpen && !gameContainer.gameOver && !gameContainer.isStageClearOpen && !gameContainer.isStageClearCelebrating) {
                             gameContainer.isPaused = true;

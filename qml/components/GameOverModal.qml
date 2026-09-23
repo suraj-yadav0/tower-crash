@@ -265,7 +265,7 @@ Rectangle {
                             }
                             Connections {
                                 target: root
-                                onThemeChanged: restartIconCanvas.requestPaint()
+                                function onThemeChanged() { restartIconCanvas.requestPaint(); }
                             }
                         }
                     }

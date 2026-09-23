@@ -145,7 +145,7 @@ Rectangle {
                             }
                             Connections {
                                 target: root
-                                onThemeChanged: resumeIconCanvas.requestPaint()
+                                function onThemeChanged() { resumeIconCanvas.requestPaint(); }
                             }
                         }
                     }

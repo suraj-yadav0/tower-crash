@@ -37,7 +37,7 @@ Rectangle {
         id: outerShell
         anchors.centerIn: parent
         width: Math.min(parent.width - units.gu(4.0), units.gu(36))
-        height: Math.min(parent.height - units.gu(3.0), innerCore.height + units.gu(2.0))
+        height: Math.min(parent.height - units.gu(3.0), modalContent.height + units.gu(4.8))
         radius: units.gu(2.0)
         color: root.theme ? root.theme.cardOuter : "#141517"
         border.color: root.theme ? root.theme.cardBorder : "#2A2C30"
@@ -56,7 +56,7 @@ Rectangle {
             id: innerCore
             anchors.centerIn: parent
             width: outerShell.width - units.gu(1.6)
-            height: Math.min(outerShell.height - units.gu(1.6), modalContent.height + units.gu(2.8))
+            height: outerShell.height - units.gu(1.6)
             radius: units.gu(1.6)
             color: root.theme ? root.theme.cardInner : "#0D0E0F"
             border.color: root.theme ? root.theme.cardBorder : "#222428"

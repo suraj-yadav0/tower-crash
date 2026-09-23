@@ -155,7 +155,7 @@ Rectangle {
                                 }
                                 Connections {
                                     target: root
-                                    onThemeChanged: prevArrowCanvas.requestPaint()
+                                    function onThemeChanged() { prevArrowCanvas.requestPaint(); }
                                 }
                             }
 
@@ -228,7 +228,7 @@ Rectangle {
                                 }
                                 Connections {
                                     target: root
-                                    onThemeChanged: nextArrowCanvas.requestPaint()
+                                    function onThemeChanged() { nextArrowCanvas.requestPaint(); }
                                 }
                             }
 
@@ -285,7 +285,7 @@ Rectangle {
                             }
                             Connections {
                                 target: root
-                                onThemeChanged: playIconCanvas.requestPaint()
+                                function onThemeChanged() { playIconCanvas.requestPaint(); }
                             }
                         }
 

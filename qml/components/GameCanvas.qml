@@ -10,8 +10,8 @@ Canvas {
 
     Connections {
         target: game
-        onCurrentThemeChanged: root.requestPaint()
-        onThemeTransitionProgressChanged: root.requestPaint()
+        function onCurrentThemeChanged() { root.requestPaint(); }
+        function onThemeTransitionProgressChanged() { root.requestPaint(); }
     }
 
     onPaint: {
