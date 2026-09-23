@@ -99,7 +99,8 @@ function flushPendingWrites() {
             tx.executeSql('CREATE TABLE IF NOT EXISTS kv(k TEXT UNIQUE, v TEXT)');
             for (var i = 0; i < keys.length; i++) {
                 var k = keys[i];
-                tx.executeSql('INSERT OR REPLACE INTO kv VALUES(?, ?)', [k, _dirty[k].toString()]);
+                var v = _dirty[k] != null ? _dirty[k].toString() : "";
+                tx.executeSql('INSERT OR REPLACE INTO kv VALUES(?, ?)', [k, v]);
             }
         });
         _dirty = {};

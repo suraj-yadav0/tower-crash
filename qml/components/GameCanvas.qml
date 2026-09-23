@@ -423,7 +423,7 @@ Canvas {
             if (ring2.shockwaves && ring2.shockwaves.length > 0) {
                 for (var sw = 0; sw < ring2.shockwaves.length; sw++) {
                     var wave = ring2.shockwaves[sw];
-                    var waveAngle = game.towerAngle + wave.angle;
+                    var waveAngle = game.towerAngle + ring2Offset + wave.angle;
                     var wx = centerX + midR * Math.cos(waveAngle);
                     var wy = r2ScreenY + midR * Math.sin(waveAngle) * tilt;
 
@@ -450,7 +450,7 @@ Canvas {
             if (ring2.splats && ring2.splats.length > 0) {
                 for (var sp = 0; sp < ring2.splats.length; sp++) {
                     var splat = ring2.splats[sp];
-                    var splatAngle = game.towerAngle + splat.angle;
+                    var splatAngle = game.towerAngle + ring2Offset + splat.angle;
                     var sx = centerX + midR * Math.cos(splatAngle);
                     var sy = r2ScreenY + midR * Math.sin(splatAngle) * tilt;
 

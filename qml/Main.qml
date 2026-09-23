@@ -537,6 +537,23 @@ MainView {
                 }
             }
 
+            Connections {
+                target: Qt.application
+                onStateChanged: {
+                    if (Qt.application.state !== Qt.ApplicationActive) {
+                        if (!gameContainer.isWelcomeOpen && !gameContainer.gameOver && !gameContainer.isStageClearOpen && !gameContainer.isStageClearCelebrating) {
+                            gameContainer.isPaused = true;
+                        } else {
+                            if (gameContainer.activePlayTimeAccumulator > 0.0) {
+                                Storage.recordPlayTime(gameContainer.activePlayTimeAccumulator);
+                                gameContainer.activePlayTimeAccumulator = 0.0;
+                            }
+                            Storage.flushPendingWrites();
+                        }
+                    }
+                }
+            }
+
             Component.onCompleted: {
                 var stats = Storage.loadStats();
                 bestScore = stats.bestScore;
@@ -552,6 +569,21 @@ MainView {
                 initGame(selectedCheckpoint);
             }
 
+            Keys.onPressed: {
+                if (event.key === Qt.Key_A) {
+                    if (!gameOver && !isPaused && !isSettingsOpen && !isWelcomeOpen && !isStageClearOpen && !isStageClearCelebrating) {
+                        towerAngle += 0.12;
+                        gameCanvas.requestPaint();
+                        event.accepted = true;
+                    }
+                } else if (event.key === Qt.Key_D) {
+                    if (!gameOver && !isPaused && !isSettingsOpen && !isWelcomeOpen && !isStageClearOpen && !isStageClearCelebrating) {
+                        towerAngle -= 0.12;
+                        gameCanvas.requestPaint();
+                        event.accepted = true;
+                    }
+                }
+            }
             Keys.onLeftPressed: {
                 if (!gameOver && !isPaused && !isSettingsOpen && !isWelcomeOpen && !isStageClearOpen && !isStageClearCelebrating) {
                     towerAngle += 0.12;
@@ -607,6 +639,8 @@ MainView {
                     goToMainMenu();
                 } else if (!isWelcomeOpen && isPaused) {
                     isPaused = false;
+                } else if (!isWelcomeOpen && !gameOver && !isStageClearCelebrating) {
+                    isPaused = true;
                 }
             }
 
@@ -731,8 +765,9 @@ MainView {
 
                                 if (ring.isGoal) {
                                     ring.broken = true;
-                                    var isGrand = ring.isGrandGoal || (gameContainer.currentLevel >= 100);
-                                    var nextLvl = gameContainer.currentLevel + 1;
+                                    var goalLevel = Math.floor(ring.index / gameContainer.levelRings) + 1;
+                                    var isGrand = ring.isGrandGoal || (goalLevel >= 100);
+                                    var nextLvl = goalLevel + 1;
                                     var isZone = (nextLvl % 10 === 1 && nextLvl > 1);
                                     var isCp = gameContainer.isCheckpointLevel(nextLvl);
 
@@ -758,7 +793,7 @@ MainView {
                                     } else {
                                         gameContainer.spawnShatterDebris(ring.y, true, false, gameContainer.currentTheme, false);
                                         gameContainer.score += 100;
-                                        gameContainer.bannerText = i18n.tr("LEVEL %1 COMPLETE!").arg(gameContainer.currentLevel);
+                                        gameContainer.bannerText = i18n.tr("LEVEL %1 COMPLETE!").arg(goalLevel);
                                         soundManager.haptic(true);
                                     }
                                     gameContainer.bannerOpacity = 1.0;
@@ -800,7 +835,7 @@ MainView {
                                     Storage.flushPendingWrites();
 
                                     if (isCp || isGrand) {
-                                        gameContainer.stageClearStage = gameContainer.currentLevel;
+                                        gameContainer.stageClearStage = goalLevel;
                                         gameContainer.stageClearBonus = earned;
                                         gameContainer.stageClearStreak = currentStreak;
                                         gameContainer.stageClearIsCheckpoint = isCp;
@@ -818,6 +853,7 @@ MainView {
                                 if (gameContainer.isSuperFall && segType !== 1) {
                                     ring.broken = true;
                                     gameContainer.spawnShatterDebris(ring.y, false, false, gameContainer.currentTheme, true);
+                                    soundManager.playBounce(1.0);
                                     soundManager.haptic(true);
 
                                     gameContainer.score += 25;
