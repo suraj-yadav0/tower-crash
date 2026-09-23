@@ -42,8 +42,8 @@ Canvas {
         var midR = (outR + inR) / 2.0;
 
         var spotGrad = ctx.createRadialGradient(centerX, h * 0.38, game.poleRadius, centerX, h * 0.38, outR * 2.4);
-        spotGrad.addColorStop(0.0, "rgba(255, 255, 255, 0.08)");
-        spotGrad.addColorStop(0.5, "rgba(255, 255, 255, 0.03)");
+        spotGrad.addColorStop(0.0, "rgba(255, 255, 255, 0.05)");
+        spotGrad.addColorStop(0.5, "rgba(255, 255, 255, 0.02)");
         spotGrad.addColorStop(1.0, "rgba(0, 0, 0, 0.0)");
         ctx.fillStyle = spotGrad;
         ctx.fillRect(0, 0, w, h);
@@ -182,9 +182,8 @@ Canvas {
             }
 
             var aoGrad = ctx.createLinearGradient(xi, yit, xo, yot);
-            aoGrad.addColorStop(0.0, "rgba(0, 0, 0, 0.45)");
-            aoGrad.addColorStop(0.35, "rgba(0, 0, 0, 0.08)");
-            aoGrad.addColorStop(1.0, "rgba(0, 0, 0, 0.0)");
+            aoGrad.addColorStop(0.0, "rgba(0, 0, 0, 0.16)");
+            aoGrad.addColorStop(0.40, "rgba(0, 0, 0, 0.0)");
             ctx.fillStyle = aoGrad;
             ctx.fill();
 
@@ -219,8 +218,8 @@ Canvas {
             ctx.fillStyle = topGrad;
             ctx.fill();
 
-            var innerAo = ctx.createRadialGradient(0, 0, inR, 0, 0, inR + units.gu(1.8));
-            innerAo.addColorStop(0.0, "rgba(0, 0, 0, 0.32)");
+            var innerAo = ctx.createRadialGradient(0, 0, inR, 0, 0, inR + units.gu(0.8));
+            innerAo.addColorStop(0.0, "rgba(0, 0, 0, 0.10)");
             innerAo.addColorStop(1.0, "rgba(0, 0, 0, 0.0)");
             ctx.fillStyle = innerAo;
             ctx.fill();
@@ -355,57 +354,27 @@ Canvas {
         var pWidth = game.poleRadius * 2.0;
 
         var poleGrad = ctx.createLinearGradient(pLeft, 0, pRight, 0);
-        var specOffset = Math.sin(game.towerAngle * 0.5) * 0.05;
-        var specPos = Math.max(0.20, Math.min(0.42, 0.28 + specOffset));
-
         poleGrad.addColorStop(0.00, theme.pole1);
-        poleGrad.addColorStop(Math.max(0.08, specPos - 0.14), theme.pole2);
-        poleGrad.addColorStop(specPos, theme.pole3 || "#D0D2D6");
-        poleGrad.addColorStop(Math.min(0.58, specPos + 0.16), theme.pole2);
-        poleGrad.addColorStop(0.85, theme.pole2);
+        poleGrad.addColorStop(0.32, theme.pole2);
+        poleGrad.addColorStop(0.72, theme.pole2);
         poleGrad.addColorStop(1.00, theme.pole1);
 
         ctx.fillStyle = poleGrad;
         ctx.fillRect(pLeft, 0, pWidth, h);
 
-        var specWidth = game.poleRadius * 0.28;
-        var specX = pLeft + pWidth * specPos - specWidth * 0.5;
-        var specGrad = ctx.createLinearGradient(specX, 0, specX + specWidth, 0);
-        specGrad.addColorStop(0.0, "rgba(255, 255, 255, 0.0)");
-        specGrad.addColorStop(0.5, "rgba(255, 255, 255, 0.15)");
-        specGrad.addColorStop(1.0, "rgba(255, 255, 255, 0.0)");
-        ctx.fillStyle = specGrad;
-        ctx.fillRect(specX, 0, specWidth, h);
-
+        // Subtle, smooth ambient shadow directly under each platform
         for (var aoR = 0; aoR < game.rings.length; aoR++) {
             var aoRing = game.rings[aoR];
             if (aoRing.broken) continue;
             var aoRingScreenY = bScreenY + (aoRing.y - camY) + (aoRing.recoil || 0);
             if (aoRingScreenY < -rSpacing || aoRingScreenY > h + rSpacing) continue;
 
-            var topAoH = units.gu(1.0);
-            var topAoGrad = ctx.createLinearGradient(0, aoRingScreenY - topAoH, 0, aoRingScreenY);
-            topAoGrad.addColorStop(0.0, "rgba(0, 0, 0, 0.0)");
-            topAoGrad.addColorStop(1.0, "rgba(0, 0, 0, 0.35)");
-            ctx.fillStyle = topAoGrad;
-            ctx.fillRect(pLeft, aoRingScreenY - topAoH, pWidth, topAoH);
-
-            var botAoH = units.gu(2.4);
+            var botAoH = units.gu(0.9);
             var botAoGrad = ctx.createLinearGradient(0, aoRingScreenY + rHeight, 0, aoRingScreenY + rHeight + botAoH);
-            botAoGrad.addColorStop(0.0, "rgba(0, 0, 0, 0.50)");
+            botAoGrad.addColorStop(0.0, "rgba(0, 0, 0, 0.14)");
             botAoGrad.addColorStop(1.0, "rgba(0, 0, 0, 0.0)");
             ctx.fillStyle = botAoGrad;
             ctx.fillRect(pLeft, aoRingScreenY + rHeight, pWidth, botAoH);
-
-            ctx.save();
-            ctx.translate(centerX, aoRingScreenY);
-            ctx.scale(1.0, tilt);
-            ctx.beginPath();
-            ctx.arc(0, 0, game.poleRadius + units.gu(0.12), Math.PI, 0, false);
-            ctx.lineWidth = units.gu(0.25);
-            ctx.strokeStyle = "rgba(0, 0, 0, 0.30)";
-            ctx.stroke();
-            ctx.restore();
         }
 
         for (var r2 = 0; r2 < game.rings.length; r2++) {
