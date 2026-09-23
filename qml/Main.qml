@@ -128,6 +128,9 @@ MainView {
             property bool hapticsEnabled: true
             property int themeMode: 0
             property var currentTheme: Themes.getTheme(themeMode, currentLevel)
+            onCurrentThemeChanged: {
+                gameCanvas.requestPaint();
+            }
 
             property real towerAngle: 0.0
             property real angularVelocity: 0.0
@@ -1186,12 +1189,13 @@ MainView {
                         speedMode: gameContainer.speedMode
                         selectedCheckpoint: gameContainer.selectedCheckpoint
                         unlockedCheckpoints: gameContainer.unlockedCheckpoints
-                        theme: gameContainer.currentTheme
-                        themeName: Themes.getThemeName(gameContainer.themeMode, gameContainer.currentLevel)
+                        theme: Themes.getTheme(gameContainer.themeMode, gameContainer.selectedCheckpoint)
+                        themeName: Themes.getThemeName(gameContainer.themeMode, gameContainer.selectedCheckpoint)
                         onCheckpointSelected: {
                             soundManager.buttonHaptic();
                             gameContainer.selectedCheckpoint = checkpoint;
                             Storage.saveSelectedCheckpoint(checkpoint);
+                            gameCanvas.requestPaint();
                         }
                         onPlayRequested: {
                             soundManager.buttonHaptic();
@@ -1371,7 +1375,9 @@ MainView {
                         nextCheckpoint: gameContainer.stageClearNextCheckpoint
                         checkpointLevel: gameContainer.getNearestCheckpoint(gameContainer.stageClearStage)
                         isGrandVictory: gameContainer.stageClearIsGrand
-                        theme: gameContainer.currentTheme
+                        theme: gameContainer.stageClearIsCheckpoint
+                               ? Themes.getTheme(gameContainer.themeMode, gameContainer.stageClearNextCheckpoint)
+                               : gameContainer.currentTheme
                         onContinueRequested: {
                             soundManager.buttonHaptic();
                             if (gameContainer.stageClearIsGrand) {
