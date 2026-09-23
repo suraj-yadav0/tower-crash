@@ -143,13 +143,13 @@ MainView {
             property real squashVelocity: 0.0
             property bool isSuperFall: false
 
-            property real ringSpacing: units.gu(14)
-            property real outerRadius: units.gu(15)
-            property real innerRadius: units.gu(3.2)
-            property real poleRadius: units.gu(2.8)
-            property real ballRadius: units.gu(1.5)
-            property real ringHeight: units.gu(1.2)
-            property real tiltRatio: 0.36
+            property real ringSpacing: units.gu(26)
+            property real outerRadius: units.gu(20)
+            property real innerRadius: units.gu(4.8)
+            property real poleRadius: units.gu(4.8)
+            property real ballRadius: units.gu(2.4)
+            property real ringHeight: units.gu(2.8)
+            property real tiltRatio: 0.34
 
             property int speedMode: 1
             property real speedMultiplier: {
@@ -158,16 +158,16 @@ MainView {
                 return 1.0;
             }
 
-            property real baseGravity: units.gu(215)
-            property real baseBounceSpeed: units.gu(50)
-            property real baseMaxFallSpeed: units.gu(135)
+            property real baseGravity: units.gu(260)
+            property real baseBounceSpeed: units.gu(77)
+            property real baseMaxFallSpeed: units.gu(180)
 
             property real gravity: baseGravity * speedMultiplier
             property real bounceSpeed: baseBounceSpeed * Math.sqrt(speedMultiplier)
             property real maxFallSpeed: baseMaxFallSpeed * speedMultiplier
             property real lastPhysicsTime: 0.0
 
-            property real ballScreenY: units.gu(20.0)
+            property real ballScreenY: units.gu(28.0)
             property var rings: []
             property int nextRingIndex: 0
             property var particles: []
@@ -260,15 +260,15 @@ MainView {
                     var angle = Math.random() * Math.PI * 2.0;
                     var speed = units.gu(4.0) + Math.random() * units.gu(8.0);
                     particles.push({
-                        x: Math.cos(angle) * units.gu(0.6),
+                        x: Math.cos(angle) * units.gu(0.9),
                         y: y,
-                        z: midR + Math.sin(angle) * units.gu(0.6),
+                        z: midR + Math.sin(angle) * units.gu(0.9),
                         vx: Math.cos(angle) * speed,
                         vy: -units.gu(1.5) - Math.random() * units.gu(4.0),
                         vz: Math.sin(angle) * speed,
                         color: (Math.random() < 0.6) ? color1 : color2,
                         alpha: 0.85,
-                        size: units.gu(0.28 + Math.random() * 0.32)
+                        size: units.gu(0.35 + Math.random() * 0.4)
                     });
                 }
             }
@@ -286,10 +286,10 @@ MainView {
                     vx: 0,
                     vy: 0,
                     vz: 0,
-                    radius: units.gu(1.5),
-                    maxRadius: outerRadius * 1.5,
-                    speed: units.gu(34.0),
-                    thickness: units.gu(0.45),
+                    radius: units.gu(2.0),
+                    maxRadius: outerRadius * 1.6,
+                    speed: units.gu(42.0),
+                    thickness: units.gu(0.65),
                     color: isGoal ? (isGrand ? "#FFD700" : "#E8C872") : (isSuper ? "#FF793F" : theme.topSafe),
                     alpha: 0.95,
                     decay: 3.2
@@ -298,10 +298,10 @@ MainView {
                 var chunkCount = isGrand ? 8 : 6;
                 for (var c = 0; c < chunkCount; c++) {
                     var chunkAngle = (c / chunkCount) * Math.PI * 2.0 + (Math.random() - 0.5) * 0.35;
-                    var chunkR = midR + (Math.random() - 0.5) * units.gu(1.6);
-                    var radialSpeed = (units.gu(8) + Math.random() * units.gu(10)) * (isSuper ? 1.4 : 1.0);
-                    var cw = units.gu(1.8 + Math.random() * 1.2);
-                    var ch = units.gu(1.3 + Math.random() * 0.8);
+                    var chunkR = midR + (Math.random() - 0.5) * units.gu(2.2);
+                    var radialSpeed = (units.gu(9) + Math.random() * units.gu(12)) * (isSuper ? 1.4 : 1.0);
+                    var cw = units.gu(2.6 + Math.random() * 1.6);
+                    var ch = units.gu(1.8 + Math.random() * 1.0);
 
                     particles.push({
                         kind: "chunk",
@@ -319,7 +319,7 @@ MainView {
                         vrotZ: (Math.random() - 0.5) * 8.0,
                         width: cw,
                         height: ch,
-                        depth: units.gu(0.7),
+                        depth: units.gu(1.0),
                         topColor: topClr,
                         edgeColor: edgeClr,
                         specular: isGoal,
@@ -332,9 +332,9 @@ MainView {
                 for (var s = 0; s < shardCount; s++) {
                     var shardAngle = Math.random() * Math.PI * 2.0;
                     var shardR = innerRadius + Math.random() * (outerRadius - innerRadius);
-                    var shardSpeed = (units.gu(10) + Math.random() * units.gu(14)) * (isSuper ? 1.4 : 1.0);
-                    var sw = units.gu(0.9 + Math.random() * 0.8);
-                    var sh = units.gu(0.8 + Math.random() * 0.7);
+                    var shardSpeed = (units.gu(11) + Math.random() * units.gu(15)) * (isSuper ? 1.4 : 1.0);
+                    var sw = units.gu(1.4 + Math.random() * 0.9);
+                    var sh = units.gu(1.1 + Math.random() * 0.7);
 
                     particles.push({
                         kind: "shard",
@@ -352,7 +352,7 @@ MainView {
                         vrotZ: (Math.random() - 0.5) * 14.0,
                         width: sw,
                         height: sh,
-                        depth: units.gu(0.4),
+                        depth: units.gu(0.6),
                         topColor: topClr,
                         edgeColor: edgeClr,
                         specular: isGoal,
@@ -373,7 +373,7 @@ MainView {
                         vx: Math.cos(spAngle) * spSpeed,
                         vy: -units.gu(8 + Math.random() * 14),
                         vz: Math.sin(spAngle) * spSpeed,
-                        size: units.gu(0.3 + Math.random() * 0.25),
+                        size: units.gu(0.35 + Math.random() * 0.3),
                         color: isGoal ? "#FFFFFF" : (isSuper ? "#FFEAA7" : topClr),
                         alpha: 1.0,
                         decay: 2.2
@@ -382,7 +382,7 @@ MainView {
 
                 for (var d = 0; d < 6; d++) {
                     var dustAngle = Math.random() * Math.PI * 2.0;
-                    var dustR = midR + (Math.random() - 0.5) * units.gu(2.0);
+                    var dustR = midR + (Math.random() - 0.5) * units.gu(2.4);
                     particles.push({
                         kind: "dust",
                         x: Math.cos(dustAngle) * dustR,
@@ -391,8 +391,8 @@ MainView {
                         vx: Math.cos(dustAngle) * units.gu(3 + Math.random() * 4),
                         vy: -units.gu(1.5 + Math.random() * 3),
                         vz: Math.sin(dustAngle) * units.gu(3 + Math.random() * 4),
-                        size: units.gu(0.6),
-                        targetSize: units.gu(1.8 + Math.random() * 0.8),
+                        size: units.gu(0.8),
+                        targetSize: units.gu(2.2 + Math.random() * 1.0),
                         color: topClr,
                         alpha: 0.65,
                         decay: 1.6
@@ -408,9 +408,9 @@ MainView {
                 var midR = (outerRadius + innerRadius) / 2.0;
                 for (var s = 0; s < 6; s++) {
                     var shardAngle = angle + (Math.random() - 0.5) * 0.45;
-                    var radialSpeed = units.gu(7) + Math.random() * units.gu(10);
-                    var sw = units.gu(1.0 + Math.random() * 0.6);
-                    var sh = units.gu(0.8 + Math.random() * 0.6);
+                    var radialSpeed = units.gu(8) + Math.random() * units.gu(11);
+                    var sw = units.gu(1.5 + Math.random() * 0.8);
+                    var sh = units.gu(1.2 + Math.random() * 0.7);
                     particles.push({
                         kind: "shard",
                         x: Math.cos(shardAngle) * midR,
@@ -427,7 +427,7 @@ MainView {
                         vrotZ: (Math.random() - 0.5) * 12.0,
                         width: sw,
                         height: sh,
-                        depth: units.gu(0.4),
+                        depth: units.gu(0.6),
                         topColor: topClr,
                         edgeColor: edgeClr,
                         specular: false,
@@ -471,7 +471,7 @@ MainView {
                     generateRing();
                 }
 
-                ballY = (startIndex + 1) * ringSpacing - units.gu(5.0);
+                ballY = (startIndex + 1) * ringSpacing - units.gu(7.0);
                 ballVy = 0.0;
                 cameraY = (startIndex + 1) * ringSpacing;
                 activePlatformY = (startIndex + 1) * ringSpacing;
@@ -857,15 +857,15 @@ MainView {
                                     }
                                     soundManager.haptic(false);
 
-                                    ring.recoil = units.gu(0.42);
-                                    ring.recoilVelocity = units.gu(4.2);
+                                    ring.recoil = units.gu(0.55);
+                                    ring.recoilVelocity = units.gu(5.0);
 
                                     if (!ring.shockwaves) ring.shockwaves = [];
                                     ring.shockwaves.push({
                                         angle: relAngle,
-                                        radius: units.gu(0.5),
-                                        maxRadius: units.gu(4.5),
-                                        speed: units.gu(26.0),
+                                        radius: units.gu(0.6),
+                                        maxRadius: units.gu(6.0),
+                                        speed: units.gu(30.0),
                                         alpha: 0.85,
                                         maxAlpha: 0.85
                                     });
@@ -875,18 +875,18 @@ MainView {
                                     var dropCount = 4 + Math.floor(Math.random() * 3);
                                     for (var d = 0; d < dropCount; d++) {
                                         var dAngle = Math.random() * Math.PI * 2.0;
-                                        var dDist = units.gu(1.8 + Math.random() * 1.5);
+                                        var dDist = units.gu(2.4 + Math.random() * 2.0);
                                         droplets.push({
                                             dx: Math.cos(dAngle) * dDist,
                                             dy: Math.sin(dAngle) * dDist,
-                                            radius: units.gu(0.22 + Math.random() * 0.3)
+                                            radius: units.gu(0.3 + Math.random() * 0.4)
                                         });
                                     }
                                     ring.splats.push({
                                         angle: relAngle,
-                                        radius: units.gu(0.4),
-                                        targetRadius: units.gu(1.6 + Math.random() * 0.7),
-                                        growthSpeed: units.gu(20.0),
+                                        radius: units.gu(0.5),
+                                        targetRadius: units.gu(2.2 + Math.random() * 0.9),
+                                        growthSpeed: units.gu(24.0),
                                         droplets: droplets,
                                         dropletScale: 0.1
                                     });
@@ -963,7 +963,7 @@ MainView {
                             var camStep = camDiff * (1.0 - Math.exp(-followRate * dt));
                             gameContainer.cameraY += camStep;
 
-                            var maxLag = units.gu(5.5);
+                            var maxLag = units.gu(8.5);
                             if (gameContainer.ballY - gameContainer.cameraY > maxLag) {
                                 gameContainer.cameraY = gameContainer.ballY - maxLag;
                             }
@@ -1046,8 +1046,8 @@ MainView {
 
                             // Central cylindrical pole collision and tangential surface rolling
                             var distFromPole = Math.sqrt(pt.x * pt.x + pt.z * pt.z);
-                            var pThickness = (pt.kind === "chunk") ? (pt.depth || units.gu(0.7)) * 0.5 :
-                                             ((pt.kind === "shard") ? (pt.depth || units.gu(0.4)) * 0.5 : (pt.size || units.gu(0.3)) * 0.5);
+                            var pThickness = (pt.kind === "chunk") ? (pt.depth || units.gu(1.0)) * 0.5 :
+                                             ((pt.kind === "shard") ? (pt.depth || units.gu(0.6)) * 0.5 : (pt.size || units.gu(0.35)) * 0.5);
                             var minDistance = gameContainer.poleRadius + pThickness;
 
                             if (distFromPole < minDistance) {

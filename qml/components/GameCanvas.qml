@@ -25,7 +25,6 @@ Canvas {
 
         var theme = (game && game.currentTheme) ? game.currentTheme : Themes.getTheme(game ? game.currentLevel : 1);
 
-        // Dynamic gradient background
         var bgGrad = ctx.createLinearGradient(0, 0, 0, h);
         bgGrad.addColorStop(0.0, theme.bgTop);
         bgGrad.addColorStop(1.0, theme.bgBottom);
@@ -41,6 +40,13 @@ Canvas {
         var tilt = game.tiltRatio;
         var rHeight = game.ringHeight;
         var midR = (outR + inR) / 2.0;
+
+        var spotGrad = ctx.createRadialGradient(centerX, h * 0.38, game.poleRadius, centerX, h * 0.38, outR * 2.4);
+        spotGrad.addColorStop(0.0, "rgba(255, 255, 255, 0.08)");
+        spotGrad.addColorStop(0.5, "rgba(255, 255, 255, 0.03)");
+        spotGrad.addColorStop(1.0, "rgba(0, 0, 0, 0.0)");
+        ctx.fillStyle = spotGrad;
+        ctx.fillRect(0, 0, w, h);
 
         function drawParticle(pt) {
             var partScreenY = bScreenY + (pt.y - camY) + (pt.z || 0) * tilt;
@@ -79,16 +85,15 @@ Canvas {
                 var cosPitch = Math.cos(pt.rotX || 0);
                 var cosYaw = Math.cos(pt.rotY || 0);
                 var facing = cosPitch * cosYaw;
-                var pw = (pt.width || units.gu(1.2)) * Math.max(0.2, Math.abs(cosYaw));
-                var ph = (pt.height || units.gu(1.0)) * Math.max(0.2, Math.abs(cosPitch));
-                var pDepth = (pt.depth || units.gu(0.4));
+                var pw = (pt.width || units.gu(1.8)) * Math.max(0.2, Math.abs(cosYaw));
+                var ph = (pt.height || units.gu(1.4)) * Math.max(0.2, Math.abs(cosPitch));
+                var pDepth = (pt.depth || units.gu(0.6));
 
                 ctx.save();
                 ctx.translate(partScreenX, partScreenY);
                 ctx.rotate(pt.rotZ || 0);
                 ctx.globalAlpha = Math.max(0, pt.alpha);
 
-                // Exposed fracture side edge (extruded depth facet)
                 ctx.fillStyle = pt.edgeColor || "#222428";
                 ctx.beginPath();
                 ctx.moveTo(-pw * 0.5, ph * 0.5);
@@ -98,7 +103,6 @@ Canvas {
                 ctx.closePath();
                 ctx.fill();
 
-                // Top lit surface facet with curved arc geometry for chunks
                 ctx.fillStyle = facing >= 0 ? (pt.topColor || "#F5F3EF") : (pt.edgeColor || "#222428");
                 ctx.beginPath();
                 if (pt.kind === "chunk") {
@@ -114,7 +118,6 @@ Canvas {
                 ctx.closePath();
                 ctx.fill();
 
-                // Specular gleam on crystalline/golden shards
                 if (pt.specular && facing > 0.25) {
                     ctx.fillStyle = "rgba(255, 255, 255, 0.55)";
                     ctx.beginPath();
@@ -138,7 +141,6 @@ Canvas {
             }
         }
 
-        // Tier 1: Render background 3D particles (behind central column and platforms)
         if (game.particles && game.particles.length > 0) {
             for (var bp = 0; bp < game.particles.length; bp++) {
                 var bPt = game.particles[bp];
@@ -148,7 +150,206 @@ Canvas {
             }
         }
 
-        // Central column cylinder with depth-aware shading and ambient occlusion
+        function drawRadialCutWall(ringScreenY, angle, isStart, sideColor) {
+            var cosA = Math.cos(angle);
+            var sinA = Math.sin(angle);
+
+            var xi = centerX + inR * cosA;
+            var yit = ringScreenY + inR * sinA * tilt;
+            var xo = centerX + outR * cosA;
+            var yot = ringScreenY + outR * sinA * tilt;
+            var yob = yot + rHeight;
+            var yib = yit + rHeight;
+
+            ctx.beginPath();
+            ctx.moveTo(xi, yit);
+            ctx.lineTo(xo, yot);
+            ctx.lineTo(xo, yob);
+            ctx.lineTo(xi, yib);
+            ctx.closePath();
+
+            ctx.fillStyle = sideColor;
+            ctx.fill();
+
+            var wallLight = isStart ? (0.75 - 0.35 * cosA + 0.25 * sinA) : (0.75 + 0.35 * cosA - 0.25 * sinA);
+            wallLight = Math.max(0.40, Math.min(1.15, wallLight));
+            if (wallLight < 0.85) {
+                ctx.fillStyle = "rgba(0, 0, 0, " + (0.85 - wallLight).toFixed(2) + ")";
+                ctx.fill();
+            } else {
+                ctx.fillStyle = "rgba(255, 255, 255, " + ((wallLight - 0.85) * 0.45).toFixed(2) + ")";
+                ctx.fill();
+            }
+
+            var aoGrad = ctx.createLinearGradient(xi, yit, xo, yot);
+            aoGrad.addColorStop(0.0, "rgba(0, 0, 0, 0.45)");
+            aoGrad.addColorStop(0.35, "rgba(0, 0, 0, 0.08)");
+            aoGrad.addColorStop(1.0, "rgba(0, 0, 0, 0.0)");
+            ctx.fillStyle = aoGrad;
+            ctx.fill();
+
+            var vGrad = ctx.createLinearGradient(0, yot, 0, yob);
+            vGrad.addColorStop(0.0, "rgba(255, 255, 255, 0.10)");
+            vGrad.addColorStop(1.0, "rgba(0, 0, 0, 0.35)");
+            ctx.fillStyle = vGrad;
+            ctx.fill();
+
+            ctx.strokeStyle = "rgba(0, 0, 0, 0.35)";
+            ctx.lineWidth = units.gu(0.08);
+            ctx.stroke();
+        }
+
+        function drawTopFace(ringScreenY, startAngle, endAngle, topColor) {
+            ctx.save();
+            ctx.translate(centerX, ringScreenY);
+            ctx.scale(1.0, tilt);
+
+            ctx.beginPath();
+            ctx.arc(0, 0, outR, startAngle, endAngle, false);
+            ctx.arc(0, 0, inR, endAngle, startAngle, true);
+            ctx.closePath();
+
+            ctx.fillStyle = topColor;
+            ctx.fill();
+
+            var topGrad = ctx.createRadialGradient(-outR * 0.35, -outR * 0.35, inR * 0.4, 0, 0, outR * 1.15);
+            topGrad.addColorStop(0.0, "rgba(255, 255, 255, 0.18)");
+            topGrad.addColorStop(0.55, "rgba(255, 255, 255, 0.02)");
+            topGrad.addColorStop(1.0, "rgba(0, 0, 0, 0.18)");
+            ctx.fillStyle = topGrad;
+            ctx.fill();
+
+            var innerAo = ctx.createRadialGradient(0, 0, inR, 0, 0, inR + units.gu(1.8));
+            innerAo.addColorStop(0.0, "rgba(0, 0, 0, 0.32)");
+            innerAo.addColorStop(1.0, "rgba(0, 0, 0, 0.0)");
+            ctx.fillStyle = innerAo;
+            ctx.fill();
+
+            ctx.beginPath();
+            ctx.arc(0, 0, outR - 0.5, startAngle, endAngle, false);
+            ctx.strokeStyle = "rgba(255, 255, 255, 0.28)";
+            ctx.lineWidth = units.gu(0.12);
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.arc(0, 0, outR, startAngle, endAngle, false);
+            ctx.arc(0, 0, inR, endAngle, startAngle, true);
+            ctx.closePath();
+            ctx.strokeStyle = "rgba(10, 15, 20, 0.40)";
+            ctx.lineWidth = units.gu(0.08);
+            ctx.stroke();
+
+            ctx.restore();
+        }
+
+        function drawOuterRim(ringScreenY, startAngle, endAngle, sideColor) {
+            var samples = 8;
+            var topPoints = [];
+            var bottomPoints = [];
+
+            for (var s = 0; s <= samples; s++) {
+                var a = startAngle + (endAngle - startAngle) * (s / samples);
+                var sinA = Math.sin(a);
+                var cosA = Math.cos(a);
+
+                if (sinA > -0.05) {
+                    var px = centerX + outR * cosA;
+                    var py = ringScreenY + outR * sinA * tilt;
+                    topPoints.push({ x: px, y: py });
+                    bottomPoints.push({ x: px, y: py + rHeight });
+                }
+            }
+
+            if (topPoints.length > 1) {
+                ctx.beginPath();
+                ctx.moveTo(topPoints[0].x, topPoints[0].y);
+                for (var p = 1; p < topPoints.length; p++) {
+                    ctx.lineTo(topPoints[p].x, topPoints[p].y);
+                }
+                for (var bp = bottomPoints.length - 1; bp >= 0; bp--) {
+                    ctx.lineTo(bottomPoints[bp].x, bottomPoints[bp].y);
+                }
+                ctx.closePath();
+
+                ctx.fillStyle = sideColor;
+                ctx.fill();
+
+                var rimYMin = topPoints[0].y;
+                var rimYMax = bottomPoints[0].y;
+                for (var yIdx = 0; yIdx < topPoints.length; yIdx++) {
+                    if (topPoints[yIdx].y < rimYMin) rimYMin = topPoints[yIdx].y;
+                    if (bottomPoints[yIdx].y > rimYMax) rimYMax = bottomPoints[yIdx].y;
+                }
+                var rimGrad = ctx.createLinearGradient(0, rimYMin, 0, rimYMax);
+                rimGrad.addColorStop(0.0, "rgba(255, 255, 255, 0.14)");
+                rimGrad.addColorStop(0.3, "rgba(255, 255, 255, 0.0)");
+                rimGrad.addColorStop(0.85, "rgba(0, 0, 0, 0.28)");
+                rimGrad.addColorStop(1.0, "rgba(0, 0, 0, 0.45)");
+                ctx.fillStyle = rimGrad;
+                ctx.fill();
+
+                ctx.beginPath();
+                ctx.moveTo(bottomPoints[0].x, bottomPoints[0].y);
+                for (var bIdx = 1; bIdx < bottomPoints.length; bIdx++) {
+                    ctx.lineTo(bottomPoints[bIdx].x, bottomPoints[bIdx].y);
+                }
+                ctx.strokeStyle = "rgba(0, 0, 0, 0.55)";
+                ctx.lineWidth = units.gu(0.12);
+                ctx.stroke();
+
+                var shadowDepth = units.gu(1.4);
+                var shadowGrad = ctx.createLinearGradient(0, rimYMax, 0, rimYMax + shadowDepth);
+                shadowGrad.addColorStop(0.0, "rgba(0, 0, 0, 0.35)");
+                shadowGrad.addColorStop(1.0, "rgba(0, 0, 0, 0.0)");
+                ctx.beginPath();
+                ctx.moveTo(bottomPoints[0].x, bottomPoints[0].y);
+                for (var sIdx = 1; sIdx < bottomPoints.length; sIdx++) {
+                    ctx.lineTo(bottomPoints[sIdx].x, bottomPoints[sIdx].y);
+                }
+                ctx.lineTo(bottomPoints[bottomPoints.length - 1].x, bottomPoints[bottomPoints.length - 1].y + shadowDepth);
+                for (var sbIdx = bottomPoints.length - 2; sbIdx >= 0; sbIdx--) {
+                    ctx.lineTo(bottomPoints[sbIdx].x, bottomPoints[sbIdx].y + shadowDepth);
+                }
+                ctx.closePath();
+                ctx.fillStyle = shadowGrad;
+                ctx.fill();
+            }
+        }
+
+        for (var r1 = 0; r1 < game.rings.length; r1++) {
+            var ring1 = game.rings[r1];
+            if (ring1.broken) continue;
+
+            var r1ScreenY = bScreenY + (ring1.y - camY) + (ring1.recoil || 0);
+            if (r1ScreenY < -rSpacing || r1ScreenY > h + rSpacing) continue;
+
+            var ring1Offset = ring1.angleOffset || 0.0;
+
+            for (var seg1 = 0; seg1 < 8; seg1++) {
+                var seg1Type = ring1.segments[seg1];
+                if (seg1Type === 1) continue;
+
+                var isFragile1 = (seg1Type === 3);
+                var topColor1 = ring1.isGoal ? (ring1.isGrandGoal ? "#FFF275" : (theme.goalTop || "#E8C872")) : ((seg1Type === 0 || isFragile1) ? theme.topSafe : theme.topHazard);
+                var sideColor1 = ring1.isGoal ? (ring1.isGrandGoal ? "#D4AF37" : (theme.goalSide || "#B09242")) : ((seg1Type === 0 || isFragile1) ? theme.sideSafe : theme.sideHazard);
+
+                var startAngle1 = game.towerAngle + ring1Offset + seg1 * (Math.PI / 4.0);
+                var endAngle1 = startAngle1 + (Math.PI / 4.0);
+
+                drawTopFace(r1ScreenY, startAngle1, endAngle1, topColor1);
+
+                var prevSeg1 = ring1.segments[(seg1 + 7) % 8];
+                var nextSeg1 = ring1.segments[(seg1 + 1) % 8];
+
+                if (prevSeg1 === 1 && Math.cos(startAngle1) < 0.02 && Math.sin(startAngle1) < 0) {
+                    drawRadialCutWall(r1ScreenY, startAngle1, true, sideColor1);
+                }
+                if (nextSeg1 === 1 && Math.cos(endAngle1) > -0.02 && Math.sin(endAngle1) < 0) {
+                    drawRadialCutWall(r1ScreenY, endAngle1, false, sideColor1);
+                }
+            }
+        }
+
         var pLeft = centerX - game.poleRadius;
         var pRight = centerX + game.poleRadius;
         var pWidth = game.poleRadius * 2.0;
@@ -167,7 +368,6 @@ Canvas {
         ctx.fillStyle = poleGrad;
         ctx.fillRect(pLeft, 0, pWidth, h);
 
-        // Specular highlight band along the cylindrical axis
         var specWidth = game.poleRadius * 0.28;
         var specX = pLeft + pWidth * specPos - specWidth * 0.5;
         var specGrad = ctx.createLinearGradient(specX, 0, specX + specWidth, 0);
@@ -177,23 +377,22 @@ Canvas {
         ctx.fillStyle = specGrad;
         ctx.fillRect(specX, 0, specWidth, h);
 
-        // Ambient occlusion contact shadows and socket bevels where platforms intersect the pole
         for (var aoR = 0; aoR < game.rings.length; aoR++) {
             var aoRing = game.rings[aoR];
             if (aoRing.broken) continue;
             var aoRingScreenY = bScreenY + (aoRing.y - camY) + (aoRing.recoil || 0);
             if (aoRingScreenY < -rSpacing || aoRingScreenY > h + rSpacing) continue;
 
-            var topAoH = units.gu(0.7);
+            var topAoH = units.gu(1.0);
             var topAoGrad = ctx.createLinearGradient(0, aoRingScreenY - topAoH, 0, aoRingScreenY);
             topAoGrad.addColorStop(0.0, "rgba(0, 0, 0, 0.0)");
             topAoGrad.addColorStop(1.0, "rgba(0, 0, 0, 0.35)");
             ctx.fillStyle = topAoGrad;
             ctx.fillRect(pLeft, aoRingScreenY - topAoH, pWidth, topAoH);
 
-            var botAoH = units.gu(1.1);
+            var botAoH = units.gu(2.4);
             var botAoGrad = ctx.createLinearGradient(0, aoRingScreenY + rHeight, 0, aoRingScreenY + rHeight + botAoH);
-            botAoGrad.addColorStop(0.0, "rgba(0, 0, 0, 0.45)");
+            botAoGrad.addColorStop(0.0, "rgba(0, 0, 0, 0.50)");
             botAoGrad.addColorStop(1.0, "rgba(0, 0, 0, 0.0)");
             ctx.fillStyle = botAoGrad;
             ctx.fillRect(pLeft, aoRingScreenY + rHeight, pWidth, botAoH);
@@ -209,87 +408,51 @@ Canvas {
             ctx.restore();
         }
 
-        // Render platforms
-        for (var r = 0; r < game.rings.length; r++) {
-            var ring = game.rings[r];
-            if (ring.broken) continue;
+        for (var r2 = 0; r2 < game.rings.length; r2++) {
+            var ring2 = game.rings[r2];
+            if (ring2.broken) continue;
 
-            var ringScreenY = bScreenY + (ring.y - camY) + (ring.recoil || 0);
-            if (ringScreenY < -rSpacing || ringScreenY > h + rSpacing) {
-                continue;
+            var r2ScreenY = bScreenY + (ring2.y - camY) + (ring2.recoil || 0);
+            if (r2ScreenY < -rSpacing || r2ScreenY > h + rSpacing) continue;
+
+            var ring2Offset = ring2.angleOffset || 0.0;
+
+            for (var seg2 = 0; seg2 < 8; seg2++) {
+                var seg2Type = ring2.segments[seg2];
+                if (seg2Type === 1) continue;
+
+                var isFragile2 = (seg2Type === 3);
+                var topColor2 = ring2.isGoal ? (ring2.isGrandGoal ? "#FFF275" : (theme.goalTop || "#E8C872")) : ((seg2Type === 0 || isFragile2) ? theme.topSafe : theme.topHazard);
+                var sideColor2 = ring2.isGoal ? (ring2.isGrandGoal ? "#D4AF37" : (theme.goalSide || "#B09242")) : ((seg2Type === 0 || isFragile2) ? theme.sideSafe : theme.sideHazard);
+
+                var startAngle2 = game.towerAngle + ring2Offset + seg2 * (Math.PI / 4.0);
+                var endAngle2 = startAngle2 + (Math.PI / 4.0);
+
+                var hasFront = (Math.sin(startAngle2) > -0.05 || Math.sin(endAngle2) > -0.05 || Math.sin((startAngle2 + endAngle2) * 0.5) > -0.05);
+
+                if (hasFront) {
+                    drawOuterRim(r2ScreenY, startAngle2, endAngle2, sideColor2);
+
+                    var prevSeg2 = ring2.segments[(seg2 + 7) % 8];
+                    var nextSeg2 = ring2.segments[(seg2 + 1) % 8];
+
+                    if (prevSeg2 === 1 && Math.cos(startAngle2) < 0.02 && Math.sin(startAngle2) >= -0.05) {
+                        drawRadialCutWall(r2ScreenY, startAngle2, true, sideColor2);
+                    }
+                    if (nextSeg2 === 1 && Math.cos(endAngle2) > -0.02 && Math.sin(endAngle2) >= -0.05) {
+                        drawRadialCutWall(r2ScreenY, endAngle2, false, sideColor2);
+                    }
+
+                    drawTopFace(r2ScreenY, startAngle2, endAngle2, topColor2);
+                }
             }
 
-            for (var seg = 0; seg < 8; seg++) {
-                var segType = ring.segments[seg];
-                if (segType === 1) continue;
-
-                var isFragile = (segType === 3);
-                var topColor = ring.isGoal ? (ring.isGrandGoal ? "#FFF275" : (theme.goalTop || "#E8C872")) : ((segType === 0 || isFragile) ? theme.topSafe : theme.topHazard);
-                var sideColor = ring.isGoal ? (ring.isGrandGoal ? "#D4AF37" : (theme.goalSide || "#B09242")) : ((segType === 0 || isFragile) ? theme.sideSafe : theme.sideHazard);
-
-                var ringOffset = ring.angleOffset || 0.0;
-                var startAngle = game.towerAngle + ringOffset + seg * (Math.PI / 4.0);
-                var endAngle = startAngle + (Math.PI / 4.0);
-
-                // Extrude front 3D rim
-                var samples = 6;
-                var topPoints = [];
-                var bottomPoints = [];
-
-                for (var s = 0; s <= samples; s++) {
-                    var a = startAngle + (endAngle - startAngle) * (s / samples);
-                    var sinA = Math.sin(a);
-                    var cosA = Math.cos(a);
-
-                    if (sinA > -0.05) {
-                        var px = centerX + outR * cosA;
-                        var py = ringScreenY + outR * sinA * tilt;
-                        topPoints.push({ x: px, y: py });
-                        bottomPoints.push({ x: px, y: py + rHeight });
-                    }
-                }
-
-                if (topPoints.length > 1) {
-                    ctx.beginPath();
-                    ctx.moveTo(topPoints[0].x, topPoints[0].y);
-                    for (var p = 1; p < topPoints.length; p++) {
-                        ctx.lineTo(topPoints[p].x, topPoints[p].y);
-                    }
-                    for (var bp = bottomPoints.length - 1; bp >= 0; bp--) {
-                        ctx.lineTo(bottomPoints[bp].x, bottomPoints[bp].y);
-                    }
-                    ctx.closePath();
-                    ctx.fillStyle = sideColor;
-                    ctx.fill();
-                }
-
-                // Render platform face
-                ctx.save();
-                ctx.translate(centerX, ringScreenY);
-                ctx.scale(1.0, tilt);
-
-                ctx.beginPath();
-                ctx.arc(0, 0, outR, startAngle, endAngle, false);
-                ctx.arc(0, 0, inR, endAngle, startAngle, true);
-                ctx.closePath();
-
-                ctx.fillStyle = topColor;
-                ctx.fill();
-
-                ctx.lineWidth = 1.2;
-                ctx.strokeStyle = "rgba(10, 15, 20, 0.45)";
-                ctx.stroke();
-
-                ctx.restore();
-            }
-
-            // Render platform shockwave ripples
-            if (ring.shockwaves && ring.shockwaves.length > 0) {
-                for (var sw = 0; sw < ring.shockwaves.length; sw++) {
-                    var wave = ring.shockwaves[sw];
+            if (ring2.shockwaves && ring2.shockwaves.length > 0) {
+                for (var sw = 0; sw < ring2.shockwaves.length; sw++) {
+                    var wave = ring2.shockwaves[sw];
                     var waveAngle = game.towerAngle + wave.angle;
                     var wx = centerX + midR * Math.cos(waveAngle);
-                    var wy = ringScreenY + midR * Math.sin(waveAngle) * tilt;
+                    var wy = r2ScreenY + midR * Math.sin(waveAngle) * tilt;
 
                     ctx.save();
                     ctx.translate(wx, wy);
@@ -311,13 +474,12 @@ Canvas {
                 }
             }
 
-            // Render platform paint splats
-            if (ring.splats && ring.splats.length > 0) {
-                for (var sp = 0; sp < ring.splats.length; sp++) {
-                    var splat = ring.splats[sp];
+            if (ring2.splats && ring2.splats.length > 0) {
+                for (var sp = 0; sp < ring2.splats.length; sp++) {
+                    var splat = ring2.splats[sp];
                     var splatAngle = game.towerAngle + splat.angle;
                     var sx = centerX + midR * Math.cos(splatAngle);
-                    var sy = ringScreenY + midR * Math.sin(splatAngle) * tilt;
+                    var sy = r2ScreenY + midR * Math.sin(splatAngle) * tilt;
 
                     ctx.save();
                     ctx.translate(sx, sy);
@@ -351,7 +513,6 @@ Canvas {
             }
         }
 
-        // Dynamic squash-and-stretch computation combining impact compression and flight elongation
         var renderSquash = game.squash;
         if (game.squash >= 1.0) {
             var flightStretch = 1.0;
@@ -364,7 +525,6 @@ Canvas {
             renderSquash = game.squash * flightStretch;
         }
 
-        // Platform drop shadow
         for (var sr = 0; sr < game.rings.length; sr++) {
             var targetRing = game.rings[sr];
             if (targetRing.broken) continue;
@@ -374,17 +534,24 @@ Canvas {
                     var shadowY = bScreenY + (targetRing.y - camY) + (targetRing.recoil || 0) + midR * tilt;
                     var distFraction = Math.min(1.0, dist / (rSpacing * 1.6));
                     var proximity = 1.0 - distFraction;
-                    var alpha = Math.max(0.08, 0.60 * Math.pow(proximity, 1.8));
-                    var shadowScale = Math.max(0.35, 1.0 - distFraction * 0.55);
+                    var alpha = Math.max(0.06, 0.65 * Math.pow(proximity, 1.8));
+                    var shadowScale = Math.max(0.40, 1.0 - distFraction * 0.50);
                     var shadowSx = (1.0 / Math.sqrt(renderSquash)) * shadowScale;
                     var shadowSy = shadowScale;
 
                     ctx.save();
                     ctx.translate(centerX, shadowY);
                     ctx.scale(shadowSx, shadowSy * tilt);
+
+                    var sRadius = game.ballRadius * 1.4;
+                    var sGrad = ctx.createRadialGradient(0, 0, 0, 0, 0, sRadius);
+                    sGrad.addColorStop(0.0, "rgba(0, 0, 0, " + alpha.toFixed(2) + ")");
+                    sGrad.addColorStop(0.5, "rgba(0, 0, 0, " + (alpha * 0.5).toFixed(2) + ")");
+                    sGrad.addColorStop(1.0, "rgba(0, 0, 0, 0.0)");
+
                     ctx.beginPath();
-                    ctx.arc(0, 0, game.ballRadius, 0, Math.PI * 2.0);
-                    ctx.fillStyle = "rgba(0, 0, 0, " + alpha.toFixed(2) + ")";
+                    ctx.arc(0, 0, sRadius, 0, Math.PI * 2.0);
+                    ctx.fillStyle = sGrad;
                     ctx.fill();
                     ctx.restore();
                 }
@@ -392,7 +559,6 @@ Canvas {
             }
         }
 
-        // Motion trail behind the ball
         var bRadius = game.ballRadius;
         for (var tr = 0; tr < game.ballTrail.length; tr++) {
             var trItem = game.ballTrail[tr];
@@ -413,7 +579,6 @@ Canvas {
         var contactScreenY = bScreenY + (game.ballY - camY) + midR * tilt;
         var actualBallScreenY = contactScreenY - bRadius * renderSquash;
 
-        // Super fall flame aura
         if (game.isSuperFall) {
             ctx.save();
             ctx.translate(centerX, actualBallScreenY);
@@ -428,37 +593,51 @@ Canvas {
             ctx.restore();
         }
 
-        // Ball rendering with squash-and-stretch
         ctx.save();
         ctx.translate(centerX, actualBallScreenY);
         ctx.scale(1.0 / Math.sqrt(renderSquash), renderSquash);
 
         var ballGrad = ctx.createRadialGradient(
-            -bRadius * 0.32,
             -bRadius * 0.35,
-            bRadius * 0.1,
+            -bRadius * 0.38,
+            bRadius * 0.08,
             0,
             0,
             bRadius
         );
-        ballGrad.addColorStop(0.0, theme.ballLight);
-        ballGrad.addColorStop(0.35, theme.ballMid);
-        ballGrad.addColorStop(1.0, theme.ballDark);
+        ballGrad.addColorStop(0.0, "#FFFFFF");
+        ballGrad.addColorStop(0.18, theme.ballLight);
+        ballGrad.addColorStop(0.55, theme.ballMid);
+        ballGrad.addColorStop(0.90, theme.ballDark);
+        ballGrad.addColorStop(1.00, "rgba(0, 0, 0, 0.65)");
 
         ctx.beginPath();
         ctx.arc(0, 0, bRadius, 0, Math.PI * 2.0);
         ctx.fillStyle = ballGrad;
         ctx.fill();
 
-        // High-gloss specular highlight
+        var fresnelGrad = ctx.createRadialGradient(
+            bRadius * 0.25,
+            bRadius * 0.35,
+            0,
+            bRadius * 0.25,
+            bRadius * 0.35,
+            bRadius * 0.65
+        );
+        fresnelGrad.addColorStop(0.0, "rgba(255, 255, 255, 0.25)");
+        fresnelGrad.addColorStop(1.0, "rgba(255, 255, 255, 0.0)");
         ctx.beginPath();
-        ctx.arc(-bRadius * 0.32, -bRadius * 0.35, bRadius * 0.26, 0, Math.PI * 2.0);
-        ctx.fillStyle = "rgba(255, 255, 255, 0.55)";
+        ctx.arc(0, 0, bRadius, 0, Math.PI * 2.0);
+        ctx.fillStyle = fresnelGrad;
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.arc(-bRadius * 0.35, -bRadius * 0.38, bRadius * 0.16, 0, Math.PI * 2.0);
+        ctx.fillStyle = "rgba(255, 255, 255, 0.90)";
         ctx.fill();
 
         ctx.restore();
 
-        // Tier 2: Render foreground 3D particles (in front of central column and platforms)
         if (game.particles && game.particles.length > 0) {
             for (var fp = 0; fp < game.particles.length; fp++) {
                 var fPt = game.particles[fp];
