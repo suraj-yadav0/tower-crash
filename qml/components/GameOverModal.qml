@@ -22,16 +22,15 @@ Rectangle {
         onClicked: {}
     }
 
-    // Outer Shell (Double-Bezel architecture)
     Rectangle {
         id: outerShell
         anchors.centerIn: parent
         width: Math.min(parent.width - units.gu(4.0), units.gu(34))
-        height: innerCore.height + units.gu(2.0)
+        height: modalContent.height + units.gu(4.0)
         radius: units.gu(2.0)
-        color: root.theme ? root.theme.cardOuter : "#141517"
+        color: root.theme ? root.theme.cardInner : "#0D0E0F"
         border.color: root.theme ? root.theme.topHazard : "#BA3C3C"
-        border.width: units.gu(0.15)
+        border.width: units.gu(0.14)
         scale: root.visible ? 1.0 : 0.88
         opacity: root.visible ? 1.0 : 0.0
 
@@ -42,22 +41,11 @@ Rectangle {
             NumberAnimation { duration: 200; easing.type: Easing.OutQuad }
         }
 
-        // Inner Core
-        Rectangle {
-            id: innerCore
+        Column {
+            id: modalContent
             anchors.centerIn: parent
-            width: outerShell.width - units.gu(1.6)
-            height: modalContent.height + units.gu(3.6)
-            radius: units.gu(1.6)
-            color: root.theme ? root.theme.cardInner : "#0D0E0F"
-            border.color: root.theme ? root.theme.cardBorder : "#222428"
-            border.width: units.gu(0.1)
-
-            Column {
-                id: modalContent
-                anchors.centerIn: parent
-                width: parent.width - units.gu(4.0)
-                spacing: units.gu(1.3)
+            width: parent.width - units.gu(4.0)
+            spacing: units.gu(1.3)
 
                 // Eyebrow Tag
                 Rectangle {
@@ -348,4 +336,3 @@ Rectangle {
             }
         }
     }
-}

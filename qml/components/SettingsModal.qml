@@ -48,11 +48,11 @@ Rectangle {
         id: outerShell
         anchors.centerIn: parent
         width: Math.min(parent.width - units.gu(3.2), units.gu(36))
-        height: Math.min(parent.height - units.gu(2.4), modalContent.height + units.gu(3.6))
+        height: Math.min(parent.height - units.gu(2.4), modalContent.height + units.gu(2.8))
         radius: units.gu(2.0)
-        color: root.theme ? root.theme.cardOuter : "#141517"
+        color: root.theme ? root.theme.cardInner : "#0D0E0F"
         border.color: root.theme ? root.theme.cardBorder : "#2A2C30"
-        border.width: units.gu(0.15)
+        border.width: units.gu(0.12)
         scale: root.visible ? 1.0 : 0.88
         opacity: root.visible ? 1.0 : 0.0
 
@@ -63,25 +63,15 @@ Rectangle {
             NumberAnimation { duration: 180; easing.type: Easing.OutQuad }
         }
 
-        Rectangle {
-            id: innerCore
-            anchors.centerIn: parent
-            width: outerShell.width - units.gu(1.4)
-            height: outerShell.height - units.gu(1.4)
-            radius: units.gu(1.6)
-            color: root.theme ? root.theme.cardInner : "#0D0E0F"
-            border.color: root.theme ? root.theme.cardBorder : "#222428"
-            border.width: units.gu(0.1)
-
-            Flickable {
-                id: modalFlickable
-                anchors.fill: parent
-                anchors.margins: units.gu(0.8)
-                contentWidth: width
-                contentHeight: modalContent.height
-                clip: true
-                boundsBehavior: Flickable.DragAndOvershootBounds
-                flickableDirection: Flickable.VerticalFlick
+        Flickable {
+            id: modalFlickable
+            anchors.fill: parent
+            anchors.margins: units.gu(1.2)
+            contentWidth: width
+            contentHeight: modalContent.height
+            clip: true
+            boundsBehavior: Flickable.DragAndOvershootBounds
+            flickableDirection: Flickable.VerticalFlick
 
                 Column {
                     id: modalContent
@@ -749,15 +739,15 @@ Rectangle {
             Rectangle {
                 id: scrollIndicator
                 anchors.right: parent.right
-                anchors.rightMargin: units.gu(0.2)
+                anchors.rightMargin: units.gu(0.4)
                 width: units.gu(0.3)
-                height: Math.max(units.gu(2.0), (modalFlickable.height / Math.max(1, modalFlickable.contentHeight)) * (modalFlickable.height - units.gu(1.6)))
+                height: Math.max(units.gu(2.0), (modalFlickable.height / Math.max(1, modalFlickable.contentHeight)) * (modalFlickable.height - units.gu(2.0)))
                 radius: width / 2
                 color: root.theme ? root.theme.accent : "#D99B26"
                 visible: modalFlickable.contentHeight > modalFlickable.height
                 opacity: modalFlickable.moving ? 0.75 : 0.25
-                y: units.gu(0.8) + (modalFlickable.contentHeight > modalFlickable.height
-                   ? Math.max(0.0, Math.min(1.0, modalFlickable.contentY / (modalFlickable.contentHeight - modalFlickable.height))) * (modalFlickable.height - units.gu(1.6) - height)
+                y: units.gu(1.0) + (modalFlickable.contentHeight > modalFlickable.height
+                   ? Math.max(0.0, Math.min(1.0, modalFlickable.contentY / (modalFlickable.contentHeight - modalFlickable.height))) * (modalFlickable.height - units.gu(2.0) - height)
                    : 0)
 
                 Behavior on opacity {
@@ -766,4 +756,3 @@ Rectangle {
             }
         }
     }
-}

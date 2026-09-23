@@ -20,58 +20,47 @@ Item {
     Rectangle {
         id: outerShell
         anchors.centerIn: parent
-        width: innerCore.width + units.gu(1.2)
-        height: innerCore.height + units.gu(1.2)
-        radius: units.gu(2.4)
-        color: root.isCheckpoint ? "#2E2308" : (root.theme ? root.theme.accentBg : "#261E10")
+        width: contentCol.width + units.gu(4.4)
+        height: contentCol.height + units.gu(2.6)
+        radius: units.gu(1.8)
+        color: root.isCheckpoint ? "#2E2308" : (root.theme ? root.theme.cardInner : "#0D0E0F")
         border.color: root.isCheckpoint ? "#FFD700" : (root.isZoneTransition ? "#84B6D8" : (root.theme ? root.theme.accent : "#D99B26"))
-        border.width: units.gu(0.15)
+        border.width: units.gu(0.12)
         scale: Math.min(1.0, 0.85 + 0.15 * root.bannerOpacity)
 
-        Rectangle {
-            id: innerCore
+        Column {
+            id: contentCol
             anchors.centerIn: parent
-            width: contentCol.width + units.gu(3.6)
-            height: contentCol.height + units.gu(2.0)
-            radius: units.gu(1.8)
-            color: root.theme ? root.theme.cardInner : "#0D0E0F"
-            border.color: root.theme ? root.theme.cardBorder : "#2A2C30"
-            border.width: units.gu(0.08)
+            spacing: units.gu(0.3)
 
-            Column {
-                id: contentCol
-                anchors.centerIn: parent
-                spacing: units.gu(0.3)
-
-                Rectangle {
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    width: stageTag.width + units.gu(1.6)
-                    height: units.gu(1.8)
-                    radius: units.gu(0.9)
-                    color: root.isCheckpoint ? "#332608" : (root.isZoneTransition ? "#1A2228" : (root.theme ? root.theme.accentBg : "#261E10"))
-                    border.color: root.isCheckpoint ? "#FFD700" : (root.isZoneTransition ? "#84B6D8" : (root.theme ? root.theme.accentBorder : "#544020"))
-                    border.width: units.gu(0.08)
-
-                    Label {
-                        id: stageTag
-                        anchors.centerIn: parent
-                        text: root.isZoneTransition
-                              ? i18n.tr("NEW ZONE REACHED")
-                              : (root.isCheckpoint ? i18n.tr("CHECKPOINT UNLOCKED") : i18n.tr("STAGE COMPLETED"))
-                        font.pixelSize: units.gu(1.0)
-                        font.weight: Font.Bold
-                        color: root.isCheckpoint ? "#FFD700" : (root.isZoneTransition ? "#84B6D8" : (root.theme ? root.theme.accent : "#D99B26"))
-                    }
-                }
+            Rectangle {
+                anchors.horizontalCenter: parent.horizontalCenter
+                width: stageTag.width + units.gu(1.6)
+                height: units.gu(1.8)
+                radius: units.gu(0.9)
+                color: root.isCheckpoint ? "#332608" : (root.isZoneTransition ? "#1A2228" : (root.theme ? root.theme.accentBg : "#261E10"))
+                border.color: root.isCheckpoint ? "#FFD700" : (root.isZoneTransition ? "#84B6D8" : (root.theme ? root.theme.accentBorder : "#544020"))
+                border.width: units.gu(0.08)
 
                 Label {
-                    id: bannerLabel
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    text: root.text
-                    font.pixelSize: units.gu(2.2)
-                    font.weight: Font.Black
-                    color: "#F5F3EF"
+                    id: stageTag
+                    anchors.centerIn: parent
+                    text: root.isZoneTransition
+                          ? i18n.tr("NEW ZONE REACHED")
+                          : (root.isCheckpoint ? i18n.tr("CHECKPOINT UNLOCKED") : i18n.tr("STAGE COMPLETED"))
+                    font.pixelSize: units.gu(1.0)
+                    font.weight: Font.Bold
+                    color: root.isCheckpoint ? "#FFD700" : (root.isZoneTransition ? "#84B6D8" : (root.theme ? root.theme.accent : "#D99B26"))
                 }
+            }
+
+            Label {
+                id: bannerLabel
+                anchors.horizontalCenter: parent.horizontalCenter
+                text: root.text
+                font.pixelSize: units.gu(2.2)
+                font.weight: Font.Black
+                color: "#F5F3EF"
             }
         }
     }

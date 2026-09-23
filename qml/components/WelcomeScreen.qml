@@ -35,11 +35,11 @@ Rectangle {
         id: outerShell
         anchors.centerIn: parent
         width: Math.min(parent.width - units.gu(4.0), units.gu(36))
-        height: innerCore.height + units.gu(2.0)
+        height: (root.showingHowToPlay ? howToPlayContent.height : menuContent.height) + units.gu(4.4)
         radius: units.gu(2.0)
-        color: root.theme ? root.theme.cardOuter : "#141517"
+        color: root.theme ? root.theme.cardInner : "#0D0E0F"
         border.color: root.theme ? root.theme.cardBorder : "#2A2C30"
-        border.width: units.gu(0.15)
+        border.width: units.gu(0.12)
         scale: root.visible ? 1.0 : 0.88
         opacity: root.visible ? 1.0 : 0.0
 
@@ -49,28 +49,17 @@ Rectangle {
         Behavior on opacity {
             NumberAnimation { duration: 180; easing.type: Easing.OutQuad }
         }
+        Behavior on height {
+            NumberAnimation { duration: 180; easing.type: Easing.OutQuad }
+        }
 
-        Rectangle {
-            id: innerCore
+        // Main Menu View
+        Column {
+            id: menuContent
             anchors.centerIn: parent
-            width: outerShell.width - units.gu(1.6)
-            height: root.showingHowToPlay ? (howToPlayContent.height + units.gu(3.6)) : (menuContent.height + units.gu(3.6))
-            radius: units.gu(1.6)
-            color: root.theme ? root.theme.cardInner : "#0D0E0F"
-            border.color: root.theme ? root.theme.cardBorder : "#222428"
-            border.width: units.gu(0.1)
-
-            Behavior on height {
-                NumberAnimation { duration: 180; easing.type: Easing.OutQuad }
-            }
-
-            // Main Menu View
-            Column {
-                id: menuContent
-                anchors.centerIn: parent
-                width: parent.width - units.gu(4.0)
-                spacing: units.gu(1.3)
-                visible: !root.showingHowToPlay
+            width: parent.width - units.gu(4.0)
+            spacing: units.gu(1.3)
+            visible: !root.showingHowToPlay
 
                 // Mechanical Subtitle Badge
                 Rectangle {
@@ -725,4 +714,3 @@ Rectangle {
             }
         }
     }
-}
