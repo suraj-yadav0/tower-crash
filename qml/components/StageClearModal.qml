@@ -10,10 +10,13 @@ Rectangle {
     property int streak: 0
     property bool isCheckpoint: false
     property int nextCheckpoint: 1
+    property int checkpointLevel: 1
     property bool isGrandVictory: false
     property var theme: null
 
     signal continueRequested()
+    signal restartRequested()
+    signal restartStageOneRequested()
     signal mainMenuRequested()
 
     anchors.fill: parent
@@ -60,7 +63,7 @@ Rectangle {
                 id: modalContent
                 anchors.centerIn: parent
                 width: parent.width - units.gu(4.0)
-                spacing: units.gu(1.3)
+                spacing: units.gu(1.1)
 
                 Rectangle {
                     anchors.horizontalCenter: parent.horizontalCenter
@@ -300,6 +303,71 @@ Rectangle {
                         id: continueMouse
                         anchors.fill: parent
                         onClicked: root.continueRequested()
+                    }
+                }
+
+                // Secondary Action: Restart Stage
+                Rectangle {
+                    id: restartBtn
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    width: parent.width
+                    height: units.gu(4.4)
+                    radius: units.gu(2.2)
+                    color: restartMouse.pressed ? "#1E2024" : (root.theme ? root.theme.cardOuter : "#141517")
+                    border.color: root.theme ? root.theme.cardBorder : "#2A2C30"
+                    border.width: units.gu(0.12)
+                    scale: restartMouse.pressed ? 0.95 : 1.0
+
+                    Behavior on scale {
+                        NumberAnimation { duration: 120; easing.type: Easing.OutQuad }
+                    }
+
+                    Label {
+                        anchors.centerIn: parent
+                        text: (root.checkpointLevel > 1)
+                              ? i18n.tr("Restart Stage (Stage %1)").arg(root.checkpointLevel)
+                              : i18n.tr("Restart Stage")
+                        font.pixelSize: units.gu(1.45)
+                        font.weight: Font.DemiBold
+                        color: "#D6D5D2"
+                    }
+
+                    MouseArea {
+                        id: restartMouse
+                        anchors.fill: parent
+                        onClicked: root.restartRequested()
+                    }
+                }
+
+                // Tertiary Action: Restart from Stage 1 (if checkpointLevel > 1)
+                Rectangle {
+                    id: restartBeginningBtn
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    width: parent.width
+                    height: units.gu(4.4)
+                    radius: units.gu(2.2)
+                    visible: root.checkpointLevel > 1
+                    color: restartBeginMouse.pressed ? "#1E2024" : (root.theme ? root.theme.cardOuter : "#141517")
+                    border.color: root.theme ? root.theme.cardBorder : "#2A2C30"
+                    border.width: units.gu(0.12)
+                    scale: restartBeginMouse.pressed ? 0.95 : 1.0
+
+                    Behavior on scale {
+                        NumberAnimation { duration: 120; easing.type: Easing.OutQuad }
+                    }
+
+                    Label {
+                        anchors.centerIn: parent
+                        text: i18n.tr("Restart from Stage 1")
+                        font.pixelSize: units.gu(1.45)
+                        font.weight: Font.DemiBold
+                        color: "#848890"
+                    }
+
+                    MouseArea {
+                        id: restartBeginMouse
+                        anchors.fill: parent
+                        onClicked: root.restartStageOneRequested()
                     }
                 }
 

@@ -1261,7 +1261,7 @@ MainView {
                         bonusPoints: gameContainer.stageClearBonus
                         streak: gameContainer.stageClearStreak
                         isCheckpoint: gameContainer.stageClearIsCheckpoint
-                        nextCheckpoint: gameContainer.stageClearNextCheckpoint
+                        checkpointLevel: gameContainer.getNearestCheckpoint(gameContainer.stageClearStage)
                         isGrandVictory: gameContainer.stageClearIsGrand
                         theme: gameContainer.currentTheme
                         onContinueRequested: {
@@ -1270,6 +1270,18 @@ MainView {
                             } else {
                                 gameContainer.continueDescent();
                             }
+                        }
+                        onRestartRequested: {
+                            soundManager.buttonHaptic();
+                            gameContainer.isStageClearOpen = false;
+                            gameContainer.startFromCheckpoint(gameContainer.getNearestCheckpoint(gameContainer.stageClearStage));
+                            soundManager.play("bounce");
+                        }
+                        onRestartStageOneRequested: {
+                            soundManager.buttonHaptic();
+                            gameContainer.isStageClearOpen = false;
+                            gameContainer.startFromCheckpoint(1);
+                            soundManager.play("bounce");
                         }
                         onMainMenuRequested: {
                             soundManager.buttonHaptic();
