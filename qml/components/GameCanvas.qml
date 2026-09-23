@@ -389,7 +389,7 @@ Canvas {
 
                 var isFragile1 = (seg1Type === 3);
                 var r1Level = Math.floor(ring1.index / (game ? game.levelRings : 20)) + 1;
-                var r1Theme = (r1Level === (game ? game.currentLevel : 1)) ? theme : Themes.getTheme(game ? game.themeMode : 0, r1Level);
+                var r1Theme = (r1Level === (game ? game.currentLevel : 1)) ? theme : Themes.getTheme(game ? game.themeMode : 1, r1Level);
                 var topColor1 = ring1.isGoal ? (ring1.isGrandGoal ? "#FFF275" : (r1Theme.goalTop || "#E8C872")) : ((seg1Type === 0 || isFragile1) ? r1Theme.topSafe : r1Theme.topHazard);
                 var sideColor1 = ring1.isGoal ? (ring1.isGrandGoal ? "#D4AF37" : (r1Theme.goalSide || "#B09242")) : ((seg1Type === 0 || isFragile1) ? r1Theme.sideSafe : r1Theme.sideHazard);
 
@@ -453,7 +453,7 @@ Canvas {
 
                 var isFragile2 = (seg2Type === 3);
                 var r2Level = Math.floor(ring2.index / (game ? game.levelRings : 20)) + 1;
-                var r2Theme = (r2Level === (game ? game.currentLevel : 1)) ? theme : Themes.getTheme(game ? game.themeMode : 0, r2Level);
+                var r2Theme = (r2Level === (game ? game.currentLevel : 1)) ? theme : Themes.getTheme(game ? game.themeMode : 1, r2Level);
                 var topColor2 = ring2.isGoal ? (ring2.isGrandGoal ? "#FFF275" : (r2Theme.goalTop || "#E8C872")) : ((seg2Type === 0 || isFragile2) ? r2Theme.topSafe : r2Theme.topHazard);
                 var sideColor2 = ring2.isGoal ? (ring2.isGrandGoal ? "#D4AF37" : (r2Theme.goalSide || "#B09242")) : ((seg2Type === 0 || isFragile2) ? r2Theme.sideSafe : r2Theme.sideHazard);
 
