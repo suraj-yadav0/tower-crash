@@ -215,7 +215,25 @@ Canvas {
             ctx.stroke();
         }
 
-        function drawTopFace(ringScreenY, startAngle, endAngle, topColor) {
+        function getSegmentSlices(a1, a2) {
+            var m = Math.floor(a1 / Math.PI) + 1;
+            var root = m * Math.PI;
+            if (root > a1 + 0.0001 && root < a2 - 0.0001) {
+                var s1Mid = (a1 + root) * 0.5;
+                var s2Mid = (root + a2) * 0.5;
+                return [
+                    { start: a1, end: root, isFront: Math.sin(s1Mid) > 0, strokeStart: true, strokeEnd: false },
+                    { start: root, end: a2, isFront: Math.sin(s2Mid) > 0, strokeStart: false, strokeEnd: true }
+                ];
+            } else {
+                var mid = (a1 + a2) * 0.5;
+                return [
+                    { start: a1, end: a2, isFront: Math.sin(mid) > 0, strokeStart: true, strokeEnd: true }
+                ];
+            }
+        }
+
+        function drawTopFace(ringScreenY, startAngle, endAngle, topColor, strokeStartRadial, strokeEndRadial) {
             ctx.save();
             ctx.translate(centerX, ringScreenY);
             ctx.scale(1.0, tilt);
@@ -249,11 +267,33 @@ Canvas {
 
             ctx.beginPath();
             ctx.arc(0, 0, outR, startAngle, endAngle, false);
-            ctx.arc(0, 0, inR, endAngle, startAngle, true);
-            ctx.closePath();
             ctx.strokeStyle = "rgba(10, 15, 20, 0.40)";
             ctx.lineWidth = units.gu(0.08);
             ctx.stroke();
+
+            ctx.beginPath();
+            ctx.arc(0, 0, inR, endAngle, startAngle, true);
+            ctx.strokeStyle = "rgba(10, 15, 20, 0.40)";
+            ctx.lineWidth = units.gu(0.08);
+            ctx.stroke();
+
+            if (strokeStartRadial !== false) {
+                ctx.beginPath();
+                ctx.moveTo(inR * Math.cos(startAngle), inR * Math.sin(startAngle));
+                ctx.lineTo(outR * Math.cos(startAngle), outR * Math.sin(startAngle));
+                ctx.strokeStyle = "rgba(10, 15, 20, 0.40)";
+                ctx.lineWidth = units.gu(0.08);
+                ctx.stroke();
+            }
+
+            if (strokeEndRadial !== false) {
+                ctx.beginPath();
+                ctx.moveTo(inR * Math.cos(endAngle), inR * Math.sin(endAngle));
+                ctx.lineTo(outR * Math.cos(endAngle), outR * Math.sin(endAngle));
+                ctx.strokeStyle = "rgba(10, 15, 20, 0.40)";
+                ctx.lineWidth = units.gu(0.08);
+                ctx.stroke();
+            }
 
             ctx.restore();
         }
@@ -396,7 +436,12 @@ Canvas {
                 var startAngle1 = game.towerAngle + ring1Offset + seg1 * (Math.PI / 4.0);
                 var endAngle1 = startAngle1 + (Math.PI / 4.0);
 
-                drawTopFace(r1ScreenY, startAngle1, endAngle1, topColor1);
+                var slices1 = getSegmentSlices(startAngle1, endAngle1);
+                for (var sl1 = 0; sl1 < slices1.length; sl1++) {
+                    if (!slices1[sl1].isFront) {
+                        drawTopFace(r1ScreenY, slices1[sl1].start, slices1[sl1].end, topColor1, slices1[sl1].strokeStart, slices1[sl1].strokeEnd);
+                    }
+                }
 
                 var prevSeg1 = ring1.segments[(seg1 + 7) % 8];
                 var nextSeg1 = ring1.segments[(seg1 + 1) % 8];
@@ -468,14 +513,19 @@ Canvas {
                     var prevSeg2 = ring2.segments[(seg2 + 7) % 8];
                     var nextSeg2 = ring2.segments[(seg2 + 1) % 8];
 
-                    if (prevSeg2 === 1 && Math.cos(startAngle2) < 0.02 && Math.sin(startAngle2) >= -0.05) {
+                    if (prevSeg2 === 1 && Math.cos(startAngle2) < 0.02 && Math.sin(startAngle2) >= 0) {
                         drawRadialCutWall(r2ScreenY, startAngle2, true, sideColor2);
                     }
-                    if (nextSeg2 === 1 && Math.cos(endAngle2) > -0.02 && Math.sin(endAngle2) >= -0.05) {
+                    if (nextSeg2 === 1 && Math.cos(endAngle2) > -0.02 && Math.sin(endAngle2) >= 0) {
                         drawRadialCutWall(r2ScreenY, endAngle2, false, sideColor2);
                     }
 
-                    drawTopFace(r2ScreenY, startAngle2, endAngle2, topColor2);
+                    var slices2 = getSegmentSlices(startAngle2, endAngle2);
+                    for (var sl2 = 0; sl2 < slices2.length; sl2++) {
+                        if (slices2[sl2].isFront) {
+                            drawTopFace(r2ScreenY, slices2[sl2].start, slices2[sl2].end, topColor2, slices2[sl2].strokeStart, slices2[sl2].strokeEnd);
+                        }
+                    }
 
                     var midAngle2 = (startAngle2 + endAngle2) * 0.5;
                     if ((ring2.rotationSpeed !== 0 || ring2.isOscillating) && Math.sin(midAngle2) > 0.15) {
