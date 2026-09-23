@@ -124,9 +124,6 @@ MainView {
             property int stageClearNextCheckpoint: 1
             property bool stageClearIsGrand: false
 
-            onIsPausedChanged: {
-                if (isPaused) soundManager.stopWhoosh();
-            }
             onGameOverChanged: {
                 if (gameOver) soundManager.stopWhoosh();
             }
@@ -546,6 +543,7 @@ MainView {
                 if (!isPaused) {
                     lastPhysicsTime = 0.0;
                 } else {
+                    soundManager.stopWhoosh();
                     if (activePlayTimeAccumulator > 0.0) {
                         Storage.recordPlayTime(activePlayTimeAccumulator);
                         activePlayTimeAccumulator = 0.0;
