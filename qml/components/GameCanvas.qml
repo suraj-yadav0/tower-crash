@@ -72,10 +72,12 @@ Canvas {
                 var segType = ring.segments[seg];
                 if (segType === 1) continue;
 
-                var topColor = ring.isGoal ? (ring.isGrandGoal ? "#FFF275" : (theme.goalTop || "#E8C872")) : ((segType === 0) ? theme.topSafe : theme.topHazard);
-                var sideColor = ring.isGoal ? (ring.isGrandGoal ? "#D4AF37" : (theme.goalSide || "#B09242")) : ((segType === 0) ? theme.sideSafe : theme.sideHazard);
+                var isFragile = (segType === 3);
+                var topColor = ring.isGoal ? (ring.isGrandGoal ? "#FFF275" : (theme.goalTop || "#E8C872")) : ((segType === 0 || isFragile) ? theme.topSafe : theme.topHazard);
+                var sideColor = ring.isGoal ? (ring.isGrandGoal ? "#D4AF37" : (theme.goalSide || "#B09242")) : ((segType === 0 || isFragile) ? theme.sideSafe : theme.sideHazard);
 
-                var startAngle = game.towerAngle + seg * (Math.PI / 4.0);
+                var ringOffset = ring.angleOffset || 0.0;
+                var startAngle = game.towerAngle + ringOffset + seg * (Math.PI / 4.0);
                 var endAngle = startAngle + (Math.PI / 4.0);
 
                 // Extrude front 3D rim

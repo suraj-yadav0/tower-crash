@@ -140,6 +140,12 @@ function createRing(index, ringSpacing, prevRing) {
             segments[gSlot] = 1;
         }
 
+        // Zone 3+ Dual-Opening mechanic: occasional second opening on opposite side
+        if (level >= 21 && !isGoal && Math.random() < 0.25) {
+            var oppSlot = (newGapStart + 4) % 8;
+            segments[oppSlot] = 1;
+        }
+
         // Determine candidate hazard slots.
         // In early levels (Level 1 & 2), the slot directly beneath the previous
         // ring's gap is strictly protected (prevents blind drop deaths).
@@ -209,6 +215,32 @@ function createRing(index, ringSpacing, prevRing) {
                 segments[hazardCandidates[hz]] = 2;
             }
         }
+
+        // Zone 5+ Fragile Safe segments (type 3): break upon first bounce
+        if (level >= 41 && !isGoal && Math.random() < 0.30) {
+            for (var fs = 0; fs < 8; fs++) {
+                if (segments[fs] === 0) {
+                    segments[fs] = 3;
+                    break;
+                }
+            }
+        }
+
+        // Zone 4+ Rotating rings mechanic
+        var rotationSpeed = 0.0;
+        if (level >= 31 && !isGoal && posInLevel > 1 && Math.random() < 0.22) {
+            rotationSpeed = (Math.random() < 0.5 ? 1 : -1) * (0.45 + Math.random() * 0.4);
+        }
+
+        // Zone 7+ Moving / Oscillating gap mechanic
+        var isOscillating = false;
+        var oscSpeed = 0.0;
+        var oscAmplitude = 0.0;
+        if (level >= 61 && !isGoal && rotationSpeed === 0 && Math.random() < 0.25) {
+            isOscillating = true;
+            oscSpeed = 1.4 + Math.random() * 0.8;
+            oscAmplitude = 0.35;
+        }
     }
 
     return {
@@ -220,6 +252,12 @@ function createRing(index, ringSpacing, prevRing) {
         isGoal: isGoal,
         isGrandGoal: isGrandGoal,
         goalAwarded: false,
+        rotationSpeed: rotationSpeed || 0.0,
+        angleOffset: 0.0,
+        isOscillating: isOscillating || false,
+        oscSpeed: oscSpeed || 0.0,
+        oscAmplitude: oscAmplitude || 0.0,
+        oscTime: 0.0,
         recoil: 0.0,
         recoilVelocity: 0.0,
         shockwaves: [],

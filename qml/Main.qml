@@ -440,7 +440,8 @@ MainView {
                             if (ring.broken) continue;
 
                             if (prevY <= ring.y && nextY >= ring.y) {
-                                var relAngle = ((Math.PI / 2.0 - gameContainer.towerAngle) % (2.0 * Math.PI));
+                                var effectiveAngle = gameContainer.towerAngle + (ring.angleOffset || 0.0);
+                                var relAngle = ((Math.PI / 2.0 - effectiveAngle) % (2.0 * Math.PI));
                                 if (relAngle < 0) {
                                     relAngle += 2.0 * Math.PI;
                                 }
@@ -523,7 +524,7 @@ MainView {
                                     break;
                                 }
 
-                                if (segType === 0) {
+                                if (segType === 0 || segType === 3) {
                                     gameContainer.ballY = ring.y;
                                     gameContainer.ballVy = -gameContainer.bounceSpeed * speedScale;
                                     gameContainer.streak = 0;
@@ -532,7 +533,13 @@ MainView {
                                     gameContainer.squashVelocity = (1.0 - gameContainer.squash) * 36.0;
                                     nextY = ring.y;
 
-                                    soundManager.play("bounce");
+                                    if (segType === 3) {
+                                        ring.segments[segmentIdx] = 1;
+                                        gameContainer.spawnParticles(0, ring.y, 16, gameContainer.currentTheme.topSafe, 1.4);
+                                        soundManager.play("smash");
+                                    } else {
+                                        soundManager.play("bounce");
+                                    }
                                     soundManager.haptic(false);
 
                                     ring.recoil = units.gu(0.42);
@@ -638,6 +645,13 @@ MainView {
                     for (var rIdx = 0; rIdx < gameContainer.rings.length; rIdx++) {
                         var rObj = gameContainer.rings[rIdx];
                         if (rObj.broken) continue;
+
+                        if (rObj.rotationSpeed && rObj.rotationSpeed !== 0) {
+                            rObj.angleOffset += rObj.rotationSpeed * dt;
+                        } else if (rObj.isOscillating) {
+                            rObj.oscTime += dt * rObj.oscSpeed;
+                            rObj.angleOffset = Math.sin(rObj.oscTime) * rObj.oscAmplitude;
+                        }
 
                         if (rObj.recoil !== 0 || rObj.recoilVelocity !== 0) {
                             var rSpringK = 520.0;
