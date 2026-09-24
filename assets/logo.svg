@@ -1,44 +1,186 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
   <defs>
-    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#1e272e"/>
-      <stop offset="100%" stop-color="#0f1418"/>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#181613"/>
+      <stop offset="60%" stop-color="#110F0C"/>
+      <stop offset="100%" stop-color="#0A0907"/>
+    </linearGradient>
+    <radialGradient id="vignette" cx="50%" cy="38%" r="65%">
+      <stop offset="0%" stop-color="#242018" stop-opacity="0.5"/>
+      <stop offset="70%" stop-color="#100E0B" stop-opacity="0.1"/>
+      <stop offset="100%" stop-color="#050403" stop-opacity="0.95"/>
+    </radialGradient>
+    <linearGradient id="squircleBorder" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.14"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0.02"/>
     </linearGradient>
     <linearGradient id="poleGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="#2f3640"/>
-      <stop offset="50%" stop-color="#718093"/>
-      <stop offset="100%" stop-color="#1e272e"/>
+      <stop offset="0%" stop-color="#24211A"/>
+      <stop offset="25%" stop-color="#3F392D"/>
+      <stop offset="52%" stop-color="#5E5544"/>
+      <stop offset="78%" stop-color="#353026"/>
+      <stop offset="100%" stop-color="#1E1B15"/>
     </linearGradient>
-    <linearGradient id="ringSafe" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" stop-color="#00d2d3"/>
-      <stop offset="100%" stop-color="#01a3a4"/>
+    <linearGradient id="poleCap" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#5E5544"/>
+      <stop offset="100%" stop-color="#24211A"/>
     </linearGradient>
-    <linearGradient id="ringDeadly" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" stop-color="#ff6b6b"/>
-      <stop offset="100%" stop-color="#ee5253"/>
+    <linearGradient id="safeTop" x1="0%" y1="0%" x2="100%" y2="80%">
+      <stop offset="0%" stop-color="#FCD34D"/>
+      <stop offset="40%" stop-color="#F59E0B"/>
+      <stop offset="100%" stop-color="#D97706"/>
     </linearGradient>
-    <radialGradient id="ballGrad" cx="35%" cy="35%" r="65%">
-      <stop offset="0%" stop-color="#ffeaa7"/>
-      <stop offset="60%" stop-color="#fdcb6e"/>
-      <stop offset="100%" stop-color="#e17055"/>
+    <linearGradient id="safeSkirt" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#A16207"/>
+      <stop offset="100%" stop-color="#6B3F02"/>
+    </linearGradient>
+    <linearGradient id="safeCutRight" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#D97706"/>
+      <stop offset="100%" stop-color="#92400E"/>
+    </linearGradient>
+    <linearGradient id="safeCutLeft" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#92400E"/>
+      <stop offset="100%" stop-color="#D97706"/>
+    </linearGradient>
+    <linearGradient id="hazardTop" x1="0%" y1="0%" x2="100%" y2="80%">
+      <stop offset="0%" stop-color="#A78BFA"/>
+      <stop offset="50%" stop-color="#8B5CF6"/>
+      <stop offset="100%" stop-color="#7C3AED"/>
+    </linearGradient>
+    <linearGradient id="hazardSkirt" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#6D28D9"/>
+      <stop offset="100%" stop-color="#4C1D95"/>
+    </linearGradient>
+    <linearGradient id="hazardCut" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#7C3AED"/>
+      <stop offset="100%" stop-color="#581C87"/>
+    </linearGradient>
+    <radialGradient id="ballLit" cx="35%" cy="30%" r="70%">
+      <stop offset="0%" stop-color="#FFFBEB"/>
+      <stop offset="25%" stop-color="#FEF08A"/>
+      <stop offset="60%" stop-color="#FACC15"/>
+      <stop offset="85%" stop-color="#D97706"/>
+      <stop offset="100%" stop-color="#92400E"/>
     </radialGradient>
   </defs>
 
-  <rect width="256" height="256" rx="48" fill="url(#bgGrad)"/>
+  <!-- Canvas -->
+  <rect x="8" y="8" width="496" height="496" rx="112" fill="url(#bgGrad)"/>
+  <rect x="8" y="8" width="496" height="496" rx="112" fill="url(#vignette)"/>
+  <rect x="8" y="8" width="496" height="496" rx="112" fill="none" stroke="url(#squircleBorder)" stroke-width="2.5"/>
 
-  <!-- Central Column -->
-  <rect x="114" y="24" width="28" height="208" rx="8" fill="url(#poleGrad)"/>
+  <!-- TIER 3 (BOTTOM) - BACK -->
+  <path d="M 417.68 392.23 A 175.00 59.50 0 0 1 417.68 437.77 L 298.50 420.99 A 46.00 15.64 0 0 0 298.50 409.01 Z" fill="url(#safeTop)"/>
+  <line x1="298.50" y1="409.01" x2="417.68" y2="392.23" stroke="#000000" stroke-opacity="0.35" stroke-width="1.2"/>
+  <path d="M 94.32 437.77 A 175.00 59.50 0 0 1 94.32 392.23 L 213.50 409.01 A 46.00 15.64 0 0 0 213.50 420.99 Z" fill="url(#safeTop)"/>
+  <line x1="213.50" y1="420.99" x2="94.32" y2="437.77" stroke="#000000" stroke-opacity="0.35" stroke-width="1.2"/>
+  <path d="M 94.32 392.23 A 175.00 59.50 0 0 1 189.03 360.03 L 238.40 400.55 A 46.00 15.64 0 0 0 213.50 409.01 Z" fill="url(#safeTop)"/>
+  <line x1="213.50" y1="409.01" x2="94.32" y2="392.23" stroke="#000000" stroke-opacity="0.35" stroke-width="1.2"/>
+  <path d="M 322.97 360.03 A 175.00 59.50 0 0 1 417.68 392.23 L 298.50 409.01 A 46.00 15.64 0 0 0 273.60 400.55 Z" fill="url(#safeTop)"/>
+  <line x1="273.60" y1="400.55" x2="322.97" y2="360.03" stroke="#000000" stroke-opacity="0.35" stroke-width="1.2"/>
 
-  <!-- Upper Ring (Flattened ellipse) -->
-  <ellipse cx="128" cy="80" rx="72" ry="24" fill="none" stroke="url(#ringSafe)" stroke-width="18" stroke-dasharray="280 80"/>
+  <!-- TIER 2 (MIDDLE) - BACK -->
+  <path d="M 417.68 247.23 A 175.00 59.50 0 0 1 417.68 292.77 L 298.50 275.99 A 46.00 15.64 0 0 0 298.50 264.01 Z" fill="url(#safeTop)"/>
+  <line x1="298.50" y1="264.01" x2="417.68" y2="247.23" stroke="#000000" stroke-opacity="0.35" stroke-width="1.2"/>
+  <path d="M 94.32 292.77 A 175.00 59.50 0 0 1 94.32 247.23 L 213.50 264.01 A 46.00 15.64 0 0 0 213.50 275.99 Z" fill="url(#safeTop)"/>
+  <line x1="213.50" y1="275.99" x2="94.32" y2="292.77" stroke="#000000" stroke-opacity="0.35" stroke-width="1.2"/>
+  <path d="M 94.32 247.23 A 175.00 59.50 0 0 1 189.03 215.03 L 238.40 255.55 A 46.00 15.64 0 0 0 213.50 264.01 Z" fill="url(#safeTop)"/>
+  <line x1="213.50" y1="264.01" x2="94.32" y2="247.23" stroke="#000000" stroke-opacity="0.35" stroke-width="1.2"/>
+  <path d="M 189.03 215.03 A 175.00 59.50 0 0 1 322.97 215.03 L 273.60 255.55 A 46.00 15.64 0 0 0 238.40 255.55 Z" fill="url(#safeTop)"/>
+  <line x1="238.40" y1="255.55" x2="189.03" y2="215.03" stroke="#000000" stroke-opacity="0.35" stroke-width="1.2"/>
+  <path d="M 322.97 215.03 A 175.00 59.50 0 0 1 417.68 247.23 L 298.50 264.01 A 46.00 15.64 0 0 0 273.60 255.55 Z" fill="url(#safeTop)"/>
+  <line x1="273.60" y1="255.55" x2="322.97" y2="215.03" stroke="#000000" stroke-opacity="0.35" stroke-width="1.2"/>
 
-  <!-- Middle Ring -->
-  <ellipse cx="128" cy="140" rx="72" ry="24" fill="none" stroke="url(#ringDeadly)" stroke-width="18" stroke-dasharray="140 60 100 60"/>
+  <!-- TIER 1 (TOP) - BACK -->
+  <path d="M 417.68 102.23 A 175.00 59.50 0 0 1 417.68 147.77 L 298.50 130.99 A 46.00 15.64 0 0 0 298.50 119.01 Z" fill="url(#safeTop)"/>
+  <line x1="298.50" y1="119.01" x2="417.68" y2="102.23" stroke="#000000" stroke-opacity="0.35" stroke-width="1.2"/>
+  <path d="M 94.32 147.77 A 175.00 59.50 0 0 1 94.32 102.23 L 213.50 119.01 A 46.00 15.64 0 0 0 213.50 130.99 Z" fill="url(#safeTop)"/>
+  <line x1="213.50" y1="130.99" x2="94.32" y2="147.77" stroke="#000000" stroke-opacity="0.35" stroke-width="1.2"/>
+  <path d="M 94.32 102.23 A 175.00 59.50 0 0 1 189.03 70.03 L 238.40 110.55 A 46.00 15.64 0 0 0 213.50 119.01 Z" fill="url(#hazardTop)"/>
+  <line x1="213.50" y1="119.01" x2="94.32" y2="102.23" stroke="#000000" stroke-opacity="0.35" stroke-width="1.2"/>
+  <path d="M 189.03 70.03 A 175.00 59.50 0 0 1 322.97 70.03 L 273.60 110.55 A 46.00 15.64 0 0 0 238.40 110.55 Z" fill="url(#safeTop)"/>
+  <line x1="238.40" y1="110.55" x2="189.03" y2="70.03" stroke="#000000" stroke-opacity="0.35" stroke-width="1.2"/>
 
-  <!-- Lower Ring -->
-  <ellipse cx="128" cy="200" rx="72" ry="24" fill="none" stroke="url(#ringSafe)" stroke-width="18" stroke-dasharray="200 160"/>
+  <!-- CENTRAL PILLAR -->
+  <rect x="210.0" y="36" width="92.0" height="442" fill="url(#poleGrad)"/>
+  <ellipse cx="256.0" cy="36" rx="46.0" ry="15.64" fill="url(#poleCap)"/>
+  <ellipse cx="256.0" cy="148.0" rx="46.0" ry="15.64" fill="#000000" opacity="0.6"/>
+  <ellipse cx="256.0" cy="293.0" rx="46.0" ry="15.64" fill="#000000" opacity="0.6"/>
 
-  <!-- The Ball -->
-  <ellipse cx="128" cy="104" rx="14" ry="7" fill="rgba(0,0,0,0.3)"/>
-  <circle cx="128" cy="98" r="14" fill="url(#ballGrad)"/>
+  <!-- TIER 1 (TOP) - FRONT -->
+  <path d="M 431.00 145.00 A 175.00 59.50 0 0 1 417.68 167.77 L 417.68 177.77 A 175.00 59.50 0 0 0 431.00 155.00 Z" fill="#000000" opacity="0.45"/>
+  <path d="M 417.68 167.77 A 175.00 59.50 0 0 1 322.97 199.97 L 322.97 209.97 A 175.00 59.50 0 0 0 417.68 177.77 Z" fill="#000000" opacity="0.45"/>
+  <path d="M 322.97 199.97 A 175.00 59.50 0 0 1 189.03 199.97 L 189.03 209.97 A 175.00 59.50 0 0 0 322.97 209.97 Z" fill="#000000" opacity="0.45"/>
+  <path d="M 189.03 199.97 A 175.00 59.50 0 0 1 94.32 167.77 L 94.32 177.77 A 175.00 59.50 0 0 0 189.03 209.97 Z" fill="#000000" opacity="0.45"/>
+  <path d="M 94.32 167.77 A 175.00 59.50 0 0 1 81.00 145.00 L 81.00 155.00 A 175.00 59.50 0 0 0 94.32 177.77 Z" fill="#000000" opacity="0.45"/>
+  <path d="M 431.00 125.00 A 175.00 59.50 0 0 1 417.68 147.77 L 417.68 167.77 A 175.00 59.50 0 0 0 431.00 145.00 Z" fill="url(#safeSkirt)"/>
+  <path d="M 417.68 147.77 A 175.00 59.50 0 0 1 322.97 179.97 L 322.97 199.97 A 175.00 59.50 0 0 0 417.68 167.77 Z" fill="url(#safeSkirt)"/>
+  <path d="M 322.97 179.97 A 175.00 59.50 0 0 1 189.03 179.97 L 189.03 199.97 A 175.00 59.50 0 0 0 322.97 199.97 Z" fill="url(#safeSkirt)"/>
+  <path d="M 189.03 179.97 A 175.00 59.50 0 0 1 94.32 147.77 L 94.32 167.77 A 175.00 59.50 0 0 0 189.03 199.97 Z" fill="url(#safeSkirt)"/>
+  <path d="M 94.32 147.77 A 175.00 59.50 0 0 1 81.00 125.00 L 81.00 145.00 A 175.00 59.50 0 0 0 94.32 167.77 Z" fill="url(#safeSkirt)"/>
+  <path d="M 417.68 102.23 A 175.00 59.50 0 0 1 417.68 147.77 L 298.50 130.99 A 46.00 15.64 0 0 0 298.50 119.01 Z" fill="url(#safeTop)"/>
+  <line x1="298.50" y1="119.01" x2="417.68" y2="102.23" stroke="#000000" stroke-opacity="0.30" stroke-width="1.2"/>
+  <path d="M 417.68 147.77 A 175.00 59.50 0 0 1 322.97 179.97 L 273.60 139.45 A 46.00 15.64 0 0 0 298.50 130.99 Z" fill="url(#safeTop)"/>
+  <line x1="298.50" y1="130.99" x2="417.68" y2="147.77" stroke="#000000" stroke-opacity="0.30" stroke-width="1.2"/>
+  <path d="M 322.97 179.97 A 175.00 59.50 0 0 1 189.03 179.97 L 238.40 139.45 A 46.00 15.64 0 0 0 273.60 139.45 Z" fill="url(#safeTop)"/>
+  <line x1="273.60" y1="139.45" x2="322.97" y2="179.97" stroke="#000000" stroke-opacity="0.30" stroke-width="1.2"/>
+  <path d="M 189.03 179.97 A 175.00 59.50 0 0 1 94.32 147.77 L 213.50 130.99 A 46.00 15.64 0 0 0 238.40 139.45 Z" fill="url(#safeTop)"/>
+  <line x1="238.40" y1="139.45" x2="189.03" y2="179.97" stroke="#000000" stroke-opacity="0.30" stroke-width="1.2"/>
+  <path d="M 94.32 147.77 A 175.00 59.50 0 0 1 94.32 102.23 L 213.50 119.01 A 46.00 15.64 0 0 0 213.50 130.99 Z" fill="url(#safeTop)"/>
+  <line x1="213.50" y1="130.99" x2="94.32" y2="147.77" stroke="#000000" stroke-opacity="0.30" stroke-width="1.2"/>
+  <path d="M 210.00 125.00 A 46.00 15.64 0 0 0 302.00 125.00" fill="none" stroke="#000000" stroke-opacity="0.35" stroke-width="2.5"/>
+
+  <!-- TIER 3 (BOTTOM) - FRONT -->
+  <path d="M 431.00 435.00 A 175.00 59.50 0 0 1 417.68 457.77 L 417.68 467.77 A 175.00 59.50 0 0 0 431.00 445.00 Z" fill="#000000" opacity="0.45"/>
+  <path d="M 417.68 457.77 A 175.00 59.50 0 0 1 322.97 489.97 L 322.97 499.97 A 175.00 59.50 0 0 0 417.68 467.77 Z" fill="#000000" opacity="0.45"/>
+  <path d="M 322.97 489.97 A 175.00 59.50 0 0 1 189.03 489.97 L 189.03 499.97 A 175.00 59.50 0 0 0 322.97 499.97 Z" fill="#000000" opacity="0.45"/>
+  <path d="M 189.03 489.97 A 175.00 59.50 0 0 1 94.32 457.77 L 94.32 467.77 A 175.00 59.50 0 0 0 189.03 499.97 Z" fill="#000000" opacity="0.45"/>
+  <path d="M 94.32 457.77 A 175.00 59.50 0 0 1 81.00 435.00 L 81.00 445.00 A 175.00 59.50 0 0 0 94.32 467.77 Z" fill="#000000" opacity="0.45"/>
+  <path d="M 431.00 415.00 A 175.00 59.50 0 0 1 417.68 437.77 L 417.68 457.77 A 175.00 59.50 0 0 0 431.00 435.00 Z" fill="url(#safeSkirt)"/>
+  <path d="M 417.68 437.77 A 175.00 59.50 0 0 1 322.97 469.97 L 322.97 489.97 A 175.00 59.50 0 0 0 417.68 457.77 Z" fill="url(#safeSkirt)"/>
+  <path d="M 322.97 469.97 A 175.00 59.50 0 0 1 189.03 469.97 L 189.03 489.97 A 175.00 59.50 0 0 0 322.97 489.97 Z" fill="url(#safeSkirt)"/>
+  <path d="M 189.03 469.97 A 175.00 59.50 0 0 1 94.32 437.77 L 94.32 457.77 A 175.00 59.50 0 0 0 189.03 489.97 Z" fill="url(#hazardSkirt)"/>
+  <path d="M 94.32 437.77 A 175.00 59.50 0 0 1 81.00 415.00 L 81.00 435.00 A 175.00 59.50 0 0 0 94.32 457.77 Z" fill="url(#safeSkirt)"/>
+  <path d="M 417.68 392.23 A 175.00 59.50 0 0 1 417.68 437.77 L 298.50 420.99 A 46.00 15.64 0 0 0 298.50 409.01 Z" fill="url(#safeTop)"/>
+  <line x1="298.50" y1="409.01" x2="417.68" y2="392.23" stroke="#000000" stroke-opacity="0.30" stroke-width="1.2"/>
+  <path d="M 417.68 437.77 A 175.00 59.50 0 0 1 322.97 469.97 L 273.60 429.45 A 46.00 15.64 0 0 0 298.50 420.99 Z" fill="url(#safeTop)"/>
+  <line x1="298.50" y1="420.99" x2="417.68" y2="437.77" stroke="#000000" stroke-opacity="0.30" stroke-width="1.2"/>
+  <path d="M 322.97 469.97 A 175.00 59.50 0 0 1 189.03 469.97 L 238.40 429.45 A 46.00 15.64 0 0 0 273.60 429.45 Z" fill="url(#safeTop)"/>
+  <line x1="273.60" y1="429.45" x2="322.97" y2="469.97" stroke="#000000" stroke-opacity="0.30" stroke-width="1.2"/>
+  <path d="M 189.03 469.97 A 175.00 59.50 0 0 1 94.32 437.77 L 213.50 420.99 A 46.00 15.64 0 0 0 238.40 429.45 Z" fill="url(#hazardTop)"/>
+  <line x1="238.40" y1="429.45" x2="189.03" y2="469.97" stroke="#000000" stroke-opacity="0.30" stroke-width="1.2"/>
+  <path d="M 94.32 437.77 A 175.00 59.50 0 0 1 94.32 392.23 L 213.50 409.01 A 46.00 15.64 0 0 0 213.50 420.99 Z" fill="url(#safeTop)"/>
+  <line x1="213.50" y1="420.99" x2="94.32" y2="437.77" stroke="#000000" stroke-opacity="0.30" stroke-width="1.2"/>
+  <path d="M 210.00 415.00 A 46.00 15.64 0 0 0 302.00 415.00" fill="none" stroke="#000000" stroke-opacity="0.35" stroke-width="2.5"/>
+
+  <!-- TIER 2 (MIDDLE) - FRONT -->
+  <path d="M 431.00 290.00 A 175.00 59.50 0 0 1 417.68 312.77 L 417.68 322.77 A 175.00 59.50 0 0 0 431.00 300.00 Z" fill="#000000" opacity="0.45"/>
+  <path d="M 322.97 344.97 A 175.00 59.50 0 0 1 189.03 344.97 L 189.03 354.97 A 175.00 59.50 0 0 0 322.97 354.97 Z" fill="#000000" opacity="0.45"/>
+  <path d="M 189.03 344.97 A 175.00 59.50 0 0 1 94.32 312.77 L 94.32 322.77 A 175.00 59.50 0 0 0 189.03 354.97 Z" fill="#000000" opacity="0.45"/>
+  <path d="M 94.32 312.77 A 175.00 59.50 0 0 1 81.00 290.00 L 81.00 300.00 A 175.00 59.50 0 0 0 94.32 322.77 Z" fill="#000000" opacity="0.45"/>
+  <path d="M 431.00 270.00 A 175.00 59.50 0 0 1 417.68 292.77 L 417.68 312.77 A 175.00 59.50 0 0 0 431.00 290.00 Z" fill="url(#safeSkirt)"/>
+  <path d="M 322.97 324.97 A 175.00 59.50 0 0 1 189.03 324.97 L 189.03 344.97 A 175.00 59.50 0 0 0 322.97 344.97 Z" fill="url(#safeSkirt)"/>
+  <path d="M 189.03 324.97 A 175.00 59.50 0 0 1 94.32 292.77 L 94.32 312.77 A 175.00 59.50 0 0 0 189.03 344.97 Z" fill="url(#hazardSkirt)"/>
+  <path d="M 94.32 292.77 A 175.00 59.50 0 0 1 81.00 270.00 L 81.00 290.00 A 175.00 59.50 0 0 0 94.32 312.77 Z" fill="url(#safeSkirt)"/>
+  <path d="M 298.50 275.99 L 417.68 292.77 L 417.68 312.77 L 298.50 295.99 Z" fill="url(#safeCutRight)"/>
+  <path d="M 417.68 247.23 A 175.00 59.50 0 0 1 417.68 292.77 L 298.50 275.99 A 46.00 15.64 0 0 0 298.50 264.01 Z" fill="url(#safeTop)"/>
+  <line x1="298.50" y1="264.01" x2="417.68" y2="247.23" stroke="#000000" stroke-opacity="0.30" stroke-width="1.2"/>
+  <path d="M 322.97 324.97 A 175.00 59.50 0 0 1 189.03 324.97 L 238.40 284.45 A 46.00 15.64 0 0 0 273.60 284.45 Z" fill="url(#safeTop)"/>
+  <line x1="273.60" y1="284.45" x2="322.97" y2="324.97" stroke="#000000" stroke-opacity="0.30" stroke-width="1.2"/>
+  <path d="M 189.03 324.97 A 175.00 59.50 0 0 1 94.32 292.77 L 213.50 275.99 A 46.00 15.64 0 0 0 238.40 284.45 Z" fill="url(#hazardTop)"/>
+  <line x1="238.40" y1="284.45" x2="189.03" y2="324.97" stroke="#000000" stroke-opacity="0.30" stroke-width="1.2"/>
+  <path d="M 94.32 292.77 A 175.00 59.50 0 0 1 94.32 247.23 L 213.50 264.01 A 46.00 15.64 0 0 0 213.50 275.99 Z" fill="url(#safeTop)"/>
+  <line x1="213.50" y1="275.99" x2="94.32" y2="292.77" stroke="#000000" stroke-opacity="0.30" stroke-width="1.2"/>
+  <path d="M 210.00 270.00 A 46.00 15.64 0 0 0 302.00 270.00" fill="none" stroke="#000000" stroke-opacity="0.35" stroke-width="2.5"/>
+
+  <!-- THE BALL & BOUNCE PHYSICS -->
+  <ellipse cx="256.0" cy="307.6" rx="35.20" ry="11.97" fill="#3A2200" opacity="0.55"/>
+  <!-- Paint Bounce Mark -->
+  <ellipse cx="256.0" cy="307.6" rx="15" ry="5.10" fill="#CA8A04" opacity="0.7"/>
+  <ellipse cx="243.0" cy="305.6" rx="4" ry="1.36" fill="#CA8A04" opacity="0.6"/>
+  <ellipse cx="270.0" cy="309.6" rx="3.8" ry="1.29" fill="#CA8A04" opacity="0.6"/>
+  <ellipse cx="258.0" cy="312.6" rx="5.5" ry="1.87" fill="#CA8A04" opacity="0.6"/>
+
+  <circle cx="256.0" cy="267.0" r="32.0" fill="url(#ballLit)"/>
+  <circle cx="245.76" cy="255.80" r="6.40" fill="#FFFFFF" opacity="0.85"/>
 </svg>
