@@ -98,6 +98,34 @@ MainView {
             focus: true
 
             Rectangle {
+                id: gameBackground
+                anchors.fill: parent
+                z: 0
+                gradient: Gradient {
+                    GradientStop {
+                        position: 0.0
+                        color: {
+                            if (!gameContainer.currentTheme) return "#171612";
+                            if (gameContainer.previousTheme && gameContainer.themeTransitionProgress < 1.0) {
+                                return Themes.lerpColor(gameContainer.previousTheme.bgTop, gameContainer.currentTheme.bgTop, gameContainer.themeTransitionProgress);
+                            }
+                            return gameContainer.currentTheme.bgTop;
+                        }
+                    }
+                    GradientStop {
+                        position: 1.0
+                        color: {
+                            if (!gameContainer.currentTheme) return "#0C0B08";
+                            if (gameContainer.previousTheme && gameContainer.themeTransitionProgress < 1.0) {
+                                return Themes.lerpColor(gameContainer.previousTheme.bgBottom, gameContainer.currentTheme.bgBottom, gameContainer.themeTransitionProgress);
+                            }
+                            return gameContainer.currentTheme.bgBottom;
+                        }
+                    }
+                }
+            }
+
+            Rectangle {
                 anchors.top: parent.top
                 anchors.left: parent.left
                 anchors.right: parent.right
@@ -280,7 +308,7 @@ MainView {
 
             function spawnBounceDust(y, color1, color2) {
                 var midR = (outerRadius + innerRadius) / 2.0;
-                var count = 9;
+                var count = 4;
                 for (var p = 0; p < count; p++) {
                     var angle = Math.random() * Math.PI * 2.0;
                     var speed = units.gu(4.0) + Math.random() * units.gu(8.0);
@@ -320,7 +348,7 @@ MainView {
                     decay: 3.2
                 });
 
-                var chunkCount = isGrand ? 8 : 6;
+                var chunkCount = isGrand ? 5 : 3;
                 for (var c = 0; c < chunkCount; c++) {
                     var chunkAngle = (c / chunkCount) * Math.PI * 2.0 + (Math.random() - 0.5) * 0.35;
                     var chunkR = midR + (Math.random() - 0.5) * units.gu(2.2);
@@ -353,7 +381,7 @@ MainView {
                     });
                 }
 
-                var shardCount = isGrand ? 16 : 12;
+                var shardCount = isGrand ? 8 : 5;
                 for (var s = 0; s < shardCount; s++) {
                     var shardAngle = Math.random() * Math.PI * 2.0;
                     var shardR = innerRadius + Math.random() * (outerRadius - innerRadius);
@@ -935,8 +963,9 @@ MainView {
                                     });
 
                                     if (!ring.splats) ring.splats = [];
+                                    if (ring.splats.length >= 2) ring.splats.shift();
                                     var droplets = [];
-                                    var dropCount = 4 + Math.floor(Math.random() * 3);
+                                    var dropCount = 2;
                                     for (var d = 0; d < dropCount; d++) {
                                         var dAngle = Math.random() * Math.PI * 2.0;
                                         var dDist = units.gu(2.4 + Math.random() * 2.0);
@@ -966,7 +995,7 @@ MainView {
                                     gameContainer.cameraY = ring.y;
                                     gameContainer.isSuperFall = false;
                                     soundManager.haptic(true);
-                                    gameContainer.spawnParticles(0, ring.y, 24, gameContainer.currentTheme.topHazard, 1.4);
+                                    gameContainer.spawnParticles(0, ring.y, 12, gameContainer.currentTheme.topHazard, 1.4);
 
                                     if (gameContainer.score > gameContainer.bestScore) {
                                         gameContainer.bestScore = gameContainer.score;
@@ -1157,6 +1186,10 @@ MainView {
                         }
                     }
 
+                    while (gameContainer.particles.length > 20) {
+                        gameContainer.particles.shift();
+                    }
+
                     var lastRing = gameContainer.rings[gameContainer.rings.length - 1];
                     while (lastRing && lastRing.y < gameContainer.cameraY + gameContainer.ringSpacing * 8) {
                         gameContainer.generateRing();
@@ -1175,6 +1208,7 @@ MainView {
             GameCanvas {
                 id: gameCanvas
                 game: gameContainer
+                z: 1
             }
 
             MouseArea {
