@@ -5,6 +5,8 @@ import "../js/Themes.js" as Themes
 Canvas {
     id: root
     anchors.fill: parent
+    renderTarget: Canvas.FramebufferObject
+    renderStrategy: Canvas.Threaded
 
     property var game: null
 
@@ -26,8 +28,6 @@ Canvas {
 
         var theme = (game && game.currentTheme) ? game.currentTheme : Themes.getTheme(game ? game.currentLevel : 1);
 
-        var bgTopClr = theme.bgTop;
-        var bgBotClr = theme.bgBottom;
         var pole1Clr = theme.pole1;
         var pole2Clr = theme.pole2;
         var pole3Clr = theme.pole3;
@@ -35,18 +35,10 @@ Canvas {
         if (game && game.previousTheme && game.themeTransitionProgress < 1.0) {
             var tProg = game.themeTransitionProgress;
             var prevT = game.previousTheme;
-            bgTopClr = Themes.lerpColor(prevT.bgTop, theme.bgTop, tProg);
-            bgBotClr = Themes.lerpColor(prevT.bgBottom, theme.bgBottom, tProg);
             pole1Clr = Themes.lerpColor(prevT.pole1, theme.pole1, tProg);
             pole2Clr = Themes.lerpColor(prevT.pole2, theme.pole2, tProg);
             pole3Clr = Themes.lerpColor(prevT.pole3, theme.pole3, tProg);
         }
-
-        var bgGrad = ctx.createLinearGradient(0, 0, 0, h);
-        bgGrad.addColorStop(0.0, bgTopClr);
-        bgGrad.addColorStop(1.0, bgBotClr);
-        ctx.fillStyle = bgGrad;
-        ctx.fillRect(0, 0, w, h);
 
         var rSpacing = game.ringSpacing;
         var bY = game.ballY;
@@ -58,12 +50,19 @@ Canvas {
         var rHeight = game.ringHeight;
         var midR = (outR + inR) / 2.0;
 
-        var spotGrad = ctx.createRadialGradient(centerX, h * 0.38, game.poleRadius, centerX, h * 0.38, outR * 2.4);
-        spotGrad.addColorStop(0.0, "rgba(255, 255, 255, 0.05)");
-        spotGrad.addColorStop(0.5, "rgba(255, 255, 255, 0.02)");
-        spotGrad.addColorStop(1.0, "rgba(0, 0, 0, 0.0)");
-        ctx.fillStyle = spotGrad;
-        ctx.fillRect(0, 0, w, h);
+        var sharedTopGrad = ctx.createRadialGradient(-outR * 0.35, -outR * 0.35, inR * 0.4, 0, 0, outR * 1.15);
+        sharedTopGrad.addColorStop(0.0, "rgba(255, 255, 255, 0.18)");
+        sharedTopGrad.addColorStop(0.55, "rgba(255, 255, 255, 0.02)");
+        sharedTopGrad.addColorStop(1.0, "rgba(0, 0, 0, 0.18)");
+
+        var sharedInnerAo = ctx.createRadialGradient(0, 0, inR, 0, 0, inR + units.gu(0.8));
+        sharedInnerAo.addColorStop(0.0, "rgba(0, 0, 0, 0.10)");
+        sharedInnerAo.addColorStop(1.0, "rgba(0, 0, 0, 0.0)");
+
+        var botAoH = units.gu(0.9);
+        var sharedBotAoGrad = ctx.createLinearGradient(0, 0, 0, botAoH);
+        sharedBotAoGrad.addColorStop(0.0, "rgba(0, 0, 0, 0.14)");
+        sharedBotAoGrad.addColorStop(1.0, "rgba(0, 0, 0, 0.0)");
 
         function drawParticle(pt) {
             var partScreenY = bScreenY + (pt.y - camY) + (pt.z || 0) * tilt;
@@ -198,39 +197,9 @@ Canvas {
                 ctx.fill();
             }
 
-            var aoGrad = ctx.createLinearGradient(xi, yit, xo, yot);
-            aoGrad.addColorStop(0.0, "rgba(0, 0, 0, 0.16)");
-            aoGrad.addColorStop(0.40, "rgba(0, 0, 0, 0.0)");
-            ctx.fillStyle = aoGrad;
-            ctx.fill();
-
-            var vGrad = ctx.createLinearGradient(0, yot, 0, yob);
-            vGrad.addColorStop(0.0, "rgba(255, 255, 255, 0.10)");
-            vGrad.addColorStop(1.0, "rgba(0, 0, 0, 0.35)");
-            ctx.fillStyle = vGrad;
-            ctx.fill();
-
             ctx.strokeStyle = "rgba(0, 0, 0, 0.35)";
             ctx.lineWidth = units.gu(0.08);
             ctx.stroke();
-        }
-
-        function getSegmentSlices(a1, a2) {
-            var m = Math.floor(a1 / Math.PI) + 1;
-            var root = m * Math.PI;
-            if (root > a1 + 0.0001 && root < a2 - 0.0001) {
-                var s1Mid = (a1 + root) * 0.5;
-                var s2Mid = (root + a2) * 0.5;
-                return [
-                    { start: a1, end: root, isFront: Math.sin(s1Mid) > 0, strokeStart: true, strokeEnd: false },
-                    { start: root, end: a2, isFront: Math.sin(s2Mid) > 0, strokeStart: false, strokeEnd: true }
-                ];
-            } else {
-                var mid = (a1 + a2) * 0.5;
-                return [
-                    { start: a1, end: a2, isFront: Math.sin(mid) > 0, strokeStart: true, strokeEnd: true }
-                ];
-            }
         }
 
         function drawTopFace(ringScreenY, startAngle, endAngle, topColor, strokeStartRadial, strokeEndRadial) {
@@ -246,130 +215,98 @@ Canvas {
             ctx.fillStyle = topColor;
             ctx.fill();
 
-            var topGrad = ctx.createRadialGradient(-outR * 0.35, -outR * 0.35, inR * 0.4, 0, 0, outR * 1.15);
-            topGrad.addColorStop(0.0, "rgba(255, 255, 255, 0.18)");
-            topGrad.addColorStop(0.55, "rgba(255, 255, 255, 0.02)");
-            topGrad.addColorStop(1.0, "rgba(0, 0, 0, 0.18)");
-            ctx.fillStyle = topGrad;
+            ctx.fillStyle = sharedTopGrad;
             ctx.fill();
 
-            var innerAo = ctx.createRadialGradient(0, 0, inR, 0, 0, inR + units.gu(0.8));
-            innerAo.addColorStop(0.0, "rgba(0, 0, 0, 0.10)");
-            innerAo.addColorStop(1.0, "rgba(0, 0, 0, 0.0)");
-            ctx.fillStyle = innerAo;
+            ctx.fillStyle = sharedInnerAo;
             ctx.fill();
-
-            ctx.beginPath();
-            ctx.arc(0, 0, outR - 0.5, startAngle, endAngle, false);
-            ctx.strokeStyle = "rgba(255, 255, 255, 0.28)";
-            ctx.lineWidth = units.gu(0.12);
-            ctx.stroke();
 
             ctx.beginPath();
             ctx.arc(0, 0, outR, startAngle, endAngle, false);
-            ctx.strokeStyle = "rgba(10, 15, 20, 0.40)";
-            ctx.lineWidth = units.gu(0.08);
-            ctx.stroke();
-
-            ctx.beginPath();
             ctx.arc(0, 0, inR, endAngle, startAngle, true);
-            ctx.strokeStyle = "rgba(10, 15, 20, 0.40)";
-            ctx.lineWidth = units.gu(0.08);
-            ctx.stroke();
-
             if (strokeStartRadial !== false) {
-                ctx.beginPath();
                 ctx.moveTo(inR * Math.cos(startAngle), inR * Math.sin(startAngle));
                 ctx.lineTo(outR * Math.cos(startAngle), outR * Math.sin(startAngle));
-                ctx.strokeStyle = "rgba(10, 15, 20, 0.40)";
-                ctx.lineWidth = units.gu(0.08);
-                ctx.stroke();
             }
-
             if (strokeEndRadial !== false) {
-                ctx.beginPath();
                 ctx.moveTo(inR * Math.cos(endAngle), inR * Math.sin(endAngle));
                 ctx.lineTo(outR * Math.cos(endAngle), outR * Math.sin(endAngle));
-                ctx.strokeStyle = "rgba(10, 15, 20, 0.40)";
-                ctx.lineWidth = units.gu(0.08);
-                ctx.stroke();
             }
+            ctx.strokeStyle = "rgba(10, 15, 20, 0.35)";
+            ctx.lineWidth = units.gu(0.08);
+            ctx.stroke();
 
             ctx.restore();
         }
 
+        function drawSegmentTop(ringScreenY, a1, a2, topColor, wantFront) {
+            var m = Math.floor(a1 / Math.PI) + 1;
+            var root = m * Math.PI;
+            if (root > a1 + 0.0001 && root < a2 - 0.0001) {
+                var isFront1 = Math.sin((a1 + root) * 0.5) > 0;
+                if (isFront1 === wantFront) {
+                    drawTopFace(ringScreenY, a1, root, topColor, true, false);
+                }
+                var isFront2 = Math.sin((root + a2) * 0.5) > 0;
+                if (isFront2 === wantFront) {
+                    drawTopFace(ringScreenY, root, a2, topColor, false, true);
+                }
+            } else {
+                var isFront = Math.sin((a1 + a2) * 0.5) > 0;
+                if (isFront === wantFront) {
+                    drawTopFace(ringScreenY, a1, a2, topColor, true, true);
+                }
+            }
+        }
+
         function drawOuterRim(ringScreenY, startAngle, endAngle, sideColor) {
-            var samples = 8;
-            var topPoints = [];
-            var bottomPoints = [];
+            var samples = 6;
+            var startS = -1;
+            var endS = -1;
 
             for (var s = 0; s <= samples; s++) {
                 var a = startAngle + (endAngle - startAngle) * (s / samples);
-                var sinA = Math.sin(a);
-                var cosA = Math.cos(a);
-
-                if (sinA > -0.05) {
-                    var px = centerX + outR * cosA;
-                    var py = ringScreenY + outR * sinA * tilt;
-                    topPoints.push({ x: px, y: py });
-                    bottomPoints.push({ x: px, y: py + rHeight });
+                if (Math.sin(a) > -0.05) {
+                    if (startS === -1) startS = s;
+                    endS = s;
                 }
             }
 
-            if (topPoints.length > 1) {
-                ctx.beginPath();
-                ctx.moveTo(topPoints[0].x, topPoints[0].y);
-                for (var p = 1; p < topPoints.length; p++) {
-                    ctx.lineTo(topPoints[p].x, topPoints[p].y);
-                }
-                for (var bp = bottomPoints.length - 1; bp >= 0; bp--) {
-                    ctx.lineTo(bottomPoints[bp].x, bottomPoints[bp].y);
-                }
-                ctx.closePath();
+            if (startS === -1 || endS <= startS) return;
 
-                ctx.fillStyle = sideColor;
-                ctx.fill();
-
-                var rimYMin = topPoints[0].y;
-                var rimYMax = bottomPoints[0].y;
-                for (var yIdx = 0; yIdx < topPoints.length; yIdx++) {
-                    if (topPoints[yIdx].y < rimYMin) rimYMin = topPoints[yIdx].y;
-                    if (bottomPoints[yIdx].y > rimYMax) rimYMax = bottomPoints[yIdx].y;
-                }
-                var rimGrad = ctx.createLinearGradient(0, rimYMin, 0, rimYMax);
-                rimGrad.addColorStop(0.0, "rgba(255, 255, 255, 0.14)");
-                rimGrad.addColorStop(0.3, "rgba(255, 255, 255, 0.0)");
-                rimGrad.addColorStop(0.85, "rgba(0, 0, 0, 0.28)");
-                rimGrad.addColorStop(1.0, "rgba(0, 0, 0, 0.45)");
-                ctx.fillStyle = rimGrad;
-                ctx.fill();
-
-                ctx.beginPath();
-                ctx.moveTo(bottomPoints[0].x, bottomPoints[0].y);
-                for (var bIdx = 1; bIdx < bottomPoints.length; bIdx++) {
-                    ctx.lineTo(bottomPoints[bIdx].x, bottomPoints[bIdx].y);
-                }
-                ctx.strokeStyle = "rgba(0, 0, 0, 0.55)";
-                ctx.lineWidth = units.gu(0.12);
-                ctx.stroke();
-
-                var shadowDepth = units.gu(1.4);
-                var shadowGrad = ctx.createLinearGradient(0, rimYMax, 0, rimYMax + shadowDepth);
-                shadowGrad.addColorStop(0.0, "rgba(0, 0, 0, 0.35)");
-                shadowGrad.addColorStop(1.0, "rgba(0, 0, 0, 0.0)");
-                ctx.beginPath();
-                ctx.moveTo(bottomPoints[0].x, bottomPoints[0].y);
-                for (var sIdx = 1; sIdx < bottomPoints.length; sIdx++) {
-                    ctx.lineTo(bottomPoints[sIdx].x, bottomPoints[sIdx].y);
-                }
-                ctx.lineTo(bottomPoints[bottomPoints.length - 1].x, bottomPoints[bottomPoints.length - 1].y + shadowDepth);
-                for (var sbIdx = bottomPoints.length - 2; sbIdx >= 0; sbIdx--) {
-                    ctx.lineTo(bottomPoints[sbIdx].x, bottomPoints[sbIdx].y + shadowDepth);
-                }
-                ctx.closePath();
-                ctx.fillStyle = shadowGrad;
-                ctx.fill();
+            ctx.beginPath();
+            for (var sTop = startS; sTop <= endS; sTop++) {
+                var aTop = startAngle + (endAngle - startAngle) * (sTop / samples);
+                var pxTop = centerX + outR * Math.cos(aTop);
+                var pyTop = ringScreenY + outR * Math.sin(aTop) * tilt;
+                if (sTop === startS) ctx.moveTo(pxTop, pyTop);
+                else ctx.lineTo(pxTop, pyTop);
             }
+            for (var sBot = endS; sBot >= startS; sBot--) {
+                var aBot = startAngle + (endAngle - startAngle) * (sBot / samples);
+                var pxBot = centerX + outR * Math.cos(aBot);
+                var pyBot = ringScreenY + outR * Math.sin(aBot) * tilt + rHeight;
+                ctx.lineTo(pxBot, pyBot);
+            }
+            ctx.closePath();
+
+            ctx.fillStyle = sideColor;
+            ctx.fill();
+
+            ctx.fillStyle = "rgba(0, 0, 0, 0.28)";
+            ctx.fill();
+
+            ctx.beginPath();
+            for (var sStr = startS; sStr <= endS; sStr++) {
+                var aStr = startAngle + (endAngle - startAngle) * (sStr / samples);
+                var pxStr = centerX + outR * Math.cos(aStr);
+                var pyStr = ringScreenY + outR * Math.sin(aStr) * tilt + rHeight;
+                if (sStr === startS) ctx.moveTo(pxStr, pyStr);
+                else ctx.lineTo(pxStr, pyStr);
+            }
+            ctx.strokeStyle = "rgba(0, 0, 0, 0.55)";
+            ctx.lineWidth = units.gu(0.12);
+            ctx.stroke();
         }
 
         function drawMotionIndicator(ringScreenY, midAngle, rotSpeed, isOsc) {
@@ -436,12 +373,7 @@ Canvas {
                 var startAngle1 = game.towerAngle + ring1Offset + seg1 * (Math.PI / 4.0);
                 var endAngle1 = startAngle1 + (Math.PI / 4.0);
 
-                var slices1 = getSegmentSlices(startAngle1, endAngle1);
-                for (var sl1 = 0; sl1 < slices1.length; sl1++) {
-                    if (!slices1[sl1].isFront) {
-                        drawTopFace(r1ScreenY, slices1[sl1].start, slices1[sl1].end, topColor1, slices1[sl1].strokeStart, slices1[sl1].strokeEnd);
-                    }
-                }
+                drawSegmentTop(r1ScreenY, startAngle1, endAngle1, topColor1, false);
 
                 var prevSeg1 = ring1.segments[(seg1 + 7) % 8];
                 var nextSeg1 = ring1.segments[(seg1 + 1) % 8];
@@ -475,12 +407,11 @@ Canvas {
             var aoRingScreenY = bScreenY + (aoRing.y - camY) + (aoRing.recoil || 0);
             if (aoRingScreenY < -rSpacing || aoRingScreenY > h + rSpacing) continue;
 
-            var botAoH = units.gu(0.9);
-            var botAoGrad = ctx.createLinearGradient(0, aoRingScreenY + rHeight, 0, aoRingScreenY + rHeight + botAoH);
-            botAoGrad.addColorStop(0.0, "rgba(0, 0, 0, 0.14)");
-            botAoGrad.addColorStop(1.0, "rgba(0, 0, 0, 0.0)");
-            ctx.fillStyle = botAoGrad;
-            ctx.fillRect(pLeft, aoRingScreenY + rHeight, pWidth, botAoH);
+            ctx.save();
+            ctx.translate(pLeft, aoRingScreenY + rHeight);
+            ctx.fillStyle = sharedBotAoGrad;
+            ctx.fillRect(0, 0, pWidth, botAoH);
+            ctx.restore();
         }
 
         for (var r2 = 0; r2 < game.rings.length; r2++) {
@@ -520,12 +451,7 @@ Canvas {
                         drawRadialCutWall(r2ScreenY, endAngle2, false, sideColor2);
                     }
 
-                    var slices2 = getSegmentSlices(startAngle2, endAngle2);
-                    for (var sl2 = 0; sl2 < slices2.length; sl2++) {
-                        if (slices2[sl2].isFront) {
-                            drawTopFace(r2ScreenY, slices2[sl2].start, slices2[sl2].end, topColor2, slices2[sl2].strokeStart, slices2[sl2].strokeEnd);
-                        }
-                    }
+                    drawSegmentTop(r2ScreenY, startAngle2, endAngle2, topColor2, true);
 
                     var midAngle2 = (startAngle2 + endAngle2) * 0.5;
                     if ((ring2.rotationSpeed !== 0 || ring2.isOscillating) && Math.sin(midAngle2) > 0.15) {
