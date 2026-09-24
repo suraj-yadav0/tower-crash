@@ -9,14 +9,19 @@ QML_FILES += \
     qml/components/MilestoneBanner.qml \
     qml/components/PauseModal.qml \
     qml/components/SettingsModal.qml \
+    qml/components/ThemePickerView.qml \
     qml/components/WelcomeScreen.qml \
+    qml/components/HowToPlayView.qml \
     qml/components/GameOverModal.qml \
     qml/components/StageClearModal.qml \
     qml/components/SoundManager.qml \
     qml/components/SoundBackendMultimedia.qml \
     qml/js/Themes.js \
     qml/js/Storage.js \
-    qml/js/RingGenerator.js
+    qml/js/RingGenerator.js \
+    qml/js/ParticleSystem.js \
+    qml/js/Progression.js \
+    qml/js/GamePhysics.js
 
 INSTALLS += qml desktop apparmor manifest assets license
 
