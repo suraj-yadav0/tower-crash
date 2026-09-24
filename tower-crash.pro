@@ -4,9 +4,13 @@ CONFIG += no_check_exist
 
 QML_FILES += \
     qml/Main.qml \
+    qml/components/GameBackground.qml \
     qml/components/GameCanvas.qml \
+    qml/components/GameController.qml \
+    qml/components/GameHeader.qml \
     qml/components/GameHud.qml \
     qml/components/MilestoneBanner.qml \
+    qml/components/ModalLayer.qml \
     qml/components/PauseModal.qml \
     qml/components/SettingsModal.qml \
     qml/components/ThemePickerView.qml \
