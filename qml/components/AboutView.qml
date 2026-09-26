@@ -229,47 +229,79 @@ Column {
         }
     }
 
-    // Source Code Card (Interactive)
+    // Community & Star Support Card (Interactive)
     Rectangle {
-        id: sourceCard
+        id: starCard
         anchors.horizontalCenter: parent.horizontalCenter
         width: parent.width
-        height: units.gu(4.6)
+        height: starCol.height + units.gu(2.4)
         radius: units.gu(1.4)
-        color: sourceMouse.pressed ? "#1E2024" : (root.theme ? root.theme.cardOuter : "#141517")
-        border.color: sourceMouse.pressed
-                      ? (root.theme ? root.theme.accent : "#D99B26")
-                      : (root.theme ? root.theme.cardBorder : "#2A2C30")
+        color: root.theme ? root.theme.cardOuter : "#141517"
+        border.color: root.theme ? root.theme.cardBorder : "#2A2C30"
         border.width: units.gu(0.1)
-        scale: sourceMouse.pressed ? 0.98 : 1.0
 
-        Behavior on scale { NumberAnimation { duration: 100 } }
-
-        Row {
+        Column {
+            id: starCol
             anchors.centerIn: parent
+            width: parent.width - units.gu(2.4)
             spacing: units.gu(0.8)
 
             Label {
-                text: i18n.tr("Source Repository")
-                font.pixelSize: units.gu(1.15)
+                text: i18n.tr("SUPPORT OPEN SOURCE")
+                font.pixelSize: units.gu(0.9)
                 font.weight: Font.Bold
                 color: root.theme ? root.theme.accent : "#D99B26"
-                anchors.verticalCenter: parent.verticalCenter
             }
 
             Label {
-                text: "•  GitHub"
-                font.pixelSize: units.gu(1.05)
-                color: "#848890"
-                anchors.verticalCenter: parent.verticalCenter
+                text: i18n.tr("If you enjoy descending the helical tower, consider dropping a star on GitHub. It takes five seconds, helps more Ubuntu Touch players discover the game, and keeps independent development going.")
+                font.pixelSize: units.gu(1.1)
+                color: "#D6D5D2"
+                wrapMode: Text.WordWrap
+                width: parent.width
             }
-        }
 
-        MouseArea {
-            id: sourceMouse
-            anchors.fill: parent
-            onClicked: {
-                Qt.openUrlExternally("https://github.com/suraj-yadav0/tower-crash");
+            Rectangle {
+                anchors.horizontalCenter: parent.horizontalCenter
+                width: parent.width
+                height: units.gu(3.8)
+                radius: units.gu(1.9)
+                color: starMouse.pressed ? "#1E2024" : (root.theme ? root.theme.accentBg : "#261E10")
+                border.color: starMouse.pressed
+                              ? (root.theme ? root.theme.accent : "#D99B26")
+                              : (root.theme ? root.theme.accentBorder : "#544020")
+                border.width: units.gu(0.1)
+                scale: starMouse.pressed ? 0.97 : 1.0
+
+                Behavior on scale { NumberAnimation { duration: 100 } }
+
+                Row {
+                    anchors.centerIn: parent
+                    spacing: units.gu(0.8)
+
+                    Label {
+                        text: i18n.tr("Star on GitHub")
+                        font.pixelSize: units.gu(1.2)
+                        font.weight: Font.Bold
+                        color: root.theme ? root.theme.accent : "#D99B26"
+                        anchors.verticalCenter: parent.verticalCenter
+                    }
+
+                    Label {
+                        text: "•  github.com/suraj-yadav0/tower-crash"
+                        font.pixelSize: units.gu(0.95)
+                        color: "#848890"
+                        anchors.verticalCenter: parent.verticalCenter
+                    }
+                }
+
+                MouseArea {
+                    id: starMouse
+                    anchors.fill: parent
+                    onClicked: {
+                        Qt.openUrlExternally("https://github.com/suraj-yadav0/tower-crash");
+                    }
+                }
             }
         }
     }
