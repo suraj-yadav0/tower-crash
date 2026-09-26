@@ -152,6 +152,36 @@ Column {
                     anchors.verticalCenter: parent.verticalCenter
                 }
             }
+
+            Row {
+                spacing: units.gu(1.0)
+                width: parent.width
+
+                Rectangle {
+                    width: units.gu(2.0)
+                    height: units.gu(2.0)
+                    radius: units.gu(1.0)
+                    color: root.theme ? root.theme.accent : "#D99B26"
+                    anchors.verticalCenter: parent.verticalCenter
+
+                    Label {
+                        anchors.centerIn: parent
+                        text: "10"
+                        font.pixelSize: units.gu(0.9)
+                        font.weight: Font.Bold
+                        color: root.theme ? root.theme.accentText : "#0B0C0D"
+                    }
+                }
+
+                Label {
+                    text: i18n.tr("Descend through 10 thematic zones across 100 tower levels.")
+                    font.pixelSize: units.gu(1.2)
+                    color: "#D6D5D2"
+                    wrapMode: Text.WordWrap
+                    width: parent.width - units.gu(3.0)
+                    anchors.verticalCenter: parent.verticalCenter
+                }
+            }
         }
     }
 
