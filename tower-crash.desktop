@@ -1,6 +1,6 @@
 [Desktop Entry]
 Name=Tower Crash
-Comment=Spiral Ball Jump game for Ubuntu Touch
+Comment=Tactile helical descent arcade game for Ubuntu Touch
 Exec=qmlscene %U qml/Main.qml
 Icon=assets/logo.svg
 Terminal=false

@@ -76,9 +76,9 @@ tower-crash/
 |       `-- fanfare.wav
 |-- qml/
 |   |-- components/
+|   |   |-- AboutView.qml
 |   |   |-- GameBackground.qml
 |   |   |-- GameCanvas.qml
-|   |   |-- GameHeader.qml
 |   |   |-- GameHud.qml
 |   |   |-- GameOverModal.qml
 |   |   |-- HowToPlayView.qml
@@ -174,6 +174,20 @@ To build the standalone `.click` package:
 
 ```bash
 clickable build
+```
+
+### OpenStore Review & Publishing
+
+Validate the built package against OpenStore security policies:
+
+```bash
+clickable review
+```
+
+Publish directly to the OpenStore:
+
+```bash
+clickable publish -- "Initial release of Tower Crash for Ubuntu Touch 24.04"
 ```
 
 ## Running Tests
