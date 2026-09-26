@@ -38,12 +38,52 @@ MainView {
         header: PageHeader {
             id: pageHeader
             title: i18n.tr("Tower Crash")
-            subtitle: gameContainer.isWelcomeOpen ? i18n.tr("Arcade Edition") : i18n.tr("Level %1").arg(gameContainer.currentLevel)
+            subtitle: {
+                if (gameContainer.isWelcomeOpen) return i18n.tr("Arcade Edition");
+                var diffName = Progression.getDifficultyName(gameContainer.difficultyMode);
+                var zoneName = Progression.getZoneName(gameContainer.currentLevel);
+                if (gameContainer.difficultyMode === 3) {
+                    if (gameContainer.bestScore > 0) {
+                        return i18n.tr("Level %1 • %2 • %3 (Permadeath) • Best: %4")
+                            .arg(gameContainer.currentLevel)
+                            .arg(zoneName)
+                            .arg(diffName)
+                            .arg(gameContainer.bestScore);
+                    }
+                    return i18n.tr("Level %1 • %2 • %3 (Permadeath)")
+                        .arg(gameContainer.currentLevel)
+                        .arg(zoneName)
+                        .arg(diffName);
+                }
+                var stage = ((gameContainer.currentLevel - 1) % 5) + 1;
+                if (gameContainer.bestScore > 0) {
+                    return i18n.tr("Level %1 • %2 • %3 (%4/5) • Best: %5")
+                        .arg(gameContainer.currentLevel)
+                        .arg(zoneName)
+                        .arg(diffName)
+                        .arg(stage)
+                        .arg(gameContainer.bestScore);
+                }
+                return i18n.tr("Level %1 • %2 • %3 (%4/5)")
+                    .arg(gameContainer.currentLevel)
+                    .arg(zoneName)
+                    .arg(diffName)
+                    .arg(stage);
+            }
             z: 100
             visible: true
 
-            trailingActionBar.numberOfSlots: 4
+            trailingActionBar.numberOfSlots: 5
             trailingActionBar.actions: [
+                Action {
+                    iconName: "go-home"
+                    text: i18n.tr("Main Menu")
+                    visible: !gameContainer.isWelcomeOpen && !gameContainer.isStageClearOpen && !gameContainer.isStageClearCelebrating
+                    onTriggered: {
+                        soundManager.buttonHaptic();
+                        gameContainer.goToMainMenu();
+                    }
+                },
                 Action {
                     iconName: gameContainer.isPaused ? "media-playback-start" : "media-playback-pause"
                     text: gameContainer.isPaused ? i18n.tr("Resume") : i18n.tr("Pause")
@@ -176,6 +216,9 @@ MainView {
             property real ringHeight: units.gu(2.8)
             property real tiltRatio: 0.34
 
+            property int difficultyMode: 1
+            property real difficultySpeedMultiplier: Progression.getDifficultySpeedMultiplier ? Progression.getDifficultySpeedMultiplier(difficultyMode) : 1.0
+
             property int speedMode: 1
             property real speedMultiplier: {
                 if (speedMode === 0) return 0.78;
@@ -187,9 +230,9 @@ MainView {
             property real baseBounceSpeed: units.gu(77)
             property real baseMaxFallSpeed: units.gu(180)
 
-            property real gravity: baseGravity * speedMultiplier
-            property real bounceSpeed: baseBounceSpeed * Math.sqrt(speedMultiplier)
-            property real maxFallSpeed: baseMaxFallSpeed * speedMultiplier
+            property real gravity: baseGravity * speedMultiplier * difficultySpeedMultiplier
+            property real bounceSpeed: baseBounceSpeed * Math.sqrt(speedMultiplier * difficultySpeedMultiplier)
+            property real maxFallSpeed: baseMaxFallSpeed * speedMultiplier * difficultySpeedMultiplier
             property real lastPhysicsTime: 0.0
 
             property real ballScreenY: units.gu(28.0)
@@ -214,26 +257,62 @@ MainView {
             onCurrentLevelChanged: {
                 if (currentLevel > highestLevelReached) {
                     highestLevelReached = currentLevel;
-                    Storage.saveHighestLevel(highestLevelReached);
+                    if (Storage.saveHighestLevelForMode) {
+                        Storage.saveHighestLevelForMode(highestLevelReached, difficultyMode);
+                    } else {
+                        Storage.saveHighestLevel(highestLevelReached);
+                    }
                 }
-                if (Progression.isCheckpointLevel(currentLevel)) {
+                if (Progression.isCheckpointLevel(currentLevel, difficultyMode)) {
                     unlockCheckpoint(currentLevel);
                 }
             }
 
             function unlockCheckpoint(lvl) {
-                var updated = Progression.unlockCheckpoint(lvl, unlockedCheckpoints);
+                if (!Progression.hasCheckpoints(difficultyMode)) return;
+                var updated = Progression.unlockCheckpoint(lvl, unlockedCheckpoints, difficultyMode);
                 if (updated.length !== unlockedCheckpoints.length) {
                     unlockedCheckpoints = updated;
-                    Storage.saveUnlockedCheckpoints(unlockedCheckpoints);
+                    selectedCheckpoint = lvl;
+                    if (Storage.saveUnlockedCheckpointsForMode) {
+                        Storage.saveUnlockedCheckpointsForMode(unlockedCheckpoints, difficultyMode);
+                        Storage.saveSelectedCheckpointForMode(selectedCheckpoint, difficultyMode);
+                    } else {
+                        Storage.saveUnlockedCheckpoints(unlockedCheckpoints);
+                        Storage.saveSelectedCheckpoint(selectedCheckpoint);
+                    }
                 }
             }
 
             function startFromCheckpoint(checkpointLevel) {
+                if (difficultyMode === 3) {
+                    selectedCheckpoint = 1;
+                    initGame(1);
+                    return;
+                }
                 var validCheckpoint = Math.max(1, checkpointLevel || selectedCheckpoint || 1);
                 selectedCheckpoint = validCheckpoint;
-                Storage.saveSelectedCheckpoint(selectedCheckpoint);
+                if (Storage.saveSelectedCheckpointForMode) {
+                    Storage.saveSelectedCheckpointForMode(selectedCheckpoint, difficultyMode);
+                } else {
+                    Storage.saveSelectedCheckpoint(selectedCheckpoint);
+                }
                 initGame(validCheckpoint);
+            }
+
+            function switchDifficultyMode(newMode) {
+                var m = Math.max(0, Math.min(3, parseInt(newMode) || 0));
+                if (m === difficultyMode) return;
+                difficultyMode = m;
+                if (Storage.saveDifficultyMode) {
+                    Storage.saveDifficultyMode(m);
+                }
+                var diffStats = Storage.getDifficultyStats ? Storage.getDifficultyStats(m) : { bestScore: 0, highestLevelReached: 1, unlockedCheckpoints: [1], selectedCheckpoint: 1 };
+                bestScore = diffStats.bestScore || 0;
+                highestLevelReached = diffStats.highestLevelReached || 1;
+                unlockedCheckpoints = (m === 3) ? [1] : (diffStats.unlockedCheckpoints || [1]);
+                selectedCheckpoint = (m === 3) ? 1 : (diffStats.selectedCheckpoint || 1);
+                initGame(selectedCheckpoint);
             }
 
             function spawnParticles(x, y, count, color, speedMultiplier) {
@@ -254,12 +333,12 @@ MainView {
 
             function generateRing() {
                 var prevRing = rings.length > 0 ? rings[rings.length - 1] : null;
-                rings.push(RingGen.createRing(nextRingIndex++, ringSpacing, prevRing));
+                rings.push(RingGen.createRing(nextRingIndex++, ringSpacing, prevRing, difficultyMode));
             }
 
             function initGame(checkpointLevel) {
-                var startLvl = checkpointLevel || 1;
-                score = 0;
+                var startLvl = (difficultyMode === 3) ? 1 : (checkpointLevel || 1);
+                score = Progression.getCheckpointBaseScore(startLvl, difficultyMode);
                 streak = 0;
                 towerAngle = 0.0;
                 angularVelocity = 0.0;
@@ -329,6 +408,19 @@ MainView {
                     Storage.recordPlayTime(activePlayTimeAccumulator);
                     activePlayTimeAccumulator = 0.0;
                 }
+                if (difficultyMode !== 3) {
+                    var nearest = Progression.getNearestCheckpoint(currentLevel, unlockedCheckpoints, difficultyMode);
+                    if (nearest > selectedCheckpoint) {
+                        selectedCheckpoint = nearest;
+                        if (Storage.saveSelectedCheckpointForMode) {
+                            Storage.saveSelectedCheckpointForMode(selectedCheckpoint, difficultyMode);
+                        } else {
+                            Storage.saveSelectedCheckpoint(selectedCheckpoint);
+                        }
+                    }
+                } else {
+                    selectedCheckpoint = 1;
+                }
                 Storage.flushPendingWrites();
                 initGame(selectedCheckpoint);
                 isWelcomeOpen = true;
@@ -365,6 +457,7 @@ MainView {
 
             Component.onCompleted: {
                 var stats = Storage.loadStats();
+                difficultyMode = (stats.difficultyMode !== undefined) ? stats.difficultyMode : 1;
                 bestScore = stats.bestScore;
                 totalRings = stats.totalRings;
                 soundEnabled = stats.soundEnabled;
@@ -375,8 +468,8 @@ MainView {
                 themeMode = (stats.themeMode !== undefined) ? stats.themeMode : 0;
                 previousTheme = currentTheme;
                 highestLevelReached = stats.highestLevelReached;
-                unlockedCheckpoints = stats.unlockedCheckpoints;
-                selectedCheckpoint = stats.selectedCheckpoint;
+                unlockedCheckpoints = (difficultyMode === 3) ? [1] : stats.unlockedCheckpoints;
+                selectedCheckpoint = (difficultyMode === 3) ? 1 : stats.selectedCheckpoint;
                 isWelcomeOpen = true;
                 initGame(selectedCheckpoint);
             }
@@ -532,6 +625,7 @@ MainView {
             MouseArea {
                 id: dragArea
                 anchors.fill: parent
+                z: 2
                 enabled: !gameContainer.gameOver && !gameContainer.isPaused && !gameContainer.isSettingsOpen && !gameContainer.isWelcomeOpen && !gameContainer.isStageClearOpen && !gameContainer.isStageClearCelebrating
 
                 onPressed: {
@@ -567,6 +661,7 @@ MainView {
             }
 
             GameHud {
+                z: 10
                 visible: !gameContainer.isWelcomeOpen
                 anchors.top: parent.top
                 anchors.topMargin: units.gu(1.2)
@@ -581,6 +676,7 @@ MainView {
             }
 
             MilestoneBanner {
+                z: 20
                 text: gameContainer.bannerText
                 isCheckpoint: gameContainer.bannerIsCheckpoint
                 isZoneTransition: gameContainer.bannerIsZone
@@ -605,6 +701,7 @@ MainView {
                 totalRings: gameContainer.totalRings
                 speedMode: gameContainer.speedMode
                 themeMode: gameContainer.themeMode
+                difficultyMode: gameContainer.difficultyMode
                 currentLevel: gameContainer.currentLevel
                 selectedCheckpoint: gameContainer.selectedCheckpoint
                 unlockedCheckpoints: gameContainer.unlockedCheckpoints
@@ -630,8 +727,16 @@ MainView {
                 }
                 onCheckpointSelected: {
                     soundManager.buttonHaptic();
+                    if (gameContainer.difficultyMode === 3) {
+                        gameContainer.selectedCheckpoint = 1;
+                        return;
+                    }
                     gameContainer.selectedCheckpoint = checkpoint;
-                    Storage.saveSelectedCheckpoint(checkpoint);
+                    if (Storage.saveSelectedCheckpointForMode) {
+                        Storage.saveSelectedCheckpointForMode(checkpoint, gameContainer.difficultyMode);
+                    } else {
+                        Storage.saveSelectedCheckpoint(checkpoint);
+                    }
                     gameCanvas.requestPaint();
                 }
                 onSettingsRequested: {
@@ -691,6 +796,10 @@ MainView {
                     soundManager.buttonHaptic();
                     gameContainer.speedMode = mode;
                     Storage.saveStat("speedMode", mode.toString());
+                }
+                onDifficultyModeSelected: {
+                    soundManager.buttonHaptic();
+                    gameContainer.switchDifficultyMode(mode);
                 }
                 onThemeModeSelected: {
                     soundManager.buttonHaptic();

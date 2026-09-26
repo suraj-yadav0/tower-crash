@@ -20,6 +20,7 @@ Item {
     property int totalRings: 0
     property int speedMode: 1
     property int themeMode: 0
+    property int difficultyMode: 1
     property int currentLevel: 1
     property int selectedCheckpoint: 1
     property var unlockedCheckpoints: [1]
@@ -44,6 +45,7 @@ Item {
     signal settingsRequested()
     signal themeCycleRequested()
     signal speedCycleRequested()
+    signal difficultyModeSelected(int mode)
     signal resumeRequested()
     signal restartCheckpointRequested(int checkpoint)
     signal restartRequested()
@@ -71,11 +73,13 @@ Item {
                 bestScore: root.bestScore
                 totalRings: root.totalRings
                 speedMode: root.speedMode
+                difficultyMode: root.difficultyMode
                 selectedCheckpoint: root.selectedCheckpoint
                 unlockedCheckpoints: root.unlockedCheckpoints
                 theme: Themes.getTheme(root.themeMode, root.selectedCheckpoint)
                 themeName: Themes.getThemeName(root.themeMode, root.selectedCheckpoint)
                 onCheckpointSelected: root.checkpointSelected(checkpoint)
+                onDifficultySelected: root.difficultyModeSelected(mode)
                 onPlayRequested: root.playRequested()
                 onSettingsRequested: root.settingsRequested()
                 onThemeCycleRequested: root.themeCycleRequested()
@@ -103,10 +107,11 @@ Item {
                 soundEnabled: root.soundEnabled
                 hapticsEnabled: root.hapticsEnabled
                 speedMode: root.speedMode
-                currentCheckpoint: Progression.getNearestCheckpoint(root.currentLevel, root.unlockedCheckpoints)
+                difficultyMode: root.difficultyMode
+                currentCheckpoint: Progression.getNearestCheckpoint(root.currentLevel, root.unlockedCheckpoints, root.difficultyMode)
                 theme: root.currentTheme
                 onResumeRequested: root.resumeRequested()
-                onRestartCheckpointRequested: root.restartCheckpointRequested(Progression.getNearestCheckpoint(root.currentLevel, root.unlockedCheckpoints))
+                onRestartCheckpointRequested: root.restartCheckpointRequested(Progression.getNearestCheckpoint(root.currentLevel, root.unlockedCheckpoints, root.difficultyMode))
                 onRestartRequested: root.restartRequested()
                 onMainMenuRequested: root.mainMenuRequested()
                 onToggleSoundRequested: root.soundToggled()
@@ -131,15 +136,19 @@ Item {
                 hapticsEnabled: root.hapticsEnabled
                 speedMode: root.speedMode
                 themeMode: root.themeMode
+                difficultyMode: root.difficultyMode
                 touchSensitivityMultiplier: root.touchSensitivityMultiplier
                 bestScore: root.bestScore
                 totalRings: root.totalRings
                 theme: root.currentTheme
+                isWelcomeOpen: root.isWelcomeOpen
                 onCloseRequested: root.settingsClosed()
+                onMainMenuRequested: root.mainMenuRequested()
                 onToggleSoundRequested: root.soundToggled()
                 onVolumeChanged: root.volumeChanged(newVolume)
                 onToggleHapticsRequested: root.hapticsToggled()
                 onSpeedModeSelected: root.speedModeSelected(newMode)
+                onDifficultyModeSelected: root.difficultyModeSelected(newMode)
                 onTouchSensitivitySelected: root.touchSensitivitySelected(newSensitivity)
                 onThemeModeSelected: root.themeModeSelected(newMode)
             }
@@ -159,9 +168,10 @@ Item {
                 score: root.score
                 bestScore: root.bestScore
                 levelReached: root.currentLevel
-                checkpointLevel: Progression.getNearestCheckpoint(root.currentLevel, root.unlockedCheckpoints)
+                difficultyMode: root.difficultyMode
+                checkpointLevel: Progression.getNearestCheckpoint(root.currentLevel, root.unlockedCheckpoints, root.difficultyMode)
                 theme: root.currentTheme
-                onContinueCheckpointRequested: root.restartCheckpointRequested(Progression.getNearestCheckpoint(root.currentLevel, root.unlockedCheckpoints))
+                onContinueCheckpointRequested: root.restartCheckpointRequested(Progression.getNearestCheckpoint(root.currentLevel, root.unlockedCheckpoints, root.difficultyMode))
                 onRestartRequested: root.restartRequested()
                 onMainMenuRequested: root.mainMenuRequested()
             }
@@ -184,13 +194,13 @@ Item {
                 streak: root.stageClearStreak
                 isCheckpoint: root.stageClearIsCheckpoint
                 nextCheckpoint: root.stageClearNextCheckpoint
-                checkpointLevel: Progression.getNearestCheckpoint(root.stageClearStage, root.unlockedCheckpoints)
+                checkpointLevel: Progression.getNearestCheckpoint(root.stageClearStage, root.unlockedCheckpoints, root.difficultyMode)
                 isGrandVictory: root.stageClearIsGrand
                 theme: root.stageClearIsCheckpoint
                        ? Themes.getTheme(root.themeMode, root.stageClearNextCheckpoint)
                        : root.currentTheme
                 onContinueRequested: root.continueRequested()
-                onRestartRequested: root.restartCheckpointRequested(Progression.getNearestCheckpoint(root.stageClearStage, root.unlockedCheckpoints))
+                onRestartRequested: root.restartCheckpointRequested(Progression.getNearestCheckpoint(root.stageClearStage, root.unlockedCheckpoints, root.difficultyMode))
                 onRestartStageOneRequested: root.restartStageOneRequested()
                 onMainMenuRequested: root.mainMenuRequested()
             }

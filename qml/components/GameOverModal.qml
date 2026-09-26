@@ -1,5 +1,6 @@
 import QtQuick 2.9
 import Lomiri.Components 1.3
+import "../js/Progression.js" as Progression
 
 Rectangle {
     id: root
@@ -7,6 +8,7 @@ Rectangle {
     property int score: 0
     property int bestScore: 0
     property int levelReached: 1
+    property int difficultyMode: 1
     property int checkpointLevel: 1
     property var theme: null
 
@@ -60,7 +62,9 @@ Rectangle {
                     Label {
                         id: eyebrowLabel
                         anchors.centerIn: parent
-                        text: i18n.tr("DESCENT TERMINATED")
+                        text: (root.difficultyMode === 3)
+                              ? i18n.tr("PERMADEATH TERMINATED")
+                              : i18n.tr("DESCENT TERMINATED")
                         font.pixelSize: units.gu(1.0)
                         font.weight: Font.Bold
                         color: root.theme ? root.theme.topHazard : "#BA3C3C"
@@ -138,7 +142,7 @@ Rectangle {
                     // Best Score Pill Card
                     Rectangle {
                         width: (parent.width - units.gu(1.0)) / 2.0
-                        height: units.gu(4.8)
+                        height: units.gu(5.0)
                         radius: units.gu(1.2)
                         color: root.theme ? root.theme.cardOuter : "#141517"
                         border.color: root.theme ? root.theme.cardBorder : "#2A2C30"
@@ -150,8 +154,8 @@ Rectangle {
 
                             Label {
                                 anchors.horizontalCenter: parent.horizontalCenter
-                                text: i18n.tr("BEST RECORD")
-                                font.pixelSize: units.gu(0.95)
+                                text: i18n.tr("BEST (%1)").arg(Progression.getDifficultyName(root.difficultyMode).toUpperCase())
+                                font.pixelSize: units.gu(0.85)
                                 font.weight: Font.DemiBold
                                 color: "#848890"
                             }
@@ -159,7 +163,7 @@ Rectangle {
                             Label {
                                 anchors.horizontalCenter: parent.horizontalCenter
                                 text: root.bestScore.toString()
-                                font.pixelSize: units.gu(1.7)
+                                font.pixelSize: units.gu(1.6)
                                 font.weight: Font.Bold
                                 color: root.theme ? root.theme.ballMid : "#E6D7BA"
                             }
@@ -169,7 +173,7 @@ Rectangle {
                     // Level Reached Pill Card
                     Rectangle {
                         width: (parent.width - units.gu(1.0)) / 2.0
-                        height: units.gu(4.8)
+                        height: units.gu(5.0)
                         radius: units.gu(1.2)
                         color: root.theme ? root.theme.cardOuter : "#141517"
                         border.color: root.theme ? root.theme.cardBorder : "#2A2C30"
@@ -182,7 +186,7 @@ Rectangle {
                             Label {
                                 anchors.horizontalCenter: parent.horizontalCenter
                                 text: i18n.tr("STAGE REACHED")
-                                font.pixelSize: units.gu(0.95)
+                                font.pixelSize: units.gu(0.85)
                                 font.weight: Font.DemiBold
                                 color: "#848890"
                             }
@@ -190,9 +194,19 @@ Rectangle {
                             Label {
                                 anchors.horizontalCenter: parent.horizontalCenter
                                 text: i18n.tr("Stage %1").arg(root.levelReached)
-                                font.pixelSize: units.gu(1.7)
+                                font.pixelSize: units.gu(1.5)
                                 font.weight: Font.Bold
                                 color: root.theme ? root.theme.accent : "#D99B26"
+                            }
+
+                            Label {
+                                anchors.horizontalCenter: parent.horizontalCenter
+                                text: Progression.getZoneName(root.levelReached)
+                                font.pixelSize: units.gu(0.85)
+                                font.weight: Font.DemiBold
+                                color: "#848890"
+                                elide: Text.ElideRight
+                                maximumLineCount: 1
                             }
                         }
                     }
@@ -218,12 +232,16 @@ Rectangle {
                         anchors.left: parent.left
                         anchors.leftMargin: units.gu(2.6)
                         anchors.verticalCenter: parent.verticalCenter
-                        text: (root.checkpointLevel > 1)
-                              ? i18n.tr("Continue (Stage %1)").arg(root.checkpointLevel)
-                              : i18n.tr("Re-enter Tower")
-                        font.pixelSize: units.gu(1.6)
+                        text: (root.difficultyMode === 3)
+                              ? i18n.tr("Restart Run (Level 1)")
+                              : ((root.checkpointLevel > 1)
+                                 ? i18n.tr("Continue (Stage %1 • %2)").arg(root.checkpointLevel).arg(Progression.getZoneName(root.checkpointLevel))
+                                 : i18n.tr("Re-enter Tower"))
+                        font.pixelSize: units.gu(1.5)
                         font.weight: Font.Bold
                         color: root.theme ? root.theme.accentText : "#0B0C0D"
+                        elide: Text.ElideRight
+                        width: parent.width - units.gu(7.0)
                     }
 
                     Rectangle {
@@ -262,7 +280,9 @@ Rectangle {
                         id: primaryMouse
                         anchors.fill: parent
                         onClicked: {
-                            if (root.checkpointLevel > 1) {
+                            if (root.difficultyMode === 3) {
+                                root.restartRequested();
+                            } else if (root.checkpointLevel > 1) {
                                 root.continueCheckpointRequested();
                             } else {
                                 root.restartRequested();
@@ -271,14 +291,14 @@ Rectangle {
                     }
                 }
 
-                // Secondary Action: Restart from Level 1 (only when checkpoint is active)
+                // Secondary Action: Restart from Level 1 (only when checkpoint is active in non-permadeath modes)
                 Rectangle {
                     id: restartFromBeginningBtn
                     anchors.horizontalCenter: parent.horizontalCenter
                     width: parent.width
                     height: units.gu(4.4)
                     radius: units.gu(2.2)
-                    visible: root.checkpointLevel > 1
+                    visible: root.difficultyMode !== 3 && root.checkpointLevel > 1
                     color: restartBeginMouse.pressed ? "#1E2024" : (root.theme ? root.theme.cardOuter : "#141517")
                     border.color: root.theme ? root.theme.cardBorder : "#2A2C30"
                     border.width: units.gu(0.12)
