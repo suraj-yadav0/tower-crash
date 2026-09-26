@@ -295,13 +295,19 @@ function saveUnlockedCheckpointsForMode(checkpoints, mode) {
     if (Array.isArray(checkpoints)) {
         var clean = checkpoints.map(function(n) { return parseInt(n) || 1; });
         clean.sort(function(a, b) { return a - b; });
-        var str = JSON.stringify(clean);
+        var deduped = [];
+        for (var i = 0; i < clean.length; i++) {
+            if (deduped.indexOf(clean[i]) === -1) {
+                deduped.push(clean[i]);
+            }
+        }
+        var str = JSON.stringify(deduped);
         saveStat("unlockedCheckpoints_" + m, str);
         if (!_cache) _cache = {};
-        _cache["unlockedCheckpoints_" + m] = clean.slice();
+        _cache["unlockedCheckpoints_" + m] = deduped.slice();
         if (m === 1 || (_cache.difficultyMode !== undefined && m === _cache.difficultyMode)) {
             saveStat("unlockedCheckpoints", str);
-            _cache.unlockedCheckpoints = clean.slice();
+            _cache.unlockedCheckpoints = deduped.slice();
         }
     }
 }

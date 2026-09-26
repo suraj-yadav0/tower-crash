@@ -10,6 +10,9 @@ Canvas {
 
     property var game: null
 
+    onWidthChanged: requestPaint()
+    onHeightChanged: requestPaint()
+
     Connections {
         target: game
         function onCurrentThemeChanged() { root.requestPaint(); }

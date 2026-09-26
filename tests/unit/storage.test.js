@@ -72,8 +72,8 @@ test('Storage - checkpoints isolated and Insane mode locked to level 1', () => {
     const { Storage } = setupStorage();
     Storage.loadStats(true);
 
-    // Save checkpoints for Normal mode
-    Storage.saveUnlockedCheckpointsForMode([1, 6, 11, 16], 1);
+    // Save checkpoints for Normal mode with duplicates
+    Storage.saveUnlockedCheckpointsForMode([1, 6, 6, 11, 1, 16, 11], 1);
     Storage.saveSelectedCheckpointForMode(11, 1);
 
     // Attempt to save checkpoints for Insane mode (must be ignored)

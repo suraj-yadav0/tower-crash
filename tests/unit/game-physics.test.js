@@ -40,6 +40,10 @@ test('GamePhysics - getSegmentIndex angular conversion', () => {
     // Large angle wrapping
     const large = GamePhysics.getSegmentIndex(10 * Math.PI, 0);
     assert.ok(large.index >= 0 && large.index <= 7);
+
+    // Exact boundary at relAngle = 2*PI wrapping to index 0
+    const boundary = GamePhysics.getSegmentIndex(Math.PI / 2 - 2 * Math.PI, 0);
+    assert.strictEqual(boundary.index, 0);
 });
 
 test('GamePhysics - camera smooth tracking and maxLag clamp', () => {
@@ -97,6 +101,12 @@ test('GamePhysics - ring motion and recoil updates', () => {
     assert.ok(rings[0].angleOffset > 0, 'Rotating ring should advance angleOffset');
     assert.ok(rings[1].oscTime > 0, 'Oscillating ring should advance oscTime');
     assert.strictEqual(rings[2].angleOffset, 0.0, 'Broken ring should not be updated');
+
+    const fastRing = [
+        { broken: false, rotationSpeed: 10.0, angleOffset: Math.PI * 2.0 - 0.1, recoil: 0.0, recoilVelocity: 0.0, shockwaves: [], splats: [] }
+    ];
+    GamePhysics.updateRings(fastRing, 0.1);
+    assert.ok(fastRing[0].angleOffset <= Math.PI * 2.0, 'Rotating ring angleOffset should wrap within 2*PI');
 });
 
 test('GamePhysics - collision: gap fall increases streak and activates superfall', () => {
