@@ -92,7 +92,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y qt5-qmake qtbase5-dev
           python3 -m pip install --upgrade pip
-          pip install clickable
+          pip install clickable-ut
 
       - name: Build Click Package
         run: |
