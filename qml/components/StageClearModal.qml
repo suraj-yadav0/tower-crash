@@ -1,5 +1,6 @@
 import QtQuick 2.9
 import Lomiri.Components 1.3
+import "../js/Progression.js" as Progression
 
 Rectangle {
     id: root
@@ -90,6 +91,18 @@ Rectangle {
                     font.pixelSize: units.gu(2.6)
                     font.weight: Font.Black
                     color: "#F5F3EF"
+                }
+
+                Label {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    text: root.isGrandVictory
+                          ? i18n.tr("100 LEVELS COMPLETE • THE MONOLITH CONQUERED")
+                          : Progression.getZoneTitle(root.stageNumber).toUpperCase()
+                    font.pixelSize: units.gu(1.1)
+                    font.weight: Font.Bold
+                    color: root.isGrandVictory
+                           ? "#FFD700"
+                           : (root.theme ? root.theme.accent : "#D99B26")
                 }
 
                 Rectangle {
@@ -224,7 +237,7 @@ Rectangle {
 
                         Label {
                             anchors.verticalCenter: parent.verticalCenter
-                            text: i18n.tr("Checkpoint Saved (Stage %1)").arg(root.nextCheckpoint)
+                            text: i18n.tr("Checkpoint Saved (Stage %1 • %2)").arg(root.nextCheckpoint).arg(Progression.getZoneName(root.nextCheckpoint))
                             font.pixelSize: units.gu(1.1)
                             font.weight: Font.DemiBold
                             color: root.theme ? root.theme.accent : "#D99B26"
