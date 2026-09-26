@@ -2,13 +2,16 @@
 
 function getSegmentIndex(towerAngle, ringOffset) {
     var effectiveAngle = towerAngle + (ringOffset || 0.0);
-    var relAngle = ((Math.PI / 2.0 - effectiveAngle) % (2.0 * Math.PI));
+    var fullCircle = 2.0 * Math.PI;
+    var relAngle = (Math.PI / 2.0 - effectiveAngle) % fullCircle;
     if (relAngle < 0) {
-        relAngle += 2.0 * Math.PI;
+        relAngle += fullCircle;
     }
-    var idx = Math.floor(relAngle / (Math.PI / 4.0));
-    if (idx < 0) idx = 0;
-    if (idx > 7) idx = 7;
+    if (relAngle >= fullCircle) {
+        relAngle -= fullCircle;
+    }
+    var idx = Math.floor(relAngle / (Math.PI / 4.0)) % 8;
+    if (idx < 0) idx = (idx % 8 + 8) % 8;
     return { index: idx, relAngle: relAngle };
 }
 
@@ -49,6 +52,11 @@ function updateRings(rings, dt) {
 
         if (rObj.rotationSpeed && rObj.rotationSpeed !== 0) {
             rObj.angleOffset += rObj.rotationSpeed * dt;
+            if (rObj.angleOffset > Math.PI * 2.0) {
+                rObj.angleOffset -= Math.PI * 2.0;
+            } else if (rObj.angleOffset < -Math.PI * 2.0) {
+                rObj.angleOffset += Math.PI * 2.0;
+            }
         } else if (rObj.isOscillating) {
             rObj.oscTime += dt * rObj.oscSpeed;
             rObj.angleOffset = Math.sin(rObj.oscTime) * rObj.oscAmplitude;
@@ -366,6 +374,11 @@ function updatePhysicsStep(game, dt, soundManager, stageClearTimer, units, Stora
     if (!game.isDragging && Math.abs(game.angularVelocity) > 0.0001) {
         game.towerAngle += game.angularVelocity;
         game.angularVelocity *= Math.pow(0.04, dt);
+    }
+    if (game.towerAngle > Math.PI * 2.0) {
+        game.towerAngle -= Math.PI * 2.0;
+    } else if (game.towerAngle < -Math.PI * 2.0) {
+        game.towerAngle += Math.PI * 2.0;
     }
 
     var currentDepth = Math.floor(game.ballY / game.ringSpacing);

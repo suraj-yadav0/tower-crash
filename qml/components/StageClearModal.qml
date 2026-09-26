@@ -23,6 +23,12 @@ Rectangle {
     anchors.fill: parent
     color: "#E608090A"
 
+    onVisibleChanged: {
+        if (visible) {
+            stageClearFlickable.contentY = 0;
+        }
+    }
+
     MouseArea {
         anchors.fill: parent
         onClicked: {}
@@ -32,7 +38,7 @@ Rectangle {
         id: outerShell
         anchors.centerIn: parent
         width: Math.min(parent.width - units.gu(4.0), units.gu(34))
-        height: modalContent.height + units.gu(4.0)
+        height: Math.min(parent.height - units.gu(2.4), modalContent.height + units.gu(2.8))
         radius: units.gu(2.0)
         color: root.theme ? root.theme.cardInner : "#0D0E0F"
         border.color: root.isGrandVictory
@@ -49,12 +55,25 @@ Rectangle {
         Behavior on opacity {
             NumberAnimation { duration: 180; easing.type: Easing.OutQuad }
         }
+        Behavior on height {
+            NumberAnimation { duration: 180; easing.type: Easing.OutQuad }
+        }
 
-        Column {
-            id: modalContent
-            anchors.centerIn: parent
-            width: parent.width - units.gu(4.0)
-            spacing: units.gu(1.1)
+        Flickable {
+            id: stageClearFlickable
+            anchors.fill: parent
+            anchors.margins: units.gu(1.4)
+            contentWidth: width
+            contentHeight: modalContent.height
+            clip: true
+            boundsBehavior: Flickable.DragAndOvershootBounds
+            flickableDirection: Flickable.VerticalFlick
+
+            Column {
+                id: modalContent
+                anchors.horizontalCenter: parent.horizontalCenter
+                width: parent.width
+                spacing: units.gu(1.1)
 
                 Rectangle {
                     anchors.horizontalCenter: parent.horizontalCenter
@@ -406,3 +425,4 @@ Rectangle {
             }
         }
     }
+}

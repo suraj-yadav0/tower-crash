@@ -377,7 +377,7 @@ Rectangle {
 
                         Label {
                             anchors.horizontalCenter: parent.horizontalCenter
-                            text: i18n.tr("DIFFICULTY MODE")
+                            text: root.isWelcomeOpen ? i18n.tr("DIFFICULTY MODE") : i18n.tr("DIFFICULTY MODE (Locked in Run)")
                             font.pixelSize: units.gu(0.9)
                             font.weight: Font.Bold
                             color: "#848890"
@@ -401,6 +401,7 @@ Rectangle {
                                     width: (diffRow.width - (3 * units.gu(0.4))) / 4.0
                                     height: units.gu(2.6)
                                     radius: units.gu(1.3)
+                                    opacity: (root.isWelcomeOpen || root.difficultyMode === modelData.mode) ? 1.0 : 0.45
                                     color: root.difficultyMode === modelData.mode
                                            ? modelData.color
                                            : (settingDiffMouse.pressed ? "#1E2024" : (root.theme ? root.theme.cardInner : "#0D0E0F"))
@@ -408,7 +409,7 @@ Rectangle {
                                                   ? modelData.color
                                                   : (root.theme ? root.theme.cardBorder : "#2A2C30")
                                     border.width: units.gu(0.1)
-                                    scale: settingDiffMouse.pressed ? 0.94 : 1.0
+                                    scale: (root.isWelcomeOpen && settingDiffMouse.pressed) ? 0.94 : 1.0
 
                                     Behavior on scale { NumberAnimation { duration: 100 } }
 
@@ -425,6 +426,7 @@ Rectangle {
                                     MouseArea {
                                         id: settingDiffMouse
                                         anchors.fill: parent
+                                        enabled: root.isWelcomeOpen
                                         onClicked: root.difficultyModeSelected(modelData.mode)
                                     }
                                 }

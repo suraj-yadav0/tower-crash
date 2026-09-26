@@ -29,6 +29,16 @@ Rectangle {
     visible: false
     z: 150
 
+    onVisibleChanged: {
+        if (visible) {
+            welcomeFlickable.contentY = 0;
+        }
+    }
+
+    onShowingHowToPlayChanged: {
+        welcomeFlickable.contentY = 0;
+    }
+
     MouseArea {
         anchors.fill: parent
         onClicked: {}
@@ -38,7 +48,7 @@ Rectangle {
         id: outerShell
         anchors.centerIn: parent
         width: Math.min(parent.width - units.gu(4.0), units.gu(36))
-        height: Math.min(parent.height - units.gu(2.4), (root.showingHowToPlay ? howToPlayContent.height : menuContent.height) + units.gu(3.6))
+        height: Math.min(parent.height - units.gu(2.4), (root.showingHowToPlay ? howToPlayContent.height : menuContent.height) + units.gu(2.8))
         radius: units.gu(2.0)
         color: root.theme ? root.theme.cardInner : "#0D0E0F"
         border.color: root.theme ? root.theme.cardBorder : "#2A2C30"
@@ -56,13 +66,23 @@ Rectangle {
             NumberAnimation { duration: 180; easing.type: Easing.OutQuad }
         }
 
-        // Main Menu View
-        Column {
-            id: menuContent
-            anchors.centerIn: parent
-            width: parent.width - units.gu(4.0)
-            spacing: units.gu(1.0)
-            visible: !root.showingHowToPlay
+        Flickable {
+            id: welcomeFlickable
+            anchors.fill: parent
+            anchors.margins: units.gu(1.4)
+            contentWidth: width
+            contentHeight: (root.showingHowToPlay ? howToPlayContent.height : menuContent.height)
+            clip: true
+            boundsBehavior: Flickable.DragAndOvershootBounds
+            flickableDirection: Flickable.VerticalFlick
+
+            // Main Menu View
+            Column {
+                id: menuContent
+                anchors.horizontalCenter: parent.horizontalCenter
+                width: parent.width
+                spacing: units.gu(1.0)
+                visible: !root.showingHowToPlay
 
                 // Mechanical Subtitle Badge
                 Rectangle {
@@ -597,8 +617,8 @@ Rectangle {
 
             HowToPlayView {
                 id: howToPlayContent
-                anchors.centerIn: parent
-                width: parent.width - units.gu(4.0)
+                anchors.horizontalCenter: parent.horizontalCenter
+                width: parent.width
                 visible: root.showingHowToPlay
                 theme: root.theme
                 onBackRequested: {
@@ -608,3 +628,4 @@ Rectangle {
             }
         }
     }
+}

@@ -271,7 +271,8 @@ MainView {
             function unlockCheckpoint(lvl) {
                 if (!Progression.hasCheckpoints(difficultyMode)) return;
                 var updated = Progression.unlockCheckpoint(lvl, unlockedCheckpoints, difficultyMode);
-                if (updated.length !== unlockedCheckpoints.length) {
+                var isNew = (updated.length !== unlockedCheckpoints.length);
+                if (isNew) {
                     unlockedCheckpoints = updated;
                     selectedCheckpoint = lvl;
                     if (Storage.saveUnlockedCheckpointsForMode) {
@@ -279,6 +280,13 @@ MainView {
                         Storage.saveSelectedCheckpointForMode(selectedCheckpoint, difficultyMode);
                     } else {
                         Storage.saveUnlockedCheckpoints(unlockedCheckpoints);
+                        Storage.saveSelectedCheckpoint(selectedCheckpoint);
+                    }
+                } else if (lvl > selectedCheckpoint) {
+                    selectedCheckpoint = lvl;
+                    if (Storage.saveSelectedCheckpointForMode) {
+                        Storage.saveSelectedCheckpointForMode(selectedCheckpoint, difficultyMode);
+                    } else {
                         Storage.saveSelectedCheckpoint(selectedCheckpoint);
                     }
                 }
@@ -312,7 +320,11 @@ MainView {
                 highestLevelReached = diffStats.highestLevelReached || 1;
                 unlockedCheckpoints = (m === 3) ? [1] : (diffStats.unlockedCheckpoints || [1]);
                 selectedCheckpoint = (m === 3) ? 1 : (diffStats.selectedCheckpoint || 1);
+                var keepSettings = isSettingsOpen;
                 initGame(selectedCheckpoint);
+                if (keepSettings) {
+                    isSettingsOpen = true;
+                }
             }
 
             function spawnParticles(x, y, count, color, speedMultiplier) {
@@ -368,8 +380,10 @@ MainView {
                 activePlatformY = (startIndex + 1) * ringSpacing;
                 gameOver = false;
                 isPaused = false;
-                isSettingsOpen = false;
-                wasPausedBeforeSettings = false;
+                if (!isWelcomeOpen) {
+                    isSettingsOpen = false;
+                    wasPausedBeforeSettings = false;
+                }
                 isStageClearOpen = false;
                 isStageClearCelebrating = false;
                 stageClearIntermissionTimer.stop();
@@ -493,12 +507,46 @@ MainView {
                 if (!gameOver && !isPaused && !isSettingsOpen && !isWelcomeOpen && !isStageClearOpen && !isStageClearCelebrating) {
                     towerAngle += 0.12;
                     gameCanvas.requestPaint();
+                    event.accepted = true;
                 }
             }
             Keys.onRightPressed: {
                 if (!gameOver && !isPaused && !isSettingsOpen && !isWelcomeOpen && !isStageClearOpen && !isStageClearCelebrating) {
                     towerAngle -= 0.12;
                     gameCanvas.requestPaint();
+                    event.accepted = true;
+                }
+            }
+            Keys.onReturnPressed: {
+                if (isWelcomeOpen) {
+                    startGame();
+                    event.accepted = true;
+                } else if (isStageClearOpen) {
+                    if (stageClearIsGrand) {
+                        goToMainMenu();
+                    } else {
+                        continueDescent();
+                    }
+                    event.accepted = true;
+                } else if (gameOver) {
+                    startGame();
+                    event.accepted = true;
+                }
+            }
+            Keys.onEnterPressed: {
+                if (isWelcomeOpen) {
+                    startGame();
+                    event.accepted = true;
+                } else if (isStageClearOpen) {
+                    if (stageClearIsGrand) {
+                        goToMainMenu();
+                    } else {
+                        continueDescent();
+                    }
+                    event.accepted = true;
+                } else if (gameOver) {
+                    startGame();
+                    event.accepted = true;
                 }
             }
             Keys.onSpacePressed: {
@@ -540,12 +588,19 @@ MainView {
                     if (!wasPausedBeforeSettings && !gameOver && !isWelcomeOpen && !isStageClearOpen) {
                         isPaused = false;
                     }
+                    event.accepted = true;
                 } else if (isStageClearOpen) {
                     goToMainMenu();
+                    event.accepted = true;
+                } else if (gameOver) {
+                    goToMainMenu();
+                    event.accepted = true;
                 } else if (!isWelcomeOpen && isPaused) {
                     isPaused = false;
+                    event.accepted = true;
                 } else if (!isWelcomeOpen && !gameOver && !isStageClearCelebrating) {
                     isPaused = true;
+                    event.accepted = true;
                 }
             }
 
@@ -654,9 +709,13 @@ MainView {
 
                 onReleased: {
                     gameContainer.isDragging = false;
+                    if (Date.now() - gameContainer.lastDragTime > 80) {
+                        gameContainer.angularVelocity = 0.0;
+                    }
                 }
                 onCanceled: {
                     gameContainer.isDragging = false;
+                    gameContainer.angularVelocity = 0.0;
                 }
             }
 
