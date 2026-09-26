@@ -1,5 +1,6 @@
 import QtQuick 2.9
 import Lomiri.Components 1.3
+import "../js/Progression.js" as Progression
 
 Rectangle {
     id: root
@@ -7,6 +8,7 @@ Rectangle {
     property bool soundEnabled: true
     property bool hapticsEnabled: true
     property int speedMode: 1
+    property int difficultyMode: 1
     property int currentCheckpoint: 1
     property var theme: null
 
@@ -21,6 +23,12 @@ Rectangle {
     anchors.fill: parent
     color: "#E608090A"
 
+    onVisibleChanged: {
+        if (visible) {
+            pauseFlickable.contentY = 0;
+        }
+    }
+
     MouseArea {
         anchors.fill: parent
         onClicked: {}
@@ -30,10 +38,10 @@ Rectangle {
         id: outerShell
         anchors.centerIn: parent
         width: Math.min(parent.width - units.gu(4.0), units.gu(34))
-        height: modalContent.height + units.gu(4.0)
+        height: Math.min(parent.height - units.gu(2.4), modalContent.height + units.gu(3.2))
         radius: units.gu(2.0)
         color: root.theme ? root.theme.cardInner : "#0D0E0F"
-        border.color: root.theme ? root.theme.cardBorder : "#2A2C30"
+        border.color: root.difficultyMode === 3 ? "#7A2E2E" : (root.theme ? root.theme.cardBorder : "#2A2C30")
         border.width: units.gu(0.12)
         scale: root.visible ? 1.0 : 0.88
         opacity: root.visible ? 1.0 : 0.0
@@ -44,12 +52,25 @@ Rectangle {
         Behavior on opacity {
             NumberAnimation { duration: 180; easing.type: Easing.OutQuad }
         }
+        Behavior on height {
+            NumberAnimation { duration: 180; easing.type: Easing.OutQuad }
+        }
 
-        Column {
-            id: modalContent
-            anchors.centerIn: parent
-            width: parent.width - units.gu(4.0)
-            spacing: units.gu(1.4)
+        Flickable {
+            id: pauseFlickable
+            anchors.fill: parent
+            anchors.margins: units.gu(1.4)
+            contentWidth: width
+            contentHeight: modalContent.height
+            clip: true
+            boundsBehavior: Flickable.DragAndOvershootBounds
+            flickableDirection: Flickable.VerticalFlick
+
+            Column {
+                id: modalContent
+                anchors.horizontalCenter: parent.horizontalCenter
+                width: parent.width
+                spacing: units.gu(1.2)
 
                 // Eyebrow Tag
                 Rectangle {
@@ -57,17 +78,17 @@ Rectangle {
                     width: eyebrowLabel.width + units.gu(2.0)
                     height: units.gu(2.2)
                     radius: units.gu(1.1)
-                    color: root.theme ? root.theme.accentBg : "#261E10"
-                    border.color: root.theme ? root.theme.accentBorder : "#544020"
+                    color: root.difficultyMode === 3 ? "#261010" : (root.theme ? root.theme.accentBg : "#261E10")
+                    border.color: root.difficultyMode === 3 ? "#7A2E2E" : (root.theme ? root.theme.accentBorder : "#544020")
                     border.width: units.gu(0.1)
 
                     Label {
                         id: eyebrowLabel
                         anchors.centerIn: parent
-                        text: i18n.tr("DESCENT SUSPENDED")
+                        text: root.difficultyMode === 3 ? i18n.tr("INSANE • PERMADEATH") : i18n.tr("DESCENT SUSPENDED")
                         font.pixelSize: units.gu(1.0)
                         font.weight: Font.Bold
-                        color: root.theme ? root.theme.accent : "#D99B26"
+                        color: root.difficultyMode === 3 ? "#F87171" : (root.theme ? root.theme.accent : "#D99B26")
                     }
                 }
 
@@ -145,7 +166,7 @@ Rectangle {
                     }
                 }
 
-                // Secondary CTA: Restart from Checkpoint
+                // Secondary CTA: Restart from Checkpoint or Restart Run
                 Rectangle {
                     id: restartCheckpointBtn
                     anchors.horizontalCenter: parent.horizontalCenter
@@ -153,7 +174,7 @@ Rectangle {
                     height: units.gu(4.4)
                     radius: units.gu(2.2)
                     color: restartCpMouse.pressed ? "#1E2024" : (root.theme ? root.theme.cardOuter : "#141517")
-                    border.color: root.theme ? root.theme.cardBorder : "#2A2C30"
+                    border.color: root.difficultyMode === 3 ? "#7A2E2E" : (root.theme ? root.theme.cardBorder : "#2A2C30")
                     border.width: units.gu(0.12)
                     scale: restartCpMouse.pressed ? 0.95 : 1.0
 
@@ -163,29 +184,40 @@ Rectangle {
 
                     Label {
                         anchors.centerIn: parent
-                        text: (root.currentCheckpoint > 1)
-                              ? i18n.tr("Restart Checkpoint (L%1)").arg(root.currentCheckpoint)
-                              : i18n.tr("Restart Stage")
-                        font.pixelSize: units.gu(1.45)
+                        text: (root.difficultyMode === 3)
+                              ? i18n.tr("Restart Run (Level 1)")
+                              : ((root.currentCheckpoint > 1)
+                                 ? i18n.tr("Restart Stage %1 (%2)").arg(root.currentCheckpoint).arg(Progression.getZoneName(root.currentCheckpoint))
+                                 : i18n.tr("Restart Stage"))
+                        font.pixelSize: units.gu(1.35)
                         font.weight: Font.DemiBold
-                        color: "#D6D5D2"
+                        color: (root.difficultyMode === 3) ? "#F87171" : "#D6D5D2"
+                        elide: Text.ElideRight
+                        width: parent.width - units.gu(2.0)
+                        horizontalAlignment: Text.AlignHCenter
                     }
 
                     MouseArea {
                         id: restartCpMouse
                         anchors.fill: parent
-                        onClicked: root.restartCheckpointRequested()
+                        onClicked: {
+                            if (root.difficultyMode === 3) {
+                                root.restartRequested();
+                            } else {
+                                root.restartCheckpointRequested();
+                            }
+                        }
                     }
                 }
 
-                // Tertiary CTA: Restart from Level 1 (visible when past checkpoint 1)
+                // Tertiary CTA: Restart from Level 1 (visible when past checkpoint 1 in non-permadeath modes)
                 Rectangle {
                     id: restartFromBeginningBtn
                     anchors.horizontalCenter: parent.horizontalCenter
                     width: parent.width
                     height: units.gu(4.4)
                     radius: units.gu(2.2)
-                    visible: root.currentCheckpoint > 1
+                    visible: root.difficultyMode !== 3 && root.currentCheckpoint > 1
                     color: restartBeginMouse.pressed ? "#1E2024" : (root.theme ? root.theme.cardOuter : "#141517")
                     border.color: root.theme ? root.theme.cardBorder : "#2A2C30"
                     border.width: units.gu(0.12)
@@ -231,7 +263,7 @@ Rectangle {
                         text: i18n.tr("Main Menu")
                         font.pixelSize: units.gu(1.45)
                         font.weight: Font.DemiBold
-                        color: "#848890"
+                        color: "#D6D5D2"
                     }
 
                     MouseArea {
@@ -466,4 +498,25 @@ Rectangle {
                 }
             }
         }
+
+        // Scroll Indicator Bar
+        Rectangle {
+            id: scrollIndicator
+            anchors.right: parent.right
+            anchors.rightMargin: units.gu(0.4)
+            width: units.gu(0.3)
+            height: Math.max(units.gu(2.0), (pauseFlickable.height / Math.max(1, pauseFlickable.contentHeight)) * (pauseFlickable.height - units.gu(2.0)))
+            radius: width / 2
+            color: root.theme ? root.theme.accent : "#D99B26"
+            visible: pauseFlickable.contentHeight > pauseFlickable.height
+            opacity: pauseFlickable.moving ? 0.75 : 0.25
+            y: units.gu(1.0) + (pauseFlickable.contentHeight > pauseFlickable.height
+               ? Math.max(0.0, Math.min(1.0, pauseFlickable.contentY / (pauseFlickable.contentHeight - pauseFlickable.height))) * (pauseFlickable.height - units.gu(2.0) - height)
+               : 0)
+
+            Behavior on opacity {
+                NumberAnimation { duration: 150 }
+            }
+        }
     }
+}
