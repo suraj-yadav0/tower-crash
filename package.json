@@ -6,7 +6,9 @@
   "scripts": {
     "test": "./tests/run_tests.sh",
     "test:unit": "node --test tests/unit/*.test.js",
-    "test:qml": "node tests/run-qml-tests.js"
+    "test:qml": "node tests/run-qml-tests.js",
+    "lint": "find qml tests/qml -name '*.qml' -exec qmllint {} +",
+    "format:check": "./tests/check_formatting.sh"
   },
   "keywords": [
     "game",

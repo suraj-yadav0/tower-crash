@@ -1,0 +1,100 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - '**'
+  pull_request:
+    branches:
+      - '**'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  unit-tests:
+    name: JavaScript Unit Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Run Unit Test Suite
+        run: npm run test:unit
+
+  lint-and-format:
+    name: Lint & Code Style
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install QML Lint Tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y qtdeclarative5-dev-tools
+
+      - name: Run QML Lint
+        run: npm run lint
+
+      - name: Check Formatting and Style
+        run: npm run format:check
+
+  qml-integration-tests:
+    name: QML Integration Tests
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install Qt and Lomiri Components
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            qtdeclarative5-dev-tools \
+            qmlscene \
+            qml-module-qtquick2 \
+            qml-module-qtquick-window2 \
+            qml-module-qtquick-layouts \
+            qml-module-qtquick-localstorage \
+            qml-module-lomiri-components \
+            xvfb
+
+      - name: Run QML Integration Tests
+        run: |
+          xvfb-run -a node tests/run-qml-tests.js
+
+  build-package:
+    name: Package Verification
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Packaging Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y qt5-qmake qtbase5-dev click click-reviewers-tools
+          python3 -m pip install --upgrade pip
+          pip install clickable
+
+      - name: Build Click Package
+        run: |
+          clickable --version
+          clickable build --skip-image-setup --non-interactive
