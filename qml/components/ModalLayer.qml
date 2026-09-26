@@ -90,6 +90,12 @@ Item {
                 onCloseHowToPlayRequested: {
                     if (root.soundManager) root.soundManager.buttonHaptic();
                 }
+                onAboutRequested: {
+                    if (root.soundManager) root.soundManager.buttonHaptic();
+                }
+                onCloseAboutRequested: {
+                    if (root.soundManager) root.soundManager.buttonHaptic();
+                }
             }
         }
     }

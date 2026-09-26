@@ -49,6 +49,13 @@ Item {
                 target.playRequested();
                 if (!playFired) throw new Error("playRequested signal failed");
 
+                var aboutFired = false;
+                target.aboutRequested.connect(function() {
+                    aboutFired = true;
+                });
+                target.aboutRequested();
+                if (!aboutFired) throw new Error("aboutRequested signal failed");
+
                 console.log("PASS: test_welcome_screen");
                 Qt.quit();
             } catch (e) {

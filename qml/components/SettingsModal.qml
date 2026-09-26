@@ -17,6 +17,7 @@ Rectangle {
     property bool isWelcomeOpen: false
     property var theme: null
     property bool showingThemePicker: false
+    property bool showingAbout: false
 
     signal closeRequested()
     signal mainMenuRequested()
@@ -45,11 +46,16 @@ Rectangle {
     onVisibleChanged: {
         if (visible) {
             root.showingThemePicker = false;
+            root.showingAbout = false;
             modalFlickable.contentY = 0;
         }
     }
 
     onShowingThemePickerChanged: {
+        modalFlickable.contentY = 0;
+    }
+
+    onShowingAboutChanged: {
         modalFlickable.contentY = 0;
     }
 
@@ -69,7 +75,7 @@ Rectangle {
         width: Math.min(parent.width - units.gu(3.2), units.gu(36))
         height: Math.min(
             parent.height - units.gu(2.4),
-            (root.showingThemePicker ? paletteContent.height : modalContent.height) + units.gu(2.8)
+            (root.showingThemePicker ? paletteContent.height : (root.showingAbout ? aboutContent.height : modalContent.height)) + units.gu(2.8)
         )
         radius: units.gu(2.0)
         color: root.theme ? root.theme.cardInner : "#0D0E0F"
@@ -93,7 +99,7 @@ Rectangle {
             anchors.fill: parent
             anchors.margins: units.gu(1.2)
             contentWidth: width
-            contentHeight: root.showingThemePicker ? paletteContent.height : modalContent.height
+            contentHeight: root.showingThemePicker ? paletteContent.height : (root.showingAbout ? aboutContent.height : modalContent.height)
             clip: true
             boundsBehavior: Flickable.DragAndOvershootBounds
             flickableDirection: Flickable.VerticalFlick
@@ -103,7 +109,7 @@ Rectangle {
                 id: modalContent
                 width: parent.width
                 spacing: units.gu(0.85)
-                visible: !root.showingThemePicker
+                visible: !root.showingThemePicker && !root.showingAbout
 
                 // Eyebrow Tag
                 Rectangle {
@@ -811,6 +817,85 @@ Rectangle {
                     }
                 }
 
+                // About App Drilldown Card
+                Rectangle {
+                    id: aboutSummaryCard
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    width: parent.width
+                    height: units.gu(4.4)
+                    radius: units.gu(1.4)
+                    color: aboutCardMouse.pressed ? "#1E2024" : (root.theme ? root.theme.cardOuter : "#141517")
+                    border.color: aboutCardMouse.pressed
+                                  ? (root.theme ? root.theme.accent : "#D99B26")
+                                  : (root.theme ? root.theme.cardBorder : "#2A2C30")
+                    border.width: units.gu(0.12)
+                    scale: aboutCardMouse.pressed ? 0.98 : 1.0
+
+                    Behavior on scale { NumberAnimation { duration: 100 } }
+
+                    Row {
+                        anchors.fill: parent
+                        anchors.leftMargin: units.gu(1.4)
+                        anchors.rightMargin: units.gu(1.4)
+                        spacing: units.gu(1.0)
+
+                        Column {
+                            anchors.verticalCenter: parent.verticalCenter
+                            spacing: units.gu(0.15)
+                            width: parent.width - badgeRect.width - arrowLabel.width - units.gu(2.4)
+
+                            Label {
+                                text: i18n.tr("About Tower Crash")
+                                font.pixelSize: units.gu(1.15)
+                                font.weight: Font.Bold
+                                color: "#F5F3EF"
+                            }
+
+                            Label {
+                                text: i18n.tr("v1.0.0 • Specifications & Credits")
+                                font.pixelSize: units.gu(0.85)
+                                color: "#848890"
+                            }
+                        }
+
+                        Rectangle {
+                            id: badgeRect
+                            anchors.verticalCenter: parent.verticalCenter
+                            width: units.gu(4.4)
+                            height: units.gu(1.8)
+                            radius: units.gu(0.9)
+                            color: root.theme ? root.theme.accentBg : "#261E10"
+                            border.color: root.theme ? root.theme.accentBorder : "#544020"
+                            border.width: units.gu(0.08)
+
+                            Label {
+                                anchors.centerIn: parent
+                                text: "INFO"
+                                font.pixelSize: units.gu(0.75)
+                                font.weight: Font.Bold
+                                color: root.theme ? root.theme.accent : "#D99B26"
+                            }
+                        }
+
+                        Label {
+                            id: arrowLabel
+                            anchors.verticalCenter: parent.verticalCenter
+                            text: ">"
+                            font.pixelSize: units.gu(1.2)
+                            font.weight: Font.Bold
+                            color: "#848890"
+                        }
+                    }
+
+                    MouseArea {
+                        id: aboutCardMouse
+                        anchors.fill: parent
+                        onClicked: {
+                            root.showingAbout = true;
+                        }
+                    }
+                }
+
                 // Done CTA Button
                 Rectangle {
                     id: doneBtn
@@ -888,6 +973,14 @@ Rectangle {
                 themeMode: root.themeMode
                 onThemeModeSelected: root.themeModeSelected(newMode)
                 onDoneRequested: root.showingThemePicker = false
+            }
+
+            AboutView {
+                id: aboutContent
+                width: parent.width
+                visible: root.showingAbout
+                theme: root.theme
+                onBackRequested: root.showingAbout = false
             }
         }
 
