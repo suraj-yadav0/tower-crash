@@ -12,6 +12,7 @@ Rectangle {
     property int selectedCheckpoint: 1
     property var unlockedCheckpoints: [1]
     property bool showingHowToPlay: false
+    property bool showingAbout: false
     property var theme: null
     property string themeName: ""
 
@@ -23,6 +24,8 @@ Rectangle {
     signal speedCycleRequested()
     signal howToPlayRequested()
     signal closeHowToPlayRequested()
+    signal aboutRequested()
+    signal closeAboutRequested()
 
     anchors.fill: parent
     color: "#E608090A"
@@ -32,10 +35,16 @@ Rectangle {
     onVisibleChanged: {
         if (visible) {
             welcomeFlickable.contentY = 0;
+            root.showingAbout = false;
+            root.showingHowToPlay = false;
         }
     }
 
     onShowingHowToPlayChanged: {
+        welcomeFlickable.contentY = 0;
+    }
+
+    onShowingAboutChanged: {
         welcomeFlickable.contentY = 0;
     }
 
@@ -48,7 +57,10 @@ Rectangle {
         id: outerShell
         anchors.centerIn: parent
         width: Math.min(parent.width - units.gu(4.0), units.gu(36))
-        height: Math.min(parent.height - units.gu(2.4), (root.showingHowToPlay ? howToPlayContent.height : menuContent.height) + units.gu(2.8))
+        height: Math.min(
+            parent.height - units.gu(2.4),
+            (root.showingHowToPlay ? howToPlayContent.height : (root.showingAbout ? aboutWelcomeContent.height : menuContent.height)) + units.gu(2.8)
+        )
         radius: units.gu(2.0)
         color: root.theme ? root.theme.cardInner : "#0D0E0F"
         border.color: root.theme ? root.theme.cardBorder : "#2A2C30"
@@ -71,7 +83,7 @@ Rectangle {
             anchors.fill: parent
             anchors.margins: units.gu(1.4)
             contentWidth: width
-            contentHeight: (root.showingHowToPlay ? howToPlayContent.height : menuContent.height)
+            contentHeight: root.showingHowToPlay ? howToPlayContent.height : (root.showingAbout ? aboutWelcomeContent.height : menuContent.height)
             clip: true
             boundsBehavior: Flickable.DragAndOvershootBounds
             flickableDirection: Flickable.VerticalFlick
@@ -82,7 +94,7 @@ Rectangle {
                 anchors.horizontalCenter: parent.horizontalCenter
                 width: parent.width
                 spacing: units.gu(1.0)
-                visible: !root.showingHowToPlay
+                visible: !root.showingHowToPlay && !root.showingAbout
 
                 // Mechanical Subtitle Badge
                 Rectangle {
@@ -613,6 +625,53 @@ Rectangle {
                         }
                     }
                 }
+
+                // About App Button
+                Rectangle {
+                    id: welcomeAboutBtn
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    width: parent.width
+                    height: units.gu(3.4)
+                    radius: units.gu(1.7)
+                    color: welcomeAboutMouse.pressed ? "#1E2024" : (root.theme ? root.theme.cardOuter : "#141517")
+                    border.color: welcomeAboutMouse.pressed
+                                  ? (root.theme ? root.theme.accent : "#D99B26")
+                                  : (root.theme ? root.theme.cardBorder : "#2A2C30")
+                    border.width: units.gu(0.1)
+                    scale: welcomeAboutMouse.pressed ? 0.98 : 1.0
+
+                    Behavior on scale { NumberAnimation { duration: 100 } }
+
+                    Row {
+                        anchors.centerIn: parent
+                        spacing: units.gu(0.6)
+
+                        Label {
+                            text: i18n.tr("About Tower Crash")
+                            font.pixelSize: units.gu(1.05)
+                            font.weight: Font.DemiBold
+                            color: "#D6D5D2"
+                            anchors.verticalCenter: parent.verticalCenter
+                        }
+
+                        Label {
+                            text: "•  v1.0.0"
+                            font.pixelSize: units.gu(0.95)
+                            color: root.theme ? root.theme.accent : "#D99B26"
+                            font.weight: Font.Bold
+                            anchors.verticalCenter: parent.verticalCenter
+                        }
+                    }
+
+                    MouseArea {
+                        id: welcomeAboutMouse
+                        anchors.fill: parent
+                        onClicked: {
+                            root.showingAbout = true;
+                            root.aboutRequested();
+                        }
+                    }
+                }
             }
 
             HowToPlayView {
@@ -624,6 +683,18 @@ Rectangle {
                 onBackRequested: {
                     root.showingHowToPlay = false;
                     root.closeHowToPlayRequested();
+                }
+            }
+
+            AboutView {
+                id: aboutWelcomeContent
+                anchors.horizontalCenter: parent.horizontalCenter
+                width: parent.width
+                visible: root.showingAbout
+                theme: root.theme
+                onBackRequested: {
+                    root.showingAbout = false;
+                    root.closeAboutRequested();
                 }
             }
         }
