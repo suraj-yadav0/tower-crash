@@ -15,7 +15,7 @@ concurrency:
 jobs:
   unit-tests:
     name: JavaScript Unit Tests
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -30,7 +30,7 @@ jobs:
 
   lint-and-format:
     name: Lint & Code Style
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
