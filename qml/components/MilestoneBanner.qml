@@ -21,7 +21,7 @@ Item {
     Rectangle {
         id: outerShell
         anchors.centerIn: parent
-        width: Math.min(parent ? parent.width - units.gu(2.0) : units.gu(34), contentCol.width + units.gu(4.4))
+        width: Math.min(units.gu(34), contentCol.width + units.gu(4.4))
         height: contentCol.height + units.gu(2.6)
         radius: units.gu(1.8)
         color: root.isZoneTransition ? "#10161C" : (root.isCheckpoint ? "#2E2308" : (root.theme ? root.theme.cardInner : "#0D0E0F"))

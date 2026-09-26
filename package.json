@@ -1,0 +1,19 @@
+{
+  "name": "tower-crash",
+  "version": "1.0.0",
+  "description": "Tower Crash 3D Helix Action Game for Ubuntu Touch / Lomiri",
+  "main": "qml/Main.qml",
+  "scripts": {
+    "test": "./tests/run_tests.sh",
+    "test:unit": "node --test tests/unit/*.test.js",
+    "test:qml": "node tests/run-qml-tests.js"
+  },
+  "keywords": [
+    "game",
+    "qml",
+    "lomiri",
+    "ubuntu-touch"
+  ],
+  "author": "Suraj Yadav",
+  "license": "GPL-3.0"
+}
