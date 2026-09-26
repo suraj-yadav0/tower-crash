@@ -6,7 +6,8 @@ function resetGenerator() {
     lastGapStart = 5;
 }
 
-function createRing(index, ringSpacing, prevRing) {
+function createRing(index, ringSpacing, prevRing, difficultyMode) {
+    var mode = (difficultyMode !== undefined) ? difficultyMode : 1;
     var ringY = (index + 1) * ringSpacing;
     var segments = [0, 0, 0, 0, 0, 0, 0, 0];
     var levelRings = 20;
@@ -21,7 +22,16 @@ function createRing(index, ringSpacing, prevRing) {
         segments[1] = 0;
         segments[2] = 0;
         segments[3] = 0;
-        var initialGap = (level <= 2) ? 3 : ((level <= 5) ? 2 : 1);
+        var initialGap;
+        if (mode === 0) {
+            initialGap = (level <= 5) ? 3 : 2;
+        } else if (mode === 2) {
+            initialGap = (level <= 2) ? 2 : 1;
+        } else if (mode === 3) {
+            initialGap = 1;
+        } else {
+            initialGap = (level <= 2) ? 3 : ((level <= 5) ? 2 : 1);
+        }
         var gapStart = 5;
         for (var g = 0; g < initialGap; g++) {
             segments[(gapStart + g) % 8] = 1;
@@ -105,6 +115,21 @@ function createRing(index, ringSpacing, prevRing) {
             gapWidth = 1;
             hazardCount = (Math.random() < 0.4) ? 4 : 5;
             maxOffset = 4;
+        }
+
+        if (mode === 0) {
+            gapWidth = Math.min(3, gapWidth + 1);
+            if (level <= 20) gapWidth = Math.max(2, gapWidth);
+            hazardCount = Math.max(0, hazardCount - 1);
+            if (hazardCount > 3) hazardCount = 3;
+        } else if (mode === 2) {
+            if (level >= 15) gapWidth = 1;
+            hazardCount = Math.min(5, hazardCount + 1);
+            maxOffset = Math.min(4, maxOffset + 1);
+        } else if (mode === 3) {
+            gapWidth = (level <= 3) ? 2 : 1;
+            hazardCount = (level <= 3) ? 1 : ((level <= 10) ? 2 : Math.min(5, Math.max(3, hazardCount + 1)));
+            maxOffset = Math.min(4, maxOffset + 1);
         }
 
         // Determine reference gap position from previous ring if available
@@ -216,8 +241,9 @@ function createRing(index, ringSpacing, prevRing) {
             }
         }
 
-        // Zone 5+ Fragile Safe segments (type 3): break upon first bounce
-        if (level >= 41 && !isGoal && Math.random() < 0.30) {
+        // Fragile Safe segments (type 3): break upon first bounce
+        var fragileThreshold = (mode === 0) ? 999 : ((mode === 2) ? 30 : ((mode === 3) ? 15 : 41));
+        if (level >= fragileThreshold && !isGoal && Math.random() < (mode === 3 ? 0.40 : 0.30)) {
             for (var fs = 0; fs < 8; fs++) {
                 if (segments[fs] === 0) {
                     segments[fs] = 3;
@@ -226,20 +252,25 @@ function createRing(index, ringSpacing, prevRing) {
             }
         }
 
-        // Zone 4+ Rotating rings mechanic
+        // Rotating rings mechanic
         var rotationSpeed = 0.0;
-        if (level >= 31 && !isGoal && posInLevel > 1 && Math.random() < 0.22) {
-            rotationSpeed = (Math.random() < 0.5 ? 1 : -1) * (0.45 + Math.random() * 0.4);
+        var rotThreshold = (mode === 0) ? 50 : ((mode === 2) ? 20 : ((mode === 3) ? 10 : 31));
+        var rotChance = (mode === 0) ? 0.15 : ((mode === 2) ? 0.30 : ((mode === 3) ? 0.40 : 0.22));
+        var rotSpeedMult = (mode === 0) ? 0.6 : ((mode === 2) ? 1.25 : ((mode === 3) ? 1.4 : 1.0));
+        if (level >= rotThreshold && !isGoal && posInLevel > 1 && Math.random() < rotChance) {
+            rotationSpeed = (Math.random() < 0.5 ? 1 : -1) * (0.45 + Math.random() * 0.4) * rotSpeedMult;
         }
 
-        // Zone 7+ Moving / Oscillating gap mechanic
+        // Moving / Oscillating gap mechanic
         var isOscillating = false;
         var oscSpeed = 0.0;
         var oscAmplitude = 0.0;
-        if (level >= 61 && !isGoal && rotationSpeed === 0 && Math.random() < 0.25) {
+        var oscThreshold = (mode === 0) ? 999 : ((mode === 2) ? 40 : ((mode === 3) ? 25 : 61));
+        var oscChance = (mode === 0) ? 0.0 : ((mode === 2) ? 0.30 : ((mode === 3) ? 0.35 : 0.25));
+        if (level >= oscThreshold && !isGoal && rotationSpeed === 0 && Math.random() < oscChance) {
             isOscillating = true;
-            oscSpeed = 1.4 + Math.random() * 0.8;
-            oscAmplitude = 0.35;
+            oscSpeed = (1.4 + Math.random() * 0.8) * (mode === 3 ? 1.3 : 1.0);
+            oscAmplitude = (mode === 3 ? 0.45 : 0.35);
         }
     }
 

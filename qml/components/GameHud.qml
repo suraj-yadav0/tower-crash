@@ -3,6 +3,7 @@ import Lomiri.Components 1.3
 
 Column {
     id: root
+    z: 10
 
     property int score: 0
     property int bestScore: 0
@@ -15,28 +16,28 @@ Column {
     property int checkpointIndex: Math.floor((currentLevel - 1) / 5) + 1
     property int stageInCheckpoint: ((currentLevel - 1) % 5) + 1
 
-    width: units.gu(36)
-    spacing: units.gu(0.45)
+    width: units.gu(32)
+    spacing: units.gu(0.4)
 
-    // Double-Bezel Level Progression Card
+    // Sleek Level Progression Card
     Rectangle {
         anchors.horizontalCenter: parent.horizontalCenter
-        width: Math.min(parent.width, units.gu(36))
-        height: units.gu(3.8)
-        radius: units.gu(1.9)
+        width: Math.min(parent.width, units.gu(30))
+        height: units.gu(3.2)
+        radius: units.gu(1.6)
         color: root.theme ? root.theme.cardInner : "#0D0E0F"
         border.color: root.theme ? root.theme.cardBorder : "#2A2C30"
         border.width: units.gu(0.12)
 
         Row {
             anchors.centerIn: parent
-            spacing: units.gu(0.9)
+            spacing: units.gu(0.8)
 
             // Current Level Tag
             Rectangle {
-                width: units.gu(5.0)
-                height: units.gu(2.6)
-                radius: units.gu(1.3)
+                width: units.gu(4.4)
+                height: units.gu(2.2)
+                radius: units.gu(1.1)
                 color: root.theme ? root.theme.accentBg : "#261E10"
                 border.color: root.theme ? root.theme.accentBorder : "#544020"
                 border.width: units.gu(0.12)
@@ -45,7 +46,7 @@ Column {
                 Label {
                     anchors.centerIn: parent
                     text: i18n.tr("L%1").arg(root.currentLevel)
-                    font.pixelSize: units.gu(1.3)
+                    font.pixelSize: units.gu(1.2)
                     font.weight: Font.Bold
                     color: root.theme ? root.theme.accent : "#D99B26"
                 }
@@ -53,9 +54,9 @@ Column {
 
             // Recessed Progress Bar with Glowing Fill
             Rectangle {
-                width: units.gu(18.5)
-                height: units.gu(0.85)
-                radius: units.gu(0.42)
+                width: units.gu(16.0)
+                height: units.gu(0.7)
+                radius: units.gu(0.35)
                 color: "#070809"
                 border.color: root.theme ? root.theme.cardBorder : "#2A2C30"
                 border.width: units.gu(0.08)
@@ -76,9 +77,9 @@ Column {
 
             // Next Level Tag
             Rectangle {
-                width: units.gu(5.0)
-                height: units.gu(2.6)
-                radius: units.gu(1.3)
+                width: units.gu(4.4)
+                height: units.gu(2.2)
+                radius: units.gu(1.1)
                 color: root.theme ? root.theme.cardOuter : "#141517"
                 border.color: root.theme ? root.theme.cardBorder : "#2A2C30"
                 border.width: units.gu(0.1)
@@ -87,7 +88,7 @@ Column {
                 Label {
                     anchors.centerIn: parent
                     text: i18n.tr("L%1").arg(root.currentLevel + 1)
-                    font.pixelSize: units.gu(1.3)
+                    font.pixelSize: units.gu(1.2)
                     font.weight: Font.DemiBold
                     color: "#848890"
                 }
@@ -95,47 +96,7 @@ Column {
         }
     }
 
-    // Checkpoint Stage Tracker Pill
-    Rectangle {
-        anchors.horizontalCenter: parent.horizontalCenter
-        width: cpStageLabel.width + units.gu(1.8)
-        height: units.gu(1.8)
-        radius: units.gu(0.9)
-        color: root.theme ? root.theme.cardInner : "#0D0E0F"
-        border.color: root.theme ? root.theme.cardBorder : "#2A2C30"
-        border.width: units.gu(0.08)
-
-        Label {
-            id: cpStageLabel
-            anchors.centerIn: parent
-            text: i18n.tr("CP %1 • STAGE %2/5").arg(root.checkpointIndex).arg(root.stageInCheckpoint)
-            font.pixelSize: units.gu(0.85)
-            font.weight: Font.Bold
-            color: root.theme ? root.theme.accent : "#D99B26"
-        }
-    }
-
-    // Eyebrow tag
-    Rectangle {
-        anchors.horizontalCenter: parent.horizontalCenter
-        width: eyebrowLabel.width + units.gu(2.2)
-        height: units.gu(1.9)
-        radius: units.gu(0.95)
-        color: root.theme ? root.theme.cardInner : "#0D0E0F"
-        border.color: root.theme ? root.theme.cardBorder : "#2A2C30"
-        border.width: units.gu(0.08)
-
-        Label {
-            id: eyebrowLabel
-            anchors.centerIn: parent
-            text: i18n.tr("SCORE")
-            font.pixelSize: units.gu(0.95)
-            font.weight: Font.Bold
-            color: "#848890"
-        }
-    }
-
-    // Heroic Score with drop depth
+    // Heroic Score Display
     Item {
         anchors.horizontalCenter: parent.horizontalCenter
         width: scoreLabel.width
@@ -145,24 +106,27 @@ Column {
             anchors.centerIn: parent
             anchors.verticalCenterOffset: units.gu(0.12)
             text: root.score.toString()
-            font.pixelSize: units.gu(5.0)
+            font.pixelSize: units.gu(4.4)
             font.weight: Font.Black
             color: "#66000000"
+            scale: scoreLabel.scale
         }
 
         Label {
             id: scoreLabel
             anchors.centerIn: parent
             text: root.score.toString()
-            font.pixelSize: units.gu(5.0)
+            font.pixelSize: units.gu(4.4)
             font.weight: Font.Black
-            color: "#F5F3EF"
+            color: (root.bestScore > 0 && root.score >= root.bestScore)
+                   ? (root.theme ? root.theme.accent : "#FFD700")
+                   : "#F5F3EF"
             transformOrigin: Item.Center
 
             SequentialAnimation {
                 id: scorePopAnim
-                NumberAnimation { target: scoreLabel; property: "scale"; to: 1.18; duration: 80; easing.type: Easing.OutQuad }
-                NumberAnimation { target: scoreLabel; property: "scale"; to: 1.0; duration: 150; easing.type: Easing.OutBack }
+                NumberAnimation { target: scoreLabel; property: "scale"; to: 1.16; duration: 80; easing.type: Easing.OutQuad }
+                NumberAnimation { target: scoreLabel; property: "scale"; to: 1.0; duration: 140; easing.type: Easing.OutBack }
             }
 
             onTextChanged: {
@@ -173,54 +137,20 @@ Column {
         }
     }
 
-    // Floating Best Score capsule
-    Rectangle {
-        anchors.horizontalCenter: parent.horizontalCenter
-        width: bestRow.width + units.gu(2.4)
-        height: units.gu(2.4)
-        radius: units.gu(1.2)
-        color: root.theme ? root.theme.cardInner : "#0D0E0F"
-        border.color: root.theme ? root.theme.cardBorder : "#2A2C30"
-        border.width: units.gu(0.1)
-        visible: root.bestScore > 0
-
-        Row {
-            id: bestRow
-            anchors.centerIn: parent
-            spacing: units.gu(0.8)
-
-            Rectangle {
-                width: units.gu(0.75)
-                height: units.gu(0.75)
-                radius: units.gu(0.375)
-                color: root.theme ? root.theme.ballMid : "#E6D7BA"
-                anchors.verticalCenter: parent.verticalCenter
-            }
-
-            Label {
-                text: i18n.tr("BEST %1").arg(root.bestScore)
-                font.pixelSize: units.gu(1.2)
-                font.weight: Font.Bold
-                color: root.theme ? root.theme.ballMid : "#E6D7BA"
-                anchors.verticalCenter: parent.verticalCenter
-            }
-        }
-    }
-
     // Dynamic Streak & Fireball status pill
     Rectangle {
         id: streakPill
         anchors.horizontalCenter: parent.horizontalCenter
-        width: streakText.width + units.gu(3.2)
-        height: units.gu(3.2)
-        radius: units.gu(1.6)
+        width: streakText.width + units.gu(2.4)
+        height: units.gu(2.4)
+        radius: units.gu(1.2)
         color: root.isSuperFall
                ? "#9E2B2B"
                : (root.theme ? root.theme.accentBg : "#261E10")
         border.color: root.isSuperFall
                       ? (root.theme ? root.theme.topHazard : "#BA3C3C")
                       : (root.theme ? root.theme.accent : "#D99B26")
-        border.width: units.gu(0.14)
+        border.width: units.gu(0.12)
         visible: root.streak > 1 || root.isSuperFall
         opacity: visible ? 1.0 : 0.0
         scale: visible ? 1.0 : 0.85
@@ -241,12 +171,12 @@ Column {
 
         Row {
             anchors.centerIn: parent
-            spacing: units.gu(0.8)
+            spacing: units.gu(0.6)
 
             Rectangle {
-                width: units.gu(0.9)
-                height: units.gu(0.9)
-                radius: units.gu(0.45)
+                width: units.gu(0.7)
+                height: units.gu(0.7)
+                radius: units.gu(0.35)
                 color: root.isSuperFall ? "#FFFFFF" : (root.theme ? root.theme.accent : "#D99B26")
                 anchors.verticalCenter: parent.verticalCenter
             }
@@ -254,7 +184,7 @@ Column {
             Label {
                 id: streakText
                 text: root.isSuperFall ? i18n.tr("IMPACT OVERDRIVE!") : i18n.tr("COMBO x%1").arg(root.streak)
-                font.pixelSize: units.gu(1.3)
+                font.pixelSize: units.gu(1.1)
                 font.weight: Font.Bold
                 color: root.isSuperFall ? "#FFFFFF" : (root.theme ? root.theme.accentText : "#F5F3EF")
                 anchors.verticalCenter: parent.verticalCenter
