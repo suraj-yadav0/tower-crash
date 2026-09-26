@@ -1,6 +1,6 @@
 {
     "name": "tower-crash.surajyadav",
-    "description": "Spiral ball jump game for Ubuntu Touch",
+    "description": "Tactile helical descent arcade game for Ubuntu Touch featuring procedurally generated towers, 10 biome zones, 4 difficulty modes, custom color palettes, and local SQLite state persistence.",
     "architecture": "all",
     "title": "Tower Crash",
     "icon": "assets/logo.svg",

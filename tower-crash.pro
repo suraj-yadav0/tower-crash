@@ -14,6 +14,7 @@ QML_FILES += \
     qml/components/ThemePickerView.qml \
     qml/components/WelcomeScreen.qml \
     qml/components/HowToPlayView.qml \
+    qml/components/AboutView.qml \
     qml/components/GameOverModal.qml \
     qml/components/StageClearModal.qml \
     qml/components/SoundManager.qml \
