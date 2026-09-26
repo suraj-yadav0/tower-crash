@@ -9,18 +9,22 @@ Rectangle {
     property real soundVolume: 0.85
     property bool hapticsEnabled: true
     property int speedMode: 1
+    property int difficultyMode: 1
     property int themeMode: 0
     property real touchSensitivityMultiplier: 1.0
     property int bestScore: 0
     property int totalRings: 0
+    property bool isWelcomeOpen: false
     property var theme: null
     property bool showingThemePicker: false
 
     signal closeRequested()
+    signal mainMenuRequested()
     signal toggleSoundRequested()
     signal volumeChanged(real newVolume)
     signal toggleHapticsRequested()
     signal speedModeSelected(int newMode)
+    signal difficultyModeSelected(int newMode)
     signal touchSensitivitySelected(real newSensitivity)
     signal themeModeSelected(int newMode)
 
@@ -347,6 +351,82 @@ Rectangle {
                                     id: fastMouse
                                     anchors.fill: parent
                                     onClicked: root.speedModeSelected(2)
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // Difficulty Mode Card
+                Rectangle {
+                    id: diffCard
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    width: parent.width
+                    height: diffCol.height + units.gu(1.6)
+                    radius: units.gu(1.4)
+                    color: root.theme ? root.theme.cardOuter : "#141517"
+                    border.color: root.theme ? root.theme.cardBorder : "#2A2C30"
+                    border.width: units.gu(0.1)
+
+                    Column {
+                        id: diffCol
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        anchors.verticalCenter: parent.verticalCenter
+                        width: parent.width - units.gu(2.0)
+                        spacing: units.gu(0.5)
+
+                        Label {
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            text: i18n.tr("DIFFICULTY MODE")
+                            font.pixelSize: units.gu(0.9)
+                            font.weight: Font.Bold
+                            color: "#848890"
+                        }
+
+                        Row {
+                            id: diffRow
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            width: parent.width
+                            spacing: units.gu(0.4)
+
+                            Repeater {
+                                model: [
+                                    { mode: 0, label: i18n.tr("Easy"), color: "#34D399" },
+                                    { mode: 1, label: i18n.tr("Normal"), color: (root.theme ? root.theme.accent : "#D99B26") },
+                                    { mode: 2, label: i18n.tr("Hard"), color: "#FB923C" },
+                                    { mode: 3, label: i18n.tr("Insane"), color: "#F87171" }
+                                ]
+
+                                Rectangle {
+                                    width: (diffRow.width - (3 * units.gu(0.4))) / 4.0
+                                    height: units.gu(2.6)
+                                    radius: units.gu(1.3)
+                                    color: root.difficultyMode === modelData.mode
+                                           ? modelData.color
+                                           : (settingDiffMouse.pressed ? "#1E2024" : (root.theme ? root.theme.cardInner : "#0D0E0F"))
+                                    border.color: root.difficultyMode === modelData.mode
+                                                  ? modelData.color
+                                                  : (root.theme ? root.theme.cardBorder : "#2A2C30")
+                                    border.width: units.gu(0.1)
+                                    scale: settingDiffMouse.pressed ? 0.94 : 1.0
+
+                                    Behavior on scale { NumberAnimation { duration: 100 } }
+
+                                    Label {
+                                        anchors.centerIn: parent
+                                        text: modelData.label
+                                        font.pixelSize: units.gu(1.0)
+                                        font.weight: Font.Bold
+                                        color: root.difficultyMode === modelData.mode
+                                               ? "#0B0C0D"
+                                               : (modelData.mode === 3 ? "#E06666" : "#8E929A")
+                                    }
+
+                                    MouseArea {
+                                        id: settingDiffMouse
+                                        anchors.fill: parent
+                                        onClicked: root.difficultyModeSelected(modelData.mode)
+                                    }
                                 }
                             }
                         }
@@ -757,6 +837,38 @@ Rectangle {
                         id: doneMouse
                         anchors.fill: parent
                         onClicked: root.closeRequested()
+                    }
+                }
+
+                // Exit to Main Menu Button (only visible during active run)
+                Rectangle {
+                    id: exitMenuBtn
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    width: parent.width
+                    height: units.gu(4.4)
+                    radius: units.gu(2.2)
+                    visible: !root.isWelcomeOpen
+                    color: exitMenuMouse.pressed ? "#1E2024" : (root.theme ? root.theme.cardOuter : "#141517")
+                    border.color: root.theme ? root.theme.cardBorder : "#2A2C30"
+                    border.width: units.gu(0.12)
+                    scale: exitMenuMouse.pressed ? 0.95 : 1.0
+
+                    Behavior on scale {
+                        NumberAnimation { duration: 120; easing.type: Easing.OutQuad }
+                    }
+
+                    Label {
+                        anchors.centerIn: parent
+                        text: i18n.tr("Exit to Main Menu")
+                        font.pixelSize: units.gu(1.4)
+                        font.weight: Font.DemiBold
+                        color: "#D6D5D2"
+                    }
+
+                    MouseArea {
+                        id: exitMenuMouse
+                        anchors.fill: parent
+                        onClicked: root.mainMenuRequested()
                     }
                 }
 

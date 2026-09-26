@@ -1,5 +1,6 @@
 import QtQuick 2.9
 import Lomiri.Components 1.3
+import "../js/Progression.js" as Progression
 
 Rectangle {
     id: root
@@ -7,6 +8,7 @@ Rectangle {
     property int bestScore: 0
     property int totalRings: 0
     property int speedMode: 1
+    property int difficultyMode: 1
     property int selectedCheckpoint: 1
     property var unlockedCheckpoints: [1]
     property bool showingHowToPlay: false
@@ -15,6 +17,7 @@ Rectangle {
 
     signal playRequested()
     signal checkpointSelected(int checkpoint)
+    signal difficultySelected(int mode)
     signal settingsRequested()
     signal themeCycleRequested()
     signal speedCycleRequested()
@@ -35,7 +38,7 @@ Rectangle {
         id: outerShell
         anchors.centerIn: parent
         width: Math.min(parent.width - units.gu(4.0), units.gu(36))
-        height: (root.showingHowToPlay ? howToPlayContent.height : menuContent.height) + units.gu(4.4)
+        height: Math.min(parent.height - units.gu(2.4), (root.showingHowToPlay ? howToPlayContent.height : menuContent.height) + units.gu(3.6))
         radius: units.gu(2.0)
         color: root.theme ? root.theme.cardInner : "#0D0E0F"
         border.color: root.theme ? root.theme.cardBorder : "#2A2C30"
@@ -58,7 +61,7 @@ Rectangle {
             id: menuContent
             anchors.centerIn: parent
             width: parent.width - units.gu(4.0)
-            spacing: units.gu(1.3)
+            spacing: units.gu(1.0)
             visible: !root.showingHowToPlay
 
                 // Mechanical Subtitle Badge
@@ -103,6 +106,62 @@ Rectangle {
                     }
                 }
 
+                // Difficulty Mode Selector Tabs
+                Rectangle {
+                    id: difficultySelectorBar
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    width: parent.width
+                    height: units.gu(3.8)
+                    radius: units.gu(1.9)
+                    color: root.theme ? root.theme.cardOuter : "#141517"
+                    border.color: root.theme ? root.theme.cardBorder : "#2A2C30"
+                    border.width: units.gu(0.1)
+
+                    Row {
+                        anchors.fill: parent
+                        anchors.margins: units.gu(0.3)
+                        spacing: units.gu(0.3)
+
+                        Repeater {
+                            model: [
+                                { mode: 0, label: i18n.tr("Easy"), color: "#34D399" },
+                                { mode: 1, label: i18n.tr("Normal"), color: (root.theme ? root.theme.accent : "#D99B26") },
+                                { mode: 2, label: i18n.tr("Hard"), color: "#FB923C" },
+                                { mode: 3, label: i18n.tr("Insane"), color: "#F87171" }
+                            ]
+
+                            Rectangle {
+                                id: diffTab
+                                width: (parent.width - (3 * units.gu(0.3))) / 4.0
+                                height: parent.height
+                                radius: units.gu(1.6)
+                                color: root.difficultyMode === modelData.mode
+                                       ? modelData.color
+                                       : (diffMouse.pressed ? "#1E2024" : "transparent")
+                                scale: diffMouse.pressed ? 0.94 : 1.0
+
+                                Behavior on scale { NumberAnimation { duration: 100 } }
+
+                                Label {
+                                    anchors.centerIn: parent
+                                    text: modelData.label
+                                    font.pixelSize: units.gu(1.0)
+                                    font.weight: root.difficultyMode === modelData.mode ? Font.Black : Font.DemiBold
+                                    color: root.difficultyMode === modelData.mode
+                                           ? "#0B0C0D"
+                                           : (modelData.mode === 3 ? "#E06666" : "#8E929A")
+                                }
+
+                                MouseArea {
+                                    id: diffMouse
+                                    anchors.fill: parent
+                                    onClicked: root.difficultySelected(modelData.mode)
+                                }
+                            }
+                        }
+                    }
+                }
+
                 // Checkpoint Selector Bento Card
                 Rectangle {
                     id: checkpointSelector
@@ -110,8 +169,8 @@ Rectangle {
                     width: parent.width
                     height: units.gu(4.4)
                     radius: units.gu(1.4)
-                    color: root.theme ? root.theme.cardOuter : "#141517"
-                    border.color: root.theme ? root.theme.cardBorder : "#2A2C30"
+                    color: root.difficultyMode === 3 ? "#1F1212" : (root.theme ? root.theme.cardOuter : "#141517")
+                    border.color: root.difficultyMode === 3 ? "#7A2E2E" : (root.theme ? root.theme.cardBorder : "#2A2C30")
                     border.width: units.gu(0.1)
 
                     Row {
@@ -124,7 +183,8 @@ Rectangle {
                             height: parent.height
                             color: prevCpMouse.pressed ? "#1E2024" : "transparent"
                             radius: units.gu(1.4)
-                            opacity: (root.unlockedCheckpoints && root.unlockedCheckpoints.indexOf(root.selectedCheckpoint) > 0) ? 1.0 : 0.25
+                            opacity: (root.difficultyMode !== 3 && root.unlockedCheckpoints && root.unlockedCheckpoints.indexOf(root.selectedCheckpoint) > 0) ? 1.0 : 0.2
+                            visible: root.difficultyMode !== 3
 
                             Canvas {
                                 id: prevArrowCanvas
@@ -151,7 +211,7 @@ Rectangle {
                             MouseArea {
                                 id: prevCpMouse
                                 anchors.fill: parent
-                                enabled: root.unlockedCheckpoints && root.unlockedCheckpoints.indexOf(root.selectedCheckpoint) > 0
+                                enabled: root.difficultyMode !== 3 && root.unlockedCheckpoints && root.unlockedCheckpoints.indexOf(root.selectedCheckpoint) > 0
                                 onClicked: {
                                     var idx = root.unlockedCheckpoints.indexOf(root.selectedCheckpoint);
                                     if (idx > 0) {
@@ -163,7 +223,7 @@ Rectangle {
 
                         // Center Label: Stage and Subtitle
                         Item {
-                            width: parent.width - units.gu(8.8)
+                            width: root.difficultyMode === 3 ? parent.width : (parent.width - units.gu(8.8))
                             height: parent.height
 
                             Column {
@@ -172,20 +232,30 @@ Rectangle {
 
                                 Label {
                                     anchors.horizontalCenter: parent.horizontalCenter
-                                    text: i18n.tr("START: STAGE %1").arg(root.selectedCheckpoint)
-                                    font.pixelSize: units.gu(1.3)
+                                    text: (root.difficultyMode === 3)
+                                          ? i18n.tr("PERMADEATH ACTIVE")
+                                          : i18n.tr("STAGE %1 • %2").arg(root.selectedCheckpoint).arg(Progression.getZoneName(root.selectedCheckpoint).toUpperCase())
+                                    font.pixelSize: units.gu(1.2)
                                     font.weight: Font.Black
-                                    color: root.theme ? root.theme.accent : "#D99B26"
+                                    color: (root.difficultyMode === 3)
+                                           ? "#F87171"
+                                           : (root.theme ? root.theme.accent : "#D99B26")
+                                    elide: Text.ElideRight
+                                    maximumLineCount: 1
                                 }
 
                                 Label {
                                     anchors.horizontalCenter: parent.horizontalCenter
-                                    text: (root.selectedCheckpoint === 1)
-                                          ? i18n.tr("Initial Descent")
-                                          : i18n.tr("Unlocked Checkpoint")
+                                    text: (root.difficultyMode === 3)
+                                          ? i18n.tr("No Checkpoints • Level 1 Restart Only")
+                                          : ((root.selectedCheckpoint === 1)
+                                             ? i18n.tr("Initial Descent • 0 pts")
+                                             : i18n.tr("%1 • Base %2 pts").arg(Progression.getZoneDescription(root.selectedCheckpoint)).arg(Progression.getCheckpointBaseScore(root.selectedCheckpoint, root.difficultyMode)))
                                     font.pixelSize: units.gu(0.85)
                                     font.weight: Font.DemiBold
-                                    color: "#848890"
+                                    color: (root.difficultyMode === 3) ? "#D68080" : "#848890"
+                                    elide: Text.ElideRight
+                                    maximumLineCount: 1
                                 }
                             }
                         }
@@ -197,7 +267,8 @@ Rectangle {
                             height: parent.height
                             color: nextCpMouse.pressed ? "#1E2024" : "transparent"
                             radius: units.gu(1.4)
-                            opacity: (root.unlockedCheckpoints && root.unlockedCheckpoints.indexOf(root.selectedCheckpoint) < root.unlockedCheckpoints.length - 1) ? 1.0 : 0.25
+                            opacity: (root.difficultyMode !== 3 && root.unlockedCheckpoints && root.unlockedCheckpoints.indexOf(root.selectedCheckpoint) < root.unlockedCheckpoints.length - 1) ? 1.0 : 0.2
+                            visible: root.difficultyMode !== 3
 
                             Canvas {
                                 id: nextArrowCanvas
@@ -224,7 +295,7 @@ Rectangle {
                             MouseArea {
                                 id: nextCpMouse
                                 anchors.fill: parent
-                                enabled: root.unlockedCheckpoints && root.unlockedCheckpoints.indexOf(root.selectedCheckpoint) < root.unlockedCheckpoints.length - 1
+                                enabled: root.difficultyMode !== 3 && root.unlockedCheckpoints && root.unlockedCheckpoints.indexOf(root.selectedCheckpoint) < root.unlockedCheckpoints.length - 1
                                 onClicked: {
                                     var idx = root.unlockedCheckpoints.indexOf(root.selectedCheckpoint);
                                     if (idx >= 0 && idx < root.unlockedCheckpoints.length - 1) {
@@ -471,7 +542,7 @@ Rectangle {
 
                                 Label {
                                     anchors.horizontalCenter: parent.horizontalCenter
-                                    text: i18n.tr("BEST SCORE")
+                                    text: i18n.tr("BEST (%1)").arg(Progression.getDifficultyName(root.difficultyMode).toUpperCase())
                                     font.pixelSize: units.gu(0.85)
                                     font.weight: Font.Bold
                                     color: "#848890"

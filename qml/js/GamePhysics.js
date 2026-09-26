@@ -108,37 +108,42 @@ function checkBallCollision(game, prevY, nextY, speedScale, soundManager, stageC
                 var isGrand = ring.isGrandGoal || (goalLevel >= 100);
                 var nextLvl = goalLevel + 1;
                 var isZone = Progression.isZoneTransition(nextLvl);
-                var isCp = Progression.isCheckpointLevel(nextLvl);
+                var isCp = Progression.isCheckpointLevel(nextLvl, game.difficultyMode);
 
                 game.bannerIsCheckpoint = isCp;
                 game.bannerIsZone = isZone;
 
+                var diffMult = (Progression.getDifficultyScoreMultiplier) ? Progression.getDifficultyScoreMultiplier(game.difficultyMode) : 1.0;
+                var baseEarned = isGrand ? 1000 : (isZone ? 250 : (isCp ? 150 : 100));
+                var earned = Math.round(baseEarned * diffMult);
+
                 if (isGrand) {
                     game.spawnShatterDebris(ring.y, true, true, game.currentTheme, false);
-                    game.score += 1000;
+                    game.score += earned;
                     game.bannerText = i18n.tr("TOWER CONQUERED! 100 LEVELS COMPLETE!");
                     Storage.saveStat("gameCleared", "1");
                     soundManager.milestoneHaptic();
                 } else if (isZone) {
                     game.spawnShatterDebris(ring.y, true, false, game.currentTheme, false);
-                    game.score += 250;
-                    game.bannerText = i18n.tr("ZONE %1 ENTERED!").arg(Math.floor((nextLvl - 1) / 10) + 1);
+                    game.score += earned;
+                    var zoneIdx = Progression.getZoneIndex(nextLvl);
+                    var zoneName = Progression.getZoneName(nextLvl);
+                    game.bannerText = i18n.tr("ZONE %1: %2").arg(zoneIdx).arg(zoneName.toUpperCase());
                     soundManager.milestoneHaptic();
                 } else if (isCp) {
                     game.spawnShatterDebris(ring.y, true, false, game.currentTheme, false);
-                    game.score += 150;
+                    game.score += earned;
                     game.bannerText = i18n.tr("CHECKPOINT STAGE %1!").arg(nextLvl);
                     soundManager.milestoneHaptic();
                 } else {
                     game.spawnShatterDebris(ring.y, true, false, game.currentTheme, false);
-                    game.score += 100;
+                    game.score += earned;
                     game.bannerText = i18n.tr("LEVEL %1 COMPLETE!").arg(goalLevel);
                     soundManager.haptic(true);
                 }
                 game.bannerOpacity = 1.0;
                 soundManager.playFanfare();
 
-                var earned = isGrand ? 1000 : (isZone ? 250 : (isCp ? 150 : 100));
                 var currentStreak = game.streak;
                 game.streak = 0;
                 game.isSuperFall = false;
@@ -157,15 +162,23 @@ function checkBallCollision(game, prevY, nextY, speedScale, soundManager, stageC
 
                 if (nextLvl > game.highestLevelReached) {
                     game.highestLevelReached = nextLvl;
-                    Storage.saveHighestLevel(nextLvl);
+                    if (Storage.saveHighestLevelForMode) {
+                        Storage.saveHighestLevelForMode(nextLvl, game.difficultyMode);
+                    } else {
+                        Storage.saveHighestLevel(nextLvl);
+                    }
                 }
-                if (isCp) {
+                if (isCp && (!Progression.hasCheckpoints || Progression.hasCheckpoints(game.difficultyMode))) {
                     game.unlockCheckpoint(nextLvl);
                 }
 
                 if (game.score > game.bestScore) {
                     game.bestScore = game.score;
-                    Storage.queueStat("bestScore", game.bestScore);
+                    if (Storage.saveBestScoreForMode) {
+                        Storage.saveBestScoreForMode(game.bestScore, game.difficultyMode);
+                    } else {
+                        Storage.queueStat("bestScore", game.bestScore);
+                    }
                 }
                 if (game.activePlayTimeAccumulator > 0.0) {
                     Storage.recordPlayTime(game.activePlayTimeAccumulator);
@@ -196,7 +209,9 @@ function checkBallCollision(game, prevY, nextY, speedScale, soundManager, stageC
                 soundManager.playBounce(1.0);
                 soundManager.haptic(true);
 
-                game.score += 25;
+                var tier = Progression.getLevelTier ? Progression.getLevelTier(game.currentLevel) : 1;
+                var diffMult = (Progression.getDifficultyScoreMultiplier) ? Progression.getDifficultyScoreMultiplier(game.difficultyMode) : 1.0;
+                game.score += Math.round(25 * tier * diffMult);
                 game.streak = 0;
                 game.isSuperFall = false;
                 game.totalRings++;
@@ -212,7 +227,11 @@ function checkBallCollision(game, prevY, nextY, speedScale, soundManager, stageC
 
                 if (game.score > game.bestScore) {
                     game.bestScore = game.score;
-                    Storage.queueStat("bestScore", game.bestScore);
+                    if (Storage.saveBestScoreForMode) {
+                        Storage.saveBestScoreForMode(game.bestScore, game.difficultyMode);
+                    } else {
+                        Storage.queueStat("bestScore", game.bestScore);
+                    }
                 }
                 break;
             }
@@ -286,7 +305,11 @@ function checkBallCollision(game, prevY, nextY, speedScale, soundManager, stageC
 
                 if (game.score > game.bestScore) {
                     game.bestScore = game.score;
-                    Storage.queueStat("bestScore", game.bestScore);
+                    if (Storage.saveBestScoreForMode) {
+                        Storage.saveBestScoreForMode(game.bestScore, game.difficultyMode);
+                    } else {
+                        Storage.queueStat("bestScore", game.bestScore);
+                    }
                 }
                 if (game.activePlayTimeAccumulator > 0.0) {
                     Storage.recordPlayTime(game.activePlayTimeAccumulator);
@@ -300,8 +323,10 @@ function checkBallCollision(game, prevY, nextY, speedScale, soundManager, stageC
                     if (game.activePlatformY < ring.y) {
                         game.activePlatformY = ring.y;
                     }
+                    var tier = Progression.getLevelTier ? Progression.getLevelTier(game.currentLevel) : 1;
+                    var diffMult = (Progression.getDifficultyScoreMultiplier) ? Progression.getDifficultyScoreMultiplier(game.difficultyMode) : 1.0;
                     game.streak++;
-                    game.score += game.streak;
+                    game.score += Math.round(game.streak * tier * diffMult);
                     game.totalRings++;
 
                     if (game.streak >= 3) {
@@ -313,7 +338,11 @@ function checkBallCollision(game, prevY, nextY, speedScale, soundManager, stageC
 
                     if (game.score > game.bestScore) {
                         game.bestScore = game.score;
-                        Storage.queueStat("bestScore", game.bestScore);
+                        if (Storage.saveBestScoreForMode) {
+                            Storage.saveBestScoreForMode(game.bestScore, game.difficultyMode);
+                        } else {
+                            Storage.queueStat("bestScore", game.bestScore);
+                        }
                     }
                     Storage.queueStat("totalRings", game.totalRings);
                     Storage.queueStat("totalRingsSmashed", game.totalRings);
