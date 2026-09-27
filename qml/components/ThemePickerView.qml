@@ -13,28 +13,9 @@ Column {
     signal themeModeSelected(int newMode)
     signal doneRequested()
 
-    Rectangle {
-        anchors.horizontalCenter: parent.horizontalCenter
-        width: pickerEyebrowLabel.width + units.gu(2.0)
-        height: units.gu(2.0)
-        radius: units.gu(1.0)
-        color: root.theme ? root.theme.accentBg : "#261E10"
-        border.color: root.theme ? root.theme.accentBorder : "#544020"
-        border.width: units.gu(0.1)
-
-        Label {
-            id: pickerEyebrowLabel
-            anchors.centerIn: parent
-            text: i18n.tr("COLOR SCHEMES")
-            font.pixelSize: units.gu(0.95)
-            font.weight: Font.Bold
-            color: root.theme ? root.theme.accent : "#D99B26"
-        }
-    }
-
     Label {
         anchors.horizontalCenter: parent.horizontalCenter
-        text: i18n.tr("MATERIAL PALETTES")
+        text: i18n.tr("THEMES")
         font.pixelSize: units.gu(2.2)
         font.weight: Font.Black
         color: "#F5F3EF"
@@ -42,9 +23,9 @@ Column {
 
     Label {
         anchors.horizontalCenter: parent.horizontalCenter
-        text: i18n.tr("Select a color palette for tower rings and visuals")
-        font.pixelSize: units.gu(0.9)
-        font.weight: Font.Medium
+        text: i18n.tr("Select a color theme for the tower")
+        font.pixelSize: units.gu(0.95)
+        font.weight: Font.Normal
         color: "#848890"
         horizontalAlignment: Text.AlignHCenter
     }

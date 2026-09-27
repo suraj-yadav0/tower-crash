@@ -29,33 +29,6 @@ var themeList = [
         cardBorder: "#2E2A20"
     },
     {
-        id: "desert",
-        name: "Desert Dune",
-        previewColor: "#FB923C",
-        topSafe: "#FB923C",
-        sideSafe: "#C2410C",
-        topHazard: "#3B82F6",
-        sideHazard: "#1D4ED8",
-        ballLight: "#FFF7ED",
-        ballMid: "#FDBA74",
-        ballDark: "#EA580C",
-        bgTop: "#1A1512",
-        bgBottom: "#0E0A08",
-        pole1: "#30261E",
-        pole2: "#4D3E32",
-        pole3: "#201913",
-        goalTop: "#FACC15",
-        goalSide: "#CA8A04",
-        accent: "#FB923C",
-        accentHover: "#EA580C",
-        accentText: "#0E0A08",
-        accentBg: "#2E1B10",
-        accentBorder: "#61341C",
-        cardOuter: "#181310",
-        cardInner: "#0F0B09",
-        cardBorder: "#30231D"
-    },
-    {
         id: "tactical",
         name: "Tactical Ochre",
         previewColor: "#D99B26",
@@ -276,15 +249,14 @@ var themeList = [
 var themeOptions = [
     { id: 0, name: "Dynamic", previewColor: "#EAB308" },
     { id: 1, name: "Solar", previewColor: "#EAB308" },
-    { id: 2, name: "Desert", previewColor: "#FB923C" },
-    { id: 3, name: "Tactical", previewColor: "#D99B26" },
-    { id: 4, name: "Kyoto", previewColor: "#52B788" },
-    { id: 5, name: "Amethyst", previewColor: "#A855F7" },
-    { id: 6, name: "Lichen", previewColor: "#2DD4BF" },
-    { id: 7, name: "Braun", previewColor: "#E2E8F0" },
-    { id: 8, name: "Crimson", previewColor: "#F43F5E" },
-    { id: 9, name: "Cobalt", previewColor: "#38BDF8" },
-    { id: 10, name: "Emerald", previewColor: "#10B981" }
+    { id: 2, name: "Tactical", previewColor: "#D99B26" },
+    { id: 3, name: "Kyoto", previewColor: "#52B788" },
+    { id: 4, name: "Amethyst", previewColor: "#A855F7" },
+    { id: 5, name: "Lichen", previewColor: "#2DD4BF" },
+    { id: 6, name: "Braun", previewColor: "#E2E8F0" },
+    { id: 7, name: "Crimson", previewColor: "#F43F5E" },
+    { id: 8, name: "Cobalt", previewColor: "#38BDF8" },
+    { id: 9, name: "Emerald", previewColor: "#10B981" }
 ];
 
 function getCheckpointIndex(level) {

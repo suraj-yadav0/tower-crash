@@ -111,26 +111,6 @@ Rectangle {
                 spacing: units.gu(0.85)
                 visible: !root.showingThemePicker && !root.showingAbout
 
-                // Eyebrow Tag
-                Rectangle {
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    width: eyebrowLabel.width + units.gu(2.0)
-                    height: units.gu(2.0)
-                    radius: units.gu(1.0)
-                    color: root.theme ? root.theme.accentBg : "#261E10"
-                    border.color: root.theme ? root.theme.accentBorder : "#544020"
-                    border.width: units.gu(0.1)
-
-                    Label {
-                        id: eyebrowLabel
-                        anchors.centerIn: parent
-                        text: i18n.tr("INSTRUMENTATION")
-                        font.pixelSize: units.gu(0.95)
-                        font.weight: Font.Bold
-                        color: root.theme ? root.theme.accent : "#D99B26"
-                    }
-                }
-
                 // Title
                 Label {
                     anchors.horizontalCenter: parent.horizontalCenter
