@@ -4,40 +4,20 @@ import Lomiri.Components 1.3
 Column {
     id: root
     width: parent ? parent.width : units.gu(32)
-    spacing: units.gu(1.1)
+    spacing: units.gu(1.2)
 
     property var theme: null
 
     signal backRequested()
 
-    // Eyebrow Tag
-    Rectangle {
-        anchors.horizontalCenter: parent.horizontalCenter
-        width: eyebrowLabel.width + units.gu(2.0)
-        height: units.gu(2.0)
-        radius: units.gu(1.0)
-        color: root.theme ? root.theme.accentBg : "#261E10"
-        border.color: root.theme ? root.theme.accentBorder : "#544020"
-        border.width: units.gu(0.1)
-
-        Label {
-            id: eyebrowLabel
-            anchors.centerIn: parent
-            text: i18n.tr("SYSTEM SPEC")
-            font.pixelSize: units.gu(0.95)
-            font.weight: Font.Bold
-            color: root.theme ? root.theme.accent : "#D99B26"
-        }
-    }
-
     // Title Block
     Column {
         anchors.horizontalCenter: parent.horizontalCenter
-        spacing: units.gu(0.2)
+        spacing: units.gu(0.4)
 
         Label {
             anchors.horizontalCenter: parent.horizontalCenter
-            text: i18n.tr("TOWER CRASH")
+            text: i18n.tr("Tower Crash")
             font.pixelSize: units.gu(2.4)
             font.weight: Font.Black
             color: "#F5F3EF"
@@ -45,14 +25,14 @@ Column {
 
         Label {
             anchors.horizontalCenter: parent.horizontalCenter
-            text: i18n.tr("TACTILE HELICAL DESCENT")
-            font.pixelSize: units.gu(1.0)
-            font.weight: Font.DemiBold
+            text: i18n.tr("Spiral ball jump game for Ubuntu Touch")
+            font.pixelSize: units.gu(1.1)
+            font.weight: Font.Normal
             color: "#848890"
         }
     }
 
-    // App Specs Card
+    // App Info Card
     Rectangle {
         anchors.horizontalCenter: parent.horizontalCenter
         width: parent.width
@@ -95,99 +75,6 @@ Column {
             Row {
                 width: parent.width
                 Label {
-                    text: i18n.tr("Platform")
-                    font.pixelSize: units.gu(1.1)
-                    color: "#848890"
-                    width: parent.width / 2.0
-                }
-                Label {
-                    text: "Ubuntu Touch (Lomiri)"
-                    font.pixelSize: units.gu(1.1)
-                    font.weight: Font.Bold
-                    color: root.theme ? root.theme.accent : "#D99B26"
-                    horizontalAlignment: Text.AlignRight
-                    width: parent.width / 2.0
-                }
-            }
-
-            Rectangle {
-                width: parent.width
-                height: units.dp(1)
-                color: root.theme ? root.theme.cardBorder : "#2A2C30"
-            }
-
-            Row {
-                width: parent.width
-                Label {
-                    text: i18n.tr("Framework")
-                    font.pixelSize: units.gu(1.1)
-                    color: "#848890"
-                    width: parent.width / 2.0
-                }
-                Label {
-                    text: "ubuntu-touch-24.04-1.x"
-                    font.pixelSize: units.gu(1.1)
-                    font.weight: Font.DemiBold
-                    color: "#F5F3EF"
-                    horizontalAlignment: Text.AlignRight
-                    width: parent.width / 2.0
-                }
-            }
-        }
-    }
-
-    // Technology and Description Card
-    Rectangle {
-        anchors.horizontalCenter: parent.horizontalCenter
-        width: parent.width
-        height: descCol.height + units.gu(2.0)
-        radius: units.gu(1.4)
-        color: root.theme ? root.theme.cardOuter : "#141517"
-        border.color: root.theme ? root.theme.cardBorder : "#2A2C30"
-        border.width: units.gu(0.1)
-
-        Column {
-            id: descCol
-            anchors.centerIn: parent
-            width: parent.width - units.gu(2.4)
-            spacing: units.gu(0.6)
-
-            Label {
-                text: i18n.tr("ARCHITECTURE & ENGINE")
-                font.pixelSize: units.gu(0.9)
-                font.weight: Font.Bold
-                color: root.theme ? root.theme.accent : "#D99B26"
-            }
-
-            Label {
-                text: i18n.tr("Pure QML (QtQuick 2.9) helical renderer, Lomiri Components 1.3, JavaScript collision and spring mechanics, and local SQLite state persistence.")
-                font.pixelSize: units.gu(1.1)
-                color: "#D6D5D2"
-                wrapMode: Text.WordWrap
-                width: parent.width
-            }
-        }
-    }
-
-    // Author & License Card
-    Rectangle {
-        anchors.horizontalCenter: parent.horizontalCenter
-        width: parent.width
-        height: authorCol.height + units.gu(2.0)
-        radius: units.gu(1.4)
-        color: root.theme ? root.theme.cardOuter : "#141517"
-        border.color: root.theme ? root.theme.cardBorder : "#2A2C30"
-        border.width: units.gu(0.1)
-
-        Column {
-            id: authorCol
-            anchors.centerIn: parent
-            width: parent.width - units.gu(2.4)
-            spacing: units.gu(0.8)
-
-            Row {
-                width: parent.width
-                Label {
                     text: i18n.tr("Author")
                     font.pixelSize: units.gu(1.1)
                     color: "#848890"
@@ -226,10 +113,34 @@ Column {
                     width: parent.width / 2.0
                 }
             }
+
+            Rectangle {
+                width: parent.width
+                height: units.dp(1)
+                color: root.theme ? root.theme.cardBorder : "#2A2C30"
+            }
+
+            Row {
+                width: parent.width
+                Label {
+                    text: i18n.tr("Platform")
+                    font.pixelSize: units.gu(1.1)
+                    color: "#848890"
+                    width: parent.width / 2.0
+                }
+                Label {
+                    text: "Ubuntu Touch (Lomiri)"
+                    font.pixelSize: units.gu(1.1)
+                    font.weight: Font.Bold
+                    color: root.theme ? root.theme.accent : "#D99B26"
+                    horizontalAlignment: Text.AlignRight
+                    width: parent.width / 2.0
+                }
+            }
         }
     }
 
-    // Community & Star Support Card (Interactive)
+    // GitHub Star Support Card
     Rectangle {
         id: starCard
         anchors.horizontalCenter: parent.horizontalCenter
@@ -247,14 +158,14 @@ Column {
             spacing: units.gu(0.8)
 
             Label {
-                text: i18n.tr("SUPPORT OPEN SOURCE")
+                text: i18n.tr("OPEN SOURCE")
                 font.pixelSize: units.gu(0.9)
                 font.weight: Font.Bold
                 color: root.theme ? root.theme.accent : "#D99B26"
             }
 
             Label {
-                text: i18n.tr("If you enjoy descending the helical tower, consider dropping a star on GitHub. It takes five seconds, helps more Ubuntu Touch players discover the game, and keeps independent development going.")
+                text: i18n.tr("If you enjoy playing Tower Crash, consider giving it a star on GitHub. It helps other Ubuntu Touch users find the game and supports independent open-source development.")
                 font.pixelSize: units.gu(1.1)
                 color: "#D6D5D2"
                 wrapMode: Text.WordWrap

@@ -91,8 +91,8 @@ Rectangle {
                         id: eyebrowLabel
                         anchors.centerIn: parent
                         text: root.isGrandVictory
-                              ? i18n.tr("CAMPAIGN COMPLETE")
-                              : (root.isCheckpoint ? i18n.tr("CHECKPOINT REACHED") : i18n.tr("MILESTONE CLEARED"))
+                              ? i18n.tr("ALL STAGES COMPLETE")
+                              : (root.isCheckpoint ? i18n.tr("CHECKPOINT") : i18n.tr("STAGE CLEAR"))
                         font.pixelSize: units.gu(1.0)
                         font.weight: Font.Bold
                         color: root.isGrandVictory
@@ -105,8 +105,8 @@ Rectangle {
                 Label {
                     anchors.horizontalCenter: parent.horizontalCenter
                     text: root.isGrandVictory
-                          ? i18n.tr("TOWER CONQUERED")
-                          : i18n.tr("STAGE %1 CLEARED").arg(root.stageNumber)
+                          ? i18n.tr("VICTORY!")
+                          : i18n.tr("STAGE %1").arg(root.stageNumber)
                     font.pixelSize: units.gu(2.6)
                     font.weight: Font.Black
                     color: "#F5F3EF"
@@ -115,7 +115,7 @@ Rectangle {
                 Label {
                     anchors.horizontalCenter: parent.horizontalCenter
                     text: root.isGrandVictory
-                          ? i18n.tr("100 LEVELS COMPLETE • THE MONOLITH CONQUERED")
+                          ? i18n.tr("100 LEVELS COMPLETE")
                           : Progression.getZoneTitle(root.stageNumber).toUpperCase()
                     font.pixelSize: units.gu(1.1)
                     font.weight: Font.Bold
@@ -283,7 +283,7 @@ Rectangle {
                         anchors.left: parent.left
                         anchors.leftMargin: units.gu(2.6)
                         anchors.verticalCenter: parent.verticalCenter
-                        text: (root.stageNumber >= 100) ? i18n.tr("Finish Descent") : i18n.tr("Continue Descent")
+                        text: (root.stageNumber >= 100) ? i18n.tr("Finish") : i18n.tr("Next Level")
                         font.pixelSize: units.gu(1.6)
                         font.weight: Font.Bold
                         color: root.theme ? root.theme.accentText : "#0B0C0D"

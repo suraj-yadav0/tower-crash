@@ -47,8 +47,8 @@ Item {
                     id: stageTag
                     anchors.centerIn: parent
                     text: root.isZoneTransition
-                          ? i18n.tr("NEW ZONE REACHED")
-                          : (root.isCheckpoint ? i18n.tr("CHECKPOINT UNLOCKED") : i18n.tr("STAGE COMPLETED"))
+                          ? i18n.tr("NEW ZONE")
+                          : (root.isCheckpoint ? i18n.tr("CHECKPOINT") : i18n.tr("STAGE CLEAR"))
                     font.pixelSize: units.gu(1.0)
                     font.weight: Font.Bold
                     color: root.isZoneTransition ? "#84B6D8" : (root.isCheckpoint ? "#FFD700" : (root.theme ? root.theme.accent : "#D99B26"))

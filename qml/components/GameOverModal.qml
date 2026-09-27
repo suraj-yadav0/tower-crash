@@ -68,7 +68,7 @@ Rectangle {
                 width: parent.width
                 spacing: units.gu(1.3)
 
-                // Eyebrow Tag
+                // Status Tag
                 Rectangle {
                     anchors.horizontalCenter: parent.horizontalCenter
                     width: eyebrowLabel.width + units.gu(2.0)
@@ -82,8 +82,8 @@ Rectangle {
                         id: eyebrowLabel
                         anchors.centerIn: parent
                         text: (root.difficultyMode === 3)
-                              ? i18n.tr("PERMADEATH TERMINATED")
-                              : i18n.tr("DESCENT TERMINATED")
+                              ? i18n.tr("PERMADEATH")
+                              : i18n.tr("TRY AGAIN")
                         font.pixelSize: units.gu(1.0)
                         font.weight: Font.Bold
                         color: root.theme ? root.theme.topHazard : "#BA3C3C"
@@ -99,7 +99,7 @@ Rectangle {
                     color: root.theme ? root.theme.topHazard : "#BA3C3C"
                 }
 
-                // Hero Final Score Bento Box
+                // Final Score Box
                 Rectangle {
                     anchors.horizontalCenter: parent.horizontalCenter
                     width: parent.width
@@ -152,13 +152,12 @@ Rectangle {
                     }
                 }
 
-                // Bento Row: Best Score & Stage Reached
                 Row {
                     anchors.horizontalCenter: parent.horizontalCenter
                     width: parent.width
                     spacing: units.gu(1.0)
 
-                    // Best Score Pill Card
+                    // Best Score
                     Rectangle {
                         width: (parent.width - units.gu(1.0)) / 2.0
                         height: units.gu(5.0)
@@ -189,7 +188,7 @@ Rectangle {
                         }
                     }
 
-                    // Level Reached Pill Card
+                    // Level Reached
                     Rectangle {
                         width: (parent.width - units.gu(1.0)) / 2.0
                         height: units.gu(5.0)
@@ -252,10 +251,10 @@ Rectangle {
                         anchors.leftMargin: units.gu(2.6)
                         anchors.verticalCenter: parent.verticalCenter
                         text: (root.difficultyMode === 3)
-                              ? i18n.tr("Restart Run (Level 1)")
+                              ? i18n.tr("Restart (Level 1)")
                               : ((root.checkpointLevel > 1)
-                                 ? i18n.tr("Continue (Stage %1 • %2)").arg(root.checkpointLevel).arg(Progression.getZoneName(root.checkpointLevel))
-                                 : i18n.tr("Re-enter Tower"))
+                                 ? i18n.tr("Continue (Stage %1)").arg(root.checkpointLevel)
+                                 : i18n.tr("Play Again"))
                         font.pixelSize: units.gu(1.5)
                         font.weight: Font.Bold
                         color: root.theme ? root.theme.accentText : "#0B0C0D"

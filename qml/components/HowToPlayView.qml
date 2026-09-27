@@ -12,7 +12,7 @@ Column {
 
     Label {
         anchors.horizontalCenter: parent.horizontalCenter
-        text: i18n.tr("FLIGHT MANUAL")
+        text: i18n.tr("HOW TO PLAY")
         font.pixelSize: units.gu(2.0)
         font.weight: Font.Black
         color: root.theme ? root.theme.accent : "#D99B26"
@@ -31,7 +31,7 @@ Column {
             id: instructionsCol
             anchors.centerIn: parent
             width: parent.width - units.gu(2.4)
-            spacing: units.gu(0.9)
+            spacing: units.gu(1.0)
 
             Row {
                 spacing: units.gu(1.0)
@@ -54,7 +54,7 @@ Column {
                 }
 
                 Label {
-                    text: i18n.tr("Drag horizontally to rotate the helical tower.")
+                    text: i18n.tr("Drag left or right to rotate the tower.")
                     font.pixelSize: units.gu(1.2)
                     color: "#D6D5D2"
                     wrapMode: Text.WordWrap
@@ -84,7 +84,7 @@ Column {
                 }
 
                 Label {
-                    text: i18n.tr("Drop through ring gaps to gain gravity momentum.")
+                    text: i18n.tr("Drop through ring gaps to fall downward.")
                     font.pixelSize: units.gu(1.2)
                     color: "#D6D5D2"
                     wrapMode: Text.WordWrap
@@ -114,7 +114,7 @@ Column {
                 }
 
                 Label {
-                    text: i18n.tr("Avoid landing directly on hazard zones.")
+                    text: i18n.tr("Avoid landing on red hazard segments.")
                     font.pixelSize: units.gu(1.2)
                     color: root.theme ? root.theme.topHazard : "#BA3C3C"
                     wrapMode: Text.WordWrap
@@ -144,39 +144,9 @@ Column {
                 }
 
                 Label {
-                    text: i18n.tr("Drop past 3 continuous rings to smash platforms!")
+                    text: i18n.tr("Drop through 3 rings in a row to smash the next ring.")
                     font.pixelSize: units.gu(1.2)
                     color: root.theme ? root.theme.ballMid : "#E6D7BA"
-                    wrapMode: Text.WordWrap
-                    width: parent.width - units.gu(3.0)
-                    anchors.verticalCenter: parent.verticalCenter
-                }
-            }
-
-            Row {
-                spacing: units.gu(1.0)
-                width: parent.width
-
-                Rectangle {
-                    width: units.gu(2.0)
-                    height: units.gu(2.0)
-                    radius: units.gu(1.0)
-                    color: root.theme ? root.theme.accent : "#D99B26"
-                    anchors.verticalCenter: parent.verticalCenter
-
-                    Label {
-                        anchors.centerIn: parent
-                        text: "10"
-                        font.pixelSize: units.gu(0.9)
-                        font.weight: Font.Bold
-                        color: root.theme ? root.theme.accentText : "#0B0C0D"
-                    }
-                }
-
-                Label {
-                    text: i18n.tr("Descend through 10 thematic zones across 100 tower levels.")
-                    font.pixelSize: units.gu(1.2)
-                    color: "#D6D5D2"
                     wrapMode: Text.WordWrap
                     width: parent.width - units.gu(3.0)
                     anchors.verticalCenter: parent.verticalCenter
@@ -202,7 +172,7 @@ Column {
 
         Label {
             anchors.centerIn: parent
-            text: i18n.tr("Back to Main")
+            text: i18n.tr("Back")
             font.pixelSize: units.gu(1.5)
             font.weight: Font.Bold
             color: root.theme ? root.theme.accentText : "#0B0C0D"

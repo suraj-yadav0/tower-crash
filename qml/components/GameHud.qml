@@ -19,7 +19,7 @@ Column {
     width: units.gu(32)
     spacing: units.gu(0.4)
 
-    // Sleek Level Progression Card
+    // Level Progression
     Rectangle {
         anchors.horizontalCenter: parent.horizontalCenter
         width: Math.min(parent.width, units.gu(30))
@@ -52,7 +52,6 @@ Column {
                 }
             }
 
-            // Recessed Progress Bar with Glowing Fill
             Rectangle {
                 width: units.gu(16.0)
                 height: units.gu(0.7)
@@ -96,7 +95,7 @@ Column {
         }
     }
 
-    // Heroic Score Display
+    // Score Display
     Item {
         anchors.horizontalCenter: parent.horizontalCenter
         width: scoreLabel.width
@@ -137,7 +136,7 @@ Column {
         }
     }
 
-    // Dynamic Streak & Fireball status pill
+    // Streak Pill
     Rectangle {
         id: streakPill
         anchors.horizontalCenter: parent.horizontalCenter
@@ -183,7 +182,7 @@ Column {
 
             Label {
                 id: streakText
-                text: root.isSuperFall ? i18n.tr("IMPACT OVERDRIVE!") : i18n.tr("COMBO x%1").arg(root.streak)
+                text: root.isSuperFall ? i18n.tr("OVERDRIVE!") : i18n.tr("COMBO x%1").arg(root.streak)
                 font.pixelSize: units.gu(1.1)
                 font.weight: Font.Bold
                 color: root.isSuperFall ? "#FFFFFF" : (root.theme ? root.theme.accentText : "#F5F3EF")

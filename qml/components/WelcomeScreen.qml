@@ -96,27 +96,7 @@ Rectangle {
                 spacing: units.gu(1.0)
                 visible: !root.showingHowToPlay && !root.showingAbout
 
-                // Mechanical Subtitle Badge
-                Rectangle {
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    width: arcadeBadgeLabel.width + units.gu(2.2)
-                    height: units.gu(2.2)
-                    radius: units.gu(1.1)
-                    color: root.theme ? root.theme.accentBg : "#261E10"
-                    border.color: root.theme ? root.theme.accentBorder : "#544020"
-                    border.width: units.gu(0.1)
-
-                    Label {
-                        id: arcadeBadgeLabel
-                        anchors.centerIn: parent
-                        text: i18n.tr("PRECISION DESCENT")
-                        font.pixelSize: units.gu(0.95)
-                        font.weight: Font.Bold
-                        color: root.theme ? root.theme.accent : "#D99B26"
-                    }
-                }
-
-                // Title Banner
+                // Title
                 Column {
                     anchors.horizontalCenter: parent.horizontalCenter
                     spacing: units.gu(0.2)
@@ -131,8 +111,8 @@ Rectangle {
 
                     Label {
                         anchors.horizontalCenter: parent.horizontalCenter
-                        text: i18n.tr("TACTILE HELICAL DESCENT")
-                        font.pixelSize: units.gu(1.05)
+                        text: i18n.tr("Spiral Ball Jump")
+                        font.pixelSize: units.gu(1.1)
                         font.weight: Font.DemiBold
                         color: "#848890"
                     }
@@ -265,7 +245,7 @@ Rectangle {
                                 Label {
                                     anchors.horizontalCenter: parent.horizontalCenter
                                     text: (root.difficultyMode === 3)
-                                          ? i18n.tr("PERMADEATH ACTIVE")
+                                          ? i18n.tr("PERMADEATH")
                                           : i18n.tr("STAGE %1 • %2").arg(root.selectedCheckpoint).arg(Progression.getZoneName(root.selectedCheckpoint).toUpperCase())
                                     font.pixelSize: units.gu(1.2)
                                     font.weight: Font.Black
@@ -281,8 +261,8 @@ Rectangle {
                                     text: (root.difficultyMode === 3)
                                           ? i18n.tr("No Checkpoints • Level 1 Restart Only")
                                           : ((root.selectedCheckpoint === 1)
-                                             ? i18n.tr("Initial Descent • 0 pts")
-                                             : i18n.tr("%1 • Base %2 pts").arg(Progression.getZoneDescription(root.selectedCheckpoint)).arg(Progression.getCheckpointBaseScore(root.selectedCheckpoint, root.difficultyMode)))
+                                             ? i18n.tr("Start from Level 1")
+                                             : i18n.tr("Start at Level %1 • %2 pts").arg(root.selectedCheckpoint).arg(Progression.getCheckpointBaseScore(root.selectedCheckpoint, root.difficultyMode)))
                                     font.pixelSize: units.gu(0.85)
                                     font.weight: Font.DemiBold
                                     color: (root.difficultyMode === 3) ? "#D68080" : "#848890"
@@ -382,7 +362,7 @@ Rectangle {
                         }
 
                         Label {
-                            text: i18n.tr("ENTER TOWER")
+                            text: i18n.tr("PLAY")
                             font.pixelSize: units.gu(1.7)
                             font.weight: Font.Black
                             color: root.theme ? root.theme.accentText : "#0B0C0D"
