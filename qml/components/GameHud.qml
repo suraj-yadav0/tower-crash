@@ -19,76 +19,83 @@ Column {
     width: units.gu(32)
     spacing: units.gu(0.4)
 
-    // Level Progression
-    Item {
+    // Frosted Capsule Level Progression
+    Rectangle {
         anchors.horizontalCenter: parent.horizontalCenter
-        width: Math.min(parent.width, units.gu(28))
+        width: Math.min(parent.width - units.gu(4.0), units.gu(25))
         height: units.gu(3.6)
+        radius: height / 2
+        color: "#E00E1015"
+        border.color: root.theme ? (root.theme.cardBorder || "#2A2E38") : "#2A2E38"
+        border.width: units.gu(0.08)
 
-        // Current Level Badge
-        Rectangle {
-            id: currentLevelBadge
-            anchors.left: parent.left
-            anchors.verticalCenter: parent.verticalCenter
-            width: units.gu(3.6)
-            height: units.gu(3.6)
-            radius: width / 2
-            color: root.theme ? root.theme.accent : "#D99B26"
+        Row {
+            anchors.centerIn: parent
+            width: parent.width - units.gu(1.6)
+            spacing: units.gu(0.8)
 
-            Label {
-                anchors.centerIn: parent
-                text: root.currentLevel.toString()
-                font.pixelSize: units.gu(1.4)
-                font.weight: Font.Black
-                color: root.theme ? root.theme.accentText : "#0B0C0D"
-            }
-        }
-
-        // Progress Track
-        Rectangle {
-            id: progressTrack
-            anchors.left: currentLevelBadge.right
-            anchors.leftMargin: units.gu(0.8)
-            anchors.right: nextLevelBadge.left
-            anchors.rightMargin: units.gu(0.8)
-            anchors.verticalCenter: parent.verticalCenter
-            height: units.gu(1.0)
-            radius: height / 2
-            color: root.theme ? root.theme.cardInner : "#141517"
-            border.color: root.theme ? root.theme.cardBorder : "#2A2C30"
-            border.width: units.gu(0.08)
-            clip: true
-
+            // Current Level Chip
             Rectangle {
-                width: Math.max(parent.height, parent.width * Math.min(1.0, Math.max(0.0, root.levelProgress)))
-                height: parent.height
-                radius: parent.radius
+                id: currentLevelChip
+                width: Math.max(units.gu(2.8), currentLevelLabel.width + units.gu(1.4))
+                height: units.gu(2.4)
+                radius: height / 2
                 color: root.theme ? root.theme.accent : "#D99B26"
+                anchors.verticalCenter: parent.verticalCenter
 
-                Behavior on width {
-                    NumberAnimation { duration: 160; easing.type: Easing.OutQuad }
+                Label {
+                    id: currentLevelLabel
+                    anchors.centerIn: parent
+                    text: root.currentLevel.toString()
+                    font.pixelSize: units.gu(1.25)
+                    font.weight: Font.Black
+                    color: root.theme ? root.theme.accentText : "#0B0C0D"
                 }
             }
-        }
 
-        // Next Level Badge
-        Rectangle {
-            id: nextLevelBadge
-            anchors.right: parent.right
-            anchors.verticalCenter: parent.verticalCenter
-            width: units.gu(3.6)
-            height: units.gu(3.6)
-            radius: width / 2
-            color: root.theme ? root.theme.cardOuter : "#141517"
-            border.color: root.theme ? root.theme.cardBorder : "#2A2C30"
-            border.width: units.gu(0.12)
+            // Embedded Progress Track
+            Rectangle {
+                id: progressTrack
+                width: parent.width - currentLevelChip.width - nextLevelChip.width - (parent.spacing * 2)
+                height: units.gu(0.85)
+                radius: height / 2
+                color: "#18FFFFFF"
+                border.color: "#10FFFFFF"
+                border.width: units.gu(0.06)
+                clip: true
+                anchors.verticalCenter: parent.verticalCenter
 
-            Label {
-                anchors.centerIn: parent
-                text: (root.currentLevel + 1).toString()
-                font.pixelSize: units.gu(1.35)
-                font.weight: Font.Bold
-                color: "#E5E7EB"
+                Rectangle {
+                    width: Math.max(parent.radius * 2, parent.width * Math.min(1.0, Math.max(0.0, root.levelProgress)))
+                    height: parent.height
+                    radius: parent.radius
+                    color: root.theme ? root.theme.accent : "#D99B26"
+
+                    Behavior on width {
+                        NumberAnimation { duration: 160; easing.type: Easing.OutQuad }
+                    }
+                }
+            }
+
+            // Next Level Chip
+            Rectangle {
+                id: nextLevelChip
+                width: Math.max(units.gu(2.8), nextLevelLabel.width + units.gu(1.4))
+                height: units.gu(2.4)
+                radius: height / 2
+                color: "#1FFFFFFF"
+                border.color: "#28FFFFFF"
+                border.width: units.gu(0.08)
+                anchors.verticalCenter: parent.verticalCenter
+
+                Label {
+                    id: nextLevelLabel
+                    anchors.centerIn: parent
+                    text: (root.currentLevel + 1).toString()
+                    font.pixelSize: units.gu(1.2)
+                    font.weight: Font.Bold
+                    color: "#F3F4F6"
+                }
             }
         }
     }
