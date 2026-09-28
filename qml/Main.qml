@@ -489,6 +489,10 @@ MainView {
             }
 
             Keys.onPressed: {
+                if (event.key === Qt.Key_VolumeUp || event.key === Qt.Key_VolumeDown || event.key === Qt.Key_VolumeMute) {
+                    event.accepted = false;
+                    return;
+                }
                 if (event.key === Qt.Key_A) {
                     if (!gameOver && !isPaused && !isSettingsOpen && !isWelcomeOpen && !isStageClearOpen && !isStageClearCelebrating) {
                         towerAngle += 0.12;

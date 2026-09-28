@@ -6,24 +6,21 @@ Item {
 
     property bool soundEnabled: true
     property real masterVolume: 1.0
-    property int bounceVoiceIndex: 0
 
-    Audio {
-        id: bounceVoice1
+    SoundEffect {
+        id: sfxBounce
+        category: "music"
         source: Qt.resolvedUrl("../../assets/sounds/bounce.wav")
         muted: !backend.soundEnabled
+        volume: 1.0
     }
 
-    Audio {
-        id: bounceVoice2
-        source: Qt.resolvedUrl("../../assets/sounds/bounce.wav")
-        muted: !backend.soundEnabled
-    }
-
-    Audio {
-        id: roundClearedVoice
+    SoundEffect {
+        id: sfxRoundCleared
+        category: "music"
         source: Qt.resolvedUrl("../../assets/sounds/fanfare.wav")
         muted: !backend.soundEnabled
+        volume: 1.0
     }
 
     onSoundEnabledChanged: {
@@ -35,18 +32,14 @@ Item {
     function playBounce(velocityNorm) {
         if (!soundEnabled) return;
         try {
-            var voice = (bounceVoiceIndex === 0) ? bounceVoice1 : bounceVoice2;
-            bounceVoiceIndex = (bounceVoiceIndex + 1) % 2;
-            voice.stop();
-            voice.play();
+            sfxBounce.play();
         } catch (e) {}
     }
 
     function playRoundCleared() {
         if (!soundEnabled) return;
         try {
-            roundClearedVoice.stop();
-            roundClearedVoice.play();
+            sfxRoundCleared.play();
         } catch (e) {}
     }
 
@@ -64,9 +57,8 @@ Item {
 
     function stopAll() {
         try {
-            bounceVoice1.stop();
-            bounceVoice2.stop();
-            roundClearedVoice.stop();
+            sfxBounce.stop();
+            sfxRoundCleared.stop();
         } catch (e) {}
     }
 }
