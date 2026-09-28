@@ -43,6 +43,11 @@ Item {
                 settingsModal.mainMenuRequested();
                 if (!menuRequested) throw new Error("mainMenuRequested failed");
 
+                var volReceived = -1;
+                settingsModal.volumeChanged.connect(function(v) { volReceived = v; });
+                settingsModal.volumeChanged(0.65);
+                if (volReceived !== 0.65) throw new Error("volumeChanged failed");
+
                 var closed = false;
                 settingsModal.closeRequested.connect(function() { closed = true; });
                 settingsModal.closeRequested();

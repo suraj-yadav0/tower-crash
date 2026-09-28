@@ -651,6 +651,77 @@ Rectangle {
                     }
                 }
 
+                // Sound Volume Card
+                Rectangle {
+                    id: volumeCard
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    width: parent.width
+                    height: units.gu(4.4)
+                    radius: units.gu(1.4)
+                    color: root.theme ? root.theme.cardOuter : "#141517"
+                    border.color: root.theme ? root.theme.cardBorder : "#2A2C30"
+                    border.width: units.gu(0.1)
+
+                    Column {
+                        anchors.centerIn: parent
+                        width: parent.width - units.gu(2.4)
+                        spacing: units.gu(0.3)
+
+                        Item {
+                            width: parent.width
+                            height: units.gu(1.4)
+
+                            Label {
+                                anchors.left: parent.left
+                                anchors.verticalCenter: parent.verticalCenter
+                                text: i18n.tr("SOUND VOLUME")
+                                font.pixelSize: units.gu(0.9)
+                                font.weight: Font.Bold
+                                color: "#848890"
+                            }
+
+                            Label {
+                                anchors.right: parent.right
+                                anchors.verticalCenter: parent.verticalCenter
+                                text: Math.round(root.soundVolume * 100) + "%"
+                                font.pixelSize: units.gu(0.9)
+                                font.weight: Font.Bold
+                                color: root.soundEnabled ? (root.theme ? root.theme.accent : "#D99B26") : "#555A64"
+                            }
+                        }
+
+                        Rectangle {
+                            id: volTrack
+                            width: parent.width
+                            height: units.gu(1.6)
+                            radius: units.gu(0.8)
+                            color: root.theme ? root.theme.cardInner : "#0D0E0F"
+                            border.color: root.theme ? root.theme.cardBorder : "#2A2C30"
+                            border.width: units.gu(0.08)
+                            clip: true
+
+                            Rectangle {
+                                width: Math.max(parent.radius * 2, parent.width * Math.max(0.0, Math.min(1.0, root.soundVolume)))
+                                height: parent.height
+                                radius: parent.radius
+                                color: root.soundEnabled ? (root.theme ? root.theme.accent : "#D99B26") : "#3A3D44"
+                                opacity: root.soundEnabled ? 1.0 : 0.4
+                            }
+
+                            MouseArea {
+                                anchors.fill: parent
+                                preventStealing: true
+                                function updateVol(mx) {
+                                    var fraction = Math.max(0.0, Math.min(1.0, mx / width));
+                                    root.volumeChanged(fraction);
+                                }
+                                onPressed: updateVol(mouse.x)
+                                onPositionChanged: if (pressed) updateVol(mouse.x)
+                            }
+                        }
+                    }
+                }
+
                 // Player Stats Summary
                 Rectangle {
                     id: statsCard

@@ -31,6 +31,20 @@ MainView {
         hapticsEnabled: gameContainer.hapticsEnabled
     }
 
+    Keys.onPressed: {
+        if (event.key === Qt.Key_VolumeUp) {
+            gameContainer.adjustVolume(0.05);
+            event.accepted = false;
+        } else if (event.key === Qt.Key_VolumeDown) {
+            gameContainer.adjustVolume(-0.05);
+            event.accepted = false;
+        } else if (event.key === Qt.Key_VolumeMute) {
+            gameContainer.soundEnabled = !gameContainer.soundEnabled;
+            Storage.saveStat("soundEnabled", gameContainer.soundEnabled ? "1" : "0");
+            event.accepted = false;
+        }
+    }
+
     Page {
         id: mainPage
         anchors.fill: parent
@@ -488,8 +502,28 @@ MainView {
                 initGame(selectedCheckpoint);
             }
 
+            function adjustVolume(delta) {
+                if (delta > 0 && !gameContainer.soundEnabled) {
+                    gameContainer.soundEnabled = true;
+                    Storage.saveStat("soundEnabled", "1");
+                }
+                var newVol = Math.max(0.0, Math.min(1.0, gameContainer.soundVolume + delta));
+                gameContainer.soundVolume = Math.round(newVol * 100) / 100;
+                Storage.saveSoundVolume(gameContainer.soundVolume);
+            }
+
             Keys.onPressed: {
-                if (event.key === Qt.Key_VolumeUp || event.key === Qt.Key_VolumeDown || event.key === Qt.Key_VolumeMute) {
+                if (event.key === Qt.Key_VolumeUp) {
+                    gameContainer.adjustVolume(0.05);
+                    event.accepted = false;
+                    return;
+                } else if (event.key === Qt.Key_VolumeDown) {
+                    gameContainer.adjustVolume(-0.05);
+                    event.accepted = false;
+                    return;
+                } else if (event.key === Qt.Key_VolumeMute) {
+                    gameContainer.soundEnabled = !gameContainer.soundEnabled;
+                    Storage.saveStat("soundEnabled", gameContainer.soundEnabled ? "1" : "0");
                     event.accepted = false;
                     return;
                 }
