@@ -9,6 +9,7 @@ Item {
 
     SoundEffect {
         id: sfxBounce
+        category: "game"
         source: Qt.resolvedUrl("../../assets/sounds/bounce.wav")
         muted: !backend.soundEnabled
         volume: backend.masterVolume
@@ -16,6 +17,7 @@ Item {
 
     SoundEffect {
         id: sfxRoundCleared
+        category: "game"
         source: Qt.resolvedUrl("../../assets/sounds/fanfare.wav")
         muted: !backend.soundEnabled
         volume: backend.masterVolume * 0.95

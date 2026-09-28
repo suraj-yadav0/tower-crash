@@ -120,3 +120,18 @@ test('Storage - backfills missing checkpoints up to highest level', () => {
     // Levels 6, 11, 16 should be automatically backfilled
     assert.deepStrictEqual([...diff1.unlockedCheckpoints], [1, 6, 11, 16]);
 });
+
+test('Storage - saveSoundVolume clamping and persistence', () => {
+    const { Storage, _store } = setupStorage();
+    Storage.loadStats(true);
+
+    Storage.saveSoundVolume(0.45);
+    assert.strictEqual(_store.get('soundVolume'), '0.45');
+
+    Storage.saveSoundVolume(1.8);
+    assert.strictEqual(_store.get('soundVolume'), '1.00');
+
+    Storage.saveSoundVolume(-0.5);
+    assert.strictEqual(_store.get('soundVolume'), '0.00');
+});
+

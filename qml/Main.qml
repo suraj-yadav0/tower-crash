@@ -488,8 +488,24 @@ MainView {
                 initGame(selectedCheckpoint);
             }
 
+            function adjustVolume(delta) {
+                var newVol = Math.max(0.0, Math.min(1.0, gameContainer.soundVolume + delta));
+                gameContainer.soundVolume = Math.round(newVol * 100) / 100;
+                Storage.saveSoundVolume(gameContainer.soundVolume);
+            }
+
             Keys.onPressed: {
-                if (event.key === Qt.Key_A) {
+                if (event.key === Qt.Key_VolumeUp) {
+                    adjustVolume(0.05);
+                    event.accepted = false;
+                } else if (event.key === Qt.Key_VolumeDown) {
+                    adjustVolume(-0.05);
+                    event.accepted = false;
+                } else if (event.key === Qt.Key_VolumeMute) {
+                    gameContainer.soundEnabled = !gameContainer.soundEnabled;
+                    Storage.saveStat("soundEnabled", gameContainer.soundEnabled ? "1" : "0");
+                    event.accepted = false;
+                } else if (event.key === Qt.Key_A) {
                     if (!gameOver && !isPaused && !isSettingsOpen && !isWelcomeOpen && !isStageClearOpen && !isStageClearCelebrating) {
                         towerAngle += 0.12;
                         gameCanvas.requestPaint();
