@@ -1,6 +1,6 @@
 {
     "name": "tower-crash.surajyadav",
-    "description": "Tactile helical descent arcade game for Ubuntu Touch featuring procedurally generated towers, 10 biome zones, 4 difficulty modes, custom color palettes, and local SQLite state persistence.",
+    "description": "Helix jump arcade game for Ubuntu Touch. Rotate the tower to drop the ball through gaps, avoid hazards, and clear 100 levels.",
     "architecture": "@CLICK_ARCH@",
     "title": "Tower Crash",
     "icon": "assets/logo.svg",
