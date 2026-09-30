@@ -33,8 +33,8 @@ Rectangle {
     Rectangle {
         id: outerShell
         anchors.centerIn: parent
-        width: Math.min(parent.width - units.gu(4.0), units.gu(34))
-        height: Math.min(parent.height - units.gu(2.4), modalContent.height + units.gu(2.8))
+        width: Math.min(parent.width - units.gu(2.0), units.gu(42))
+        height: Math.min(parent.height - units.gu(2.4), modalContent.height + units.gu(3.2))
         radius: units.gu(2.0)
         color: root.theme ? root.theme.cardInner : "#0D0E0F"
         border.color: root.theme ? root.theme.topHazard : "#BA3C3C"
@@ -55,7 +55,7 @@ Rectangle {
         Flickable {
             id: gameOverFlickable
             anchors.fill: parent
-            anchors.margins: units.gu(1.4)
+            anchors.margins: units.gu(1.6)
             contentWidth: width
             contentHeight: modalContent.height
             clip: true
@@ -66,14 +66,14 @@ Rectangle {
                 id: modalContent
                 anchors.horizontalCenter: parent.horizontalCenter
                 width: parent.width
-                spacing: units.gu(1.3)
+                spacing: units.gu(1.4)
 
 
                 // Title
                 Label {
                     anchors.horizontalCenter: parent.horizontalCenter
                     text: i18n.tr("GAME OVER")
-                    font.pixelSize: units.gu(2.8)
+                    font.pixelSize: units.gu(3.0)
                     font.weight: Font.Black
                     color: root.theme ? root.theme.topHazard : "#BA3C3C"
                 }
@@ -82,8 +82,8 @@ Rectangle {
                 Rectangle {
                     anchors.horizontalCenter: parent.horizontalCenter
                     width: parent.width
-                    height: units.gu(7.6)
-                    radius: units.gu(1.4)
+                    height: units.gu(8.4)
+                    radius: units.gu(1.6)
                     color: root.theme ? root.theme.cardOuter : "#141517"
                     border.color: root.theme ? root.theme.cardBorder : "#2A2C30"
                     border.width: units.gu(0.1)
@@ -95,7 +95,7 @@ Rectangle {
                         Label {
                             anchors.horizontalCenter: parent.horizontalCenter
                             text: i18n.tr("FINAL SCORE")
-                            font.pixelSize: units.gu(1.0)
+                            font.pixelSize: units.gu(1.05)
                             font.weight: Font.DemiBold
                             color: "#848890"
                         }
@@ -103,7 +103,7 @@ Rectangle {
                         Label {
                             anchors.horizontalCenter: parent.horizontalCenter
                             text: root.score.toString()
-                            font.pixelSize: units.gu(3.8)
+                            font.pixelSize: units.gu(4.0)
                             font.weight: Font.Black
                             color: "#F5F3EF"
                         }
@@ -112,8 +112,8 @@ Rectangle {
                         Rectangle {
                             anchors.horizontalCenter: parent.horizontalCenter
                             width: newBestLabel.width + units.gu(1.6)
-                            height: units.gu(1.8)
-                            radius: units.gu(0.9)
+                            height: units.gu(2.0)
+                            radius: units.gu(1.0)
                             color: root.theme ? root.theme.accentBg : "#261E10"
                             border.color: root.theme ? root.theme.accent : "#D99B26"
                             border.width: units.gu(0.08)
@@ -123,7 +123,7 @@ Rectangle {
                                 id: newBestLabel
                                 anchors.centerIn: parent
                                 text: i18n.tr("NEW PERSONAL RECORD")
-                                font.pixelSize: units.gu(0.85)
+                                font.pixelSize: units.gu(0.9)
                                 font.weight: Font.Bold
                                 color: root.theme ? root.theme.accent : "#D99B26"
                             }
@@ -139,20 +139,20 @@ Rectangle {
                     // Best Score
                     Rectangle {
                         width: (parent.width - units.gu(1.0)) / 2.0
-                        height: units.gu(5.0)
-                        radius: units.gu(1.2)
+                        height: units.gu(5.6)
+                        radius: units.gu(1.4)
                         color: root.theme ? root.theme.cardOuter : "#141517"
                         border.color: root.theme ? root.theme.cardBorder : "#2A2C30"
                         border.width: units.gu(0.1)
 
                         Column {
                             anchors.centerIn: parent
-                            spacing: units.gu(0.1)
+                            spacing: units.gu(0.15)
 
                             Label {
                                 anchors.horizontalCenter: parent.horizontalCenter
                                 text: i18n.tr("BEST (%1)").arg(Progression.getDifficultyName(root.difficultyMode).toUpperCase())
-                                font.pixelSize: units.gu(0.85)
+                                font.pixelSize: units.gu(0.9)
                                 font.weight: Font.DemiBold
                                 color: "#848890"
                             }
@@ -160,7 +160,7 @@ Rectangle {
                             Label {
                                 anchors.horizontalCenter: parent.horizontalCenter
                                 text: root.bestScore.toString()
-                                font.pixelSize: units.gu(1.6)
+                                font.pixelSize: units.gu(1.7)
                                 font.weight: Font.Bold
                                 color: root.theme ? root.theme.ballMid : "#E6D7BA"
                             }
@@ -170,20 +170,20 @@ Rectangle {
                     // Level Reached
                     Rectangle {
                         width: (parent.width - units.gu(1.0)) / 2.0
-                        height: units.gu(5.0)
-                        radius: units.gu(1.2)
+                        height: units.gu(5.6)
+                        radius: units.gu(1.4)
                         color: root.theme ? root.theme.cardOuter : "#141517"
                         border.color: root.theme ? root.theme.cardBorder : "#2A2C30"
                         border.width: units.gu(0.1)
 
                         Column {
                             anchors.centerIn: parent
-                            spacing: units.gu(0.1)
+                            spacing: units.gu(0.15)
 
                             Label {
                                 anchors.horizontalCenter: parent.horizontalCenter
                                 text: i18n.tr("STAGE REACHED")
-                                font.pixelSize: units.gu(0.85)
+                                font.pixelSize: units.gu(0.9)
                                 font.weight: Font.DemiBold
                                 color: "#848890"
                             }
@@ -191,7 +191,7 @@ Rectangle {
                             Label {
                                 anchors.horizontalCenter: parent.horizontalCenter
                                 text: i18n.tr("Stage %1").arg(root.levelReached)
-                                font.pixelSize: units.gu(1.5)
+                                font.pixelSize: units.gu(1.6)
                                 font.weight: Font.Bold
                                 color: root.theme ? root.theme.accent : "#D99B26"
                             }
@@ -199,7 +199,7 @@ Rectangle {
                             Label {
                                 anchors.horizontalCenter: parent.horizontalCenter
                                 text: Progression.getZoneName(root.levelReached)
-                                font.pixelSize: units.gu(0.85)
+                                font.pixelSize: units.gu(0.9)
                                 font.weight: Font.DemiBold
                                 color: "#848890"
                                 elide: Text.ElideRight
@@ -214,8 +214,8 @@ Rectangle {
                     id: primaryActionBtn
                     anchors.horizontalCenter: parent.horizontalCenter
                     width: parent.width
-                    height: units.gu(5.0)
-                    radius: units.gu(2.5)
+                    height: units.gu(5.6)
+                    radius: units.gu(2.8)
                     color: primaryMouse.pressed
                            ? (root.theme ? root.theme.accentHover : "#BF8419")
                            : (root.theme ? root.theme.accent : "#D99B26")
@@ -234,7 +234,7 @@ Rectangle {
                               : ((root.checkpointLevel > 1)
                                  ? i18n.tr("Continue (Stage %1)").arg(root.checkpointLevel)
                                  : i18n.tr("Play Again"))
-                        font.pixelSize: units.gu(1.5)
+                        font.pixelSize: units.gu(1.7)
                         font.weight: Font.Bold
                         color: root.theme ? root.theme.accentText : "#0B0C0D"
                         elide: Text.ElideRight
@@ -245,16 +245,16 @@ Rectangle {
                         anchors.right: parent.right
                         anchors.rightMargin: units.gu(0.8)
                         anchors.verticalCenter: parent.verticalCenter
-                        width: units.gu(3.4)
-                        height: units.gu(3.4)
-                        radius: units.gu(1.7)
+                        width: units.gu(3.8)
+                        height: units.gu(3.8)
+                        radius: units.gu(1.9)
                         color: "#1A000000"
 
                         Canvas {
                             id: restartIconCanvas
                             anchors.centerIn: parent
-                            width: units.gu(1.4)
-                            height: units.gu(1.4)
+                            width: units.gu(1.5)
+                            height: units.gu(1.5)
                             onPaint: {
                                 var ctx = getContext("2d");
                                 ctx.clearRect(0, 0, width, height);
@@ -293,8 +293,8 @@ Rectangle {
                     id: restartFromBeginningBtn
                     anchors.horizontalCenter: parent.horizontalCenter
                     width: parent.width
-                    height: units.gu(4.4)
-                    radius: units.gu(2.2)
+                    height: units.gu(4.8)
+                    radius: units.gu(2.4)
                     visible: root.difficultyMode !== 3 && root.checkpointLevel > 1
                     color: restartBeginMouse.pressed ? "#1E2024" : (root.theme ? root.theme.cardOuter : "#141517")
                     border.color: root.theme ? root.theme.cardBorder : "#2A2C30"
@@ -325,8 +325,8 @@ Rectangle {
                     id: menuBtn
                     anchors.horizontalCenter: parent.horizontalCenter
                     width: parent.width
-                    height: units.gu(4.4)
-                    radius: units.gu(2.2)
+                    height: units.gu(4.8)
+                    radius: units.gu(2.4)
                     color: menuMouse.pressed ? "#1E2024" : (root.theme ? root.theme.cardOuter : "#141517")
                     border.color: root.theme ? root.theme.cardBorder : "#2A2C30"
                     border.width: units.gu(0.12)

@@ -56,10 +56,10 @@ Rectangle {
     Rectangle {
         id: outerShell
         anchors.centerIn: parent
-        width: Math.min(parent.width - units.gu(4.0), units.gu(36))
+        width: Math.min(parent.width - units.gu(2.0), units.gu(42))
         height: Math.min(
-            parent.height - units.gu(2.4),
-            (root.showingHowToPlay ? howToPlayContent.height : (root.showingAbout ? aboutWelcomeContent.height : menuContent.height)) + units.gu(2.8)
+            parent.height - units.gu(1.6),
+            (root.showingHowToPlay ? howToPlayContent.height : (root.showingAbout ? aboutWelcomeContent.height : menuContent.height)) + units.gu(3.2)
         )
         radius: units.gu(2.0)
         color: root.theme ? root.theme.cardInner : "#0D0E0F"
@@ -81,7 +81,7 @@ Rectangle {
         Flickable {
             id: welcomeFlickable
             anchors.fill: parent
-            anchors.margins: units.gu(1.4)
+            anchors.margins: units.gu(1.6)
             contentWidth: width
             contentHeight: root.showingHowToPlay ? howToPlayContent.height : (root.showingAbout ? aboutWelcomeContent.height : menuContent.height)
             clip: true
@@ -93,7 +93,7 @@ Rectangle {
                 id: menuContent
                 anchors.horizontalCenter: parent.horizontalCenter
                 width: parent.width
-                spacing: units.gu(1.0)
+                spacing: units.gu(1.2)
                 visible: !root.showingHowToPlay && !root.showingAbout
 
                 // Title
@@ -123,8 +123,8 @@ Rectangle {
                     id: difficultySelectorBar
                     anchors.horizontalCenter: parent.horizontalCenter
                     width: parent.width
-                    height: units.gu(3.8)
-                    radius: units.gu(1.9)
+                    height: units.gu(4.4)
+                    radius: units.gu(2.2)
                     color: root.theme ? root.theme.cardOuter : "#141517"
                     border.color: root.theme ? root.theme.cardBorder : "#2A2C30"
                     border.width: units.gu(0.1)
@@ -146,7 +146,7 @@ Rectangle {
                                 id: diffTab
                                 width: (parent.width - (3 * units.gu(0.3))) / 4.0
                                 height: parent.height
-                                radius: units.gu(1.6)
+                                radius: units.gu(1.9)
                                 color: root.difficultyMode === modelData.mode
                                        ? modelData.color
                                        : (diffMouse.pressed ? "#1E2024" : "transparent")
@@ -157,7 +157,7 @@ Rectangle {
                                 Label {
                                     anchors.centerIn: parent
                                     text: modelData.label
-                                    font.pixelSize: units.gu(1.0)
+                                    font.pixelSize: units.gu(1.15)
                                     font.weight: root.difficultyMode === modelData.mode ? Font.Black : Font.DemiBold
                                     color: root.difficultyMode === modelData.mode
                                            ? "#0B0C0D"
@@ -179,8 +179,8 @@ Rectangle {
                     id: checkpointSelector
                     anchors.horizontalCenter: parent.horizontalCenter
                     width: parent.width
-                    height: units.gu(4.4)
-                    radius: units.gu(1.4)
+                    height: units.gu(5.0)
+                    radius: units.gu(1.6)
                     color: root.difficultyMode === 3 ? "#1F1212" : (root.theme ? root.theme.cardOuter : "#141517")
                     border.color: root.difficultyMode === 3 ? "#7A2E2E" : (root.theme ? root.theme.cardBorder : "#2A2C30")
                     border.width: units.gu(0.1)
@@ -191,18 +191,18 @@ Rectangle {
                         // Previous Checkpoint Arrow Button
                         Rectangle {
                             id: prevCpBtn
-                            width: units.gu(4.4)
+                            width: units.gu(5.0)
                             height: parent.height
                             color: prevCpMouse.pressed ? "#1E2024" : "transparent"
-                            radius: units.gu(1.4)
+                            radius: units.gu(1.6)
                             opacity: (root.difficultyMode !== 3 && root.unlockedCheckpoints && root.unlockedCheckpoints.indexOf(root.selectedCheckpoint) > 0) ? 1.0 : 0.2
                             visible: root.difficultyMode !== 3
 
                             Canvas {
                                 id: prevArrowCanvas
                                 anchors.centerIn: parent
-                                width: units.gu(1.2)
-                                height: units.gu(1.2)
+                                width: units.gu(1.3)
+                                height: units.gu(1.3)
                                 onPaint: {
                                     var ctx = getContext("2d");
                                     ctx.clearRect(0, 0, width, height);
@@ -235,7 +235,7 @@ Rectangle {
 
                         // Center Label: Stage and Subtitle
                         Item {
-                            width: root.difficultyMode === 3 ? parent.width : (parent.width - units.gu(8.8))
+                            width: root.difficultyMode === 3 ? parent.width : (parent.width - units.gu(10.0))
                             height: parent.height
 
                             Column {
@@ -275,18 +275,18 @@ Rectangle {
                         // Next Checkpoint Arrow Button
                         Rectangle {
                             id: nextCpBtn
-                            width: units.gu(4.4)
+                            width: units.gu(5.0)
                             height: parent.height
                             color: nextCpMouse.pressed ? "#1E2024" : "transparent"
-                            radius: units.gu(1.4)
+                            radius: units.gu(1.6)
                             opacity: (root.difficultyMode !== 3 && root.unlockedCheckpoints && root.unlockedCheckpoints.indexOf(root.selectedCheckpoint) < root.unlockedCheckpoints.length - 1) ? 1.0 : 0.2
                             visible: root.difficultyMode !== 3
 
                             Canvas {
                                 id: nextArrowCanvas
                                 anchors.centerIn: parent
-                                width: units.gu(1.2)
-                                height: units.gu(1.2)
+                                width: units.gu(1.3)
+                                height: units.gu(1.3)
                                 onPaint: {
                                     var ctx = getContext("2d");
                                     ctx.clearRect(0, 0, width, height);
@@ -324,8 +324,8 @@ Rectangle {
                     id: playBtn
                     anchors.horizontalCenter: parent.horizontalCenter
                     width: parent.width
-                    height: units.gu(5.2)
-                    radius: units.gu(2.6)
+                    height: units.gu(5.6)
+                    radius: units.gu(2.8)
                     color: playMouse.pressed
                            ? (root.theme ? root.theme.accentHover : "#BF8419")
                            : (root.theme ? root.theme.accent : "#D99B26")
@@ -341,8 +341,8 @@ Rectangle {
 
                         Canvas {
                             id: playIconCanvas
-                            width: units.gu(1.5)
-                            height: units.gu(1.5)
+                            width: units.gu(1.6)
+                            height: units.gu(1.6)
                             anchors.verticalCenter: parent.verticalCenter
                             onPaint: {
                                 var ctx = getContext("2d");
@@ -363,7 +363,7 @@ Rectangle {
 
                         Label {
                             text: i18n.tr("PLAY")
-                            font.pixelSize: units.gu(1.7)
+                            font.pixelSize: units.gu(1.8)
                             font.weight: Font.Black
                             color: root.theme ? root.theme.accentText : "#0B0C0D"
                             anchors.verticalCenter: parent.verticalCenter
@@ -387,8 +387,8 @@ Rectangle {
                     Rectangle {
                         id: settingsBtn
                         width: (parent.width - units.gu(1.0)) / 2.0
-                        height: units.gu(4.2)
-                        radius: units.gu(2.1)
+                        height: units.gu(4.8)
+                        radius: units.gu(2.4)
                         color: settingsMouse.pressed ? "#1E2024" : (root.theme ? root.theme.cardOuter : "#141517")
                         border.color: root.theme ? root.theme.cardBorder : "#2A2C30"
                         border.width: units.gu(0.12)
@@ -401,7 +401,7 @@ Rectangle {
                         Label {
                             anchors.centerIn: parent
                             text: i18n.tr("Settings")
-                            font.pixelSize: units.gu(1.35)
+                            font.pixelSize: units.gu(1.4)
                             font.weight: Font.Bold
                             color: "#D6D5D2"
                         }
@@ -417,8 +417,8 @@ Rectangle {
                     Rectangle {
                         id: guideBtn
                         width: (parent.width - units.gu(1.0)) / 2.0
-                        height: units.gu(4.2)
-                        radius: units.gu(2.1)
+                        height: units.gu(4.8)
+                        radius: units.gu(2.4)
                         color: guideMouse.pressed ? "#1E2024" : (root.theme ? root.theme.cardOuter : "#141517")
                         border.color: root.theme ? root.theme.cardBorder : "#2A2C30"
                         border.width: units.gu(0.12)
@@ -431,7 +431,7 @@ Rectangle {
                         Label {
                             anchors.centerIn: parent
                             text: i18n.tr("How to Play")
-                            font.pixelSize: units.gu(1.35)
+                            font.pixelSize: units.gu(1.4)
                             font.weight: Font.Bold
                             color: "#D6D5D2"
                         }
@@ -456,8 +456,8 @@ Rectangle {
                     // Quick Theme Switcher
                     Rectangle {
                         width: (parent.width - units.gu(1.0)) / 2.0
-                        height: units.gu(3.8)
-                        radius: units.gu(1.9)
+                        height: units.gu(4.4)
+                        radius: units.gu(2.2)
                         color: themeMouse.pressed ? "#1E2024" : (root.theme ? root.theme.cardOuter : "#141517")
                         border.color: root.theme ? root.theme.cardBorder : "#2A2C30"
                         border.width: units.gu(0.1)
@@ -469,11 +469,11 @@ Rectangle {
 
                         Row {
                             anchors.centerIn: parent
-                            spacing: units.gu(0.7)
+                            spacing: units.gu(0.8)
 
                             Rectangle {
-                                width: units.gu(0.85)
-                                height: units.gu(0.85)
+                                width: units.gu(1.0)
+                                height: units.gu(1.0)
                                 radius: width / 2
                                 color: root.theme ? (root.theme.previewColor || root.theme.accent) : "#D99B26"
                                 anchors.verticalCenter: parent.verticalCenter
@@ -481,7 +481,7 @@ Rectangle {
 
                             Label {
                                 text: root.themeName.length > 0 ? root.themeName : i18n.tr("Theme")
-                                font.pixelSize: units.gu(1.05)
+                                font.pixelSize: units.gu(1.15)
                                 font.weight: Font.DemiBold
                                 color: "#D6D5D2"
                                 anchors.verticalCenter: parent.verticalCenter
@@ -498,8 +498,8 @@ Rectangle {
                     // Quick Speed Switcher
                     Rectangle {
                         width: (parent.width - units.gu(1.0)) / 2.0
-                        height: units.gu(3.8)
-                        radius: units.gu(1.9)
+                        height: units.gu(4.4)
+                        radius: units.gu(2.2)
                         color: speedMouse.pressed ? "#1E2024" : (root.theme ? root.theme.cardOuter : "#141517")
                         border.color: root.theme ? root.theme.cardBorder : "#2A2C30"
                         border.width: units.gu(0.1)
@@ -515,7 +515,7 @@ Rectangle {
 
                             Label {
                                 text: i18n.tr("Speed: %1").arg(root.speedMode === 0 ? i18n.tr("Slow") : (root.speedMode === 2 ? i18n.tr("Fast") : i18n.tr("Normal")))
-                                font.pixelSize: units.gu(1.05)
+                                font.pixelSize: units.gu(1.15)
                                 font.weight: Font.DemiBold
                                 color: "#D6D5D2"
                                 anchors.verticalCenter: parent.verticalCenter
@@ -534,8 +534,8 @@ Rectangle {
                 Rectangle {
                     anchors.horizontalCenter: parent.horizontalCenter
                     width: parent.width
-                    height: units.gu(5.0)
-                    radius: units.gu(1.4)
+                    height: units.gu(5.6)
+                    radius: units.gu(1.6)
                     color: root.theme ? root.theme.cardOuter : "#141517"
                     border.color: root.theme ? root.theme.cardBorder : "#2A2C30"
                     border.width: units.gu(0.1)
@@ -555,7 +555,7 @@ Rectangle {
                                 Label {
                                     anchors.horizontalCenter: parent.horizontalCenter
                                     text: i18n.tr("BEST (%1)").arg(Progression.getDifficultyName(root.difficultyMode).toUpperCase())
-                                    font.pixelSize: units.gu(0.85)
+                                    font.pixelSize: units.gu(0.9)
                                     font.weight: Font.Bold
                                     color: "#848890"
                                 }
@@ -563,7 +563,7 @@ Rectangle {
                                 Label {
                                     anchors.horizontalCenter: parent.horizontalCenter
                                     text: root.bestScore.toString()
-                                    font.pixelSize: units.gu(1.5)
+                                    font.pixelSize: units.gu(1.7)
                                     font.weight: Font.Black
                                     color: root.theme ? root.theme.ballMid : "#E6D7BA"
                                 }
@@ -589,7 +589,7 @@ Rectangle {
                                 Label {
                                     anchors.horizontalCenter: parent.horizontalCenter
                                     text: i18n.tr("RINGS CRASHED")
-                                    font.pixelSize: units.gu(0.85)
+                                    font.pixelSize: units.gu(0.9)
                                     font.weight: Font.Bold
                                     color: "#848890"
                                 }
@@ -597,7 +597,7 @@ Rectangle {
                                 Label {
                                     anchors.horizontalCenter: parent.horizontalCenter
                                     text: root.totalRings.toString()
-                                    font.pixelSize: units.gu(1.5)
+                                    font.pixelSize: units.gu(1.7)
                                     font.weight: Font.Black
                                     color: root.theme ? root.theme.accent : "#D99B26"
                                 }
@@ -611,8 +611,8 @@ Rectangle {
                     id: welcomeAboutBtn
                     anchors.horizontalCenter: parent.horizontalCenter
                     width: parent.width
-                    height: units.gu(3.4)
-                    radius: units.gu(1.7)
+                    height: units.gu(4.2)
+                    radius: units.gu(2.1)
                     color: welcomeAboutMouse.pressed ? "#1E2024" : (root.theme ? root.theme.cardOuter : "#141517")
                     border.color: welcomeAboutMouse.pressed
                                   ? (root.theme ? root.theme.accent : "#D99B26")
@@ -624,11 +624,11 @@ Rectangle {
 
                     Row {
                         anchors.centerIn: parent
-                        spacing: units.gu(0.6)
+                        spacing: units.gu(0.8)
 
                         Label {
                             text: i18n.tr("About Tower Crash")
-                            font.pixelSize: units.gu(1.05)
+                            font.pixelSize: units.gu(1.2)
                             font.weight: Font.DemiBold
                             color: "#D6D5D2"
                             anchors.verticalCenter: parent.verticalCenter
@@ -636,7 +636,7 @@ Rectangle {
 
                         Label {
                             text: "•  v1.0.0"
-                            font.pixelSize: units.gu(0.95)
+                            font.pixelSize: units.gu(1.05)
                             color: root.theme ? root.theme.accent : "#D99B26"
                             font.weight: Font.Bold
                             anchors.verticalCenter: parent.verticalCenter

@@ -16,7 +16,7 @@ Column {
     Label {
         anchors.horizontalCenter: parent.horizontalCenter
         text: i18n.tr("THEMES")
-        font.pixelSize: units.gu(2.2)
+        font.pixelSize: units.gu(2.4)
         font.weight: Font.Black
         color: "#F5F3EF"
     }
@@ -24,7 +24,7 @@ Column {
     Label {
         anchors.horizontalCenter: parent.horizontalCenter
         text: i18n.tr("Select a color theme for the tower")
-        font.pixelSize: units.gu(0.95)
+        font.pixelSize: units.gu(1.0)
         font.weight: Font.Normal
         color: "#848890"
         horizontalAlignment: Text.AlignHCenter
@@ -34,8 +34,8 @@ Column {
         id: pickerCard
         anchors.horizontalCenter: parent.horizontalCenter
         width: parent.width
-        height: pickerGridCol.height + units.gu(1.8)
-        radius: units.gu(1.4)
+        height: pickerGridCol.height + units.gu(2.2)
+        radius: units.gu(1.6)
         color: root.theme ? root.theme.cardOuter : "#141517"
         border.color: root.theme ? root.theme.cardBorder : "#2A2C30"
         border.width: units.gu(0.1)
@@ -45,20 +45,20 @@ Column {
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.verticalCenter: parent.verticalCenter
             width: parent.width - units.gu(2.0)
-            spacing: units.gu(0.6)
+            spacing: units.gu(0.7)
 
             Grid {
                 id: pickerGrid
                 anchors.horizontalCenter: parent.horizontalCenter
                 columns: 3
-                spacing: units.gu(0.5)
+                spacing: units.gu(0.6)
 
                 Repeater {
                     model: Themes.themeOptions
                     delegate: Rectangle {
-                        width: (pickerGridCol.width - units.gu(1.0)) / 3.0
-                        height: units.gu(2.8)
-                        radius: units.gu(1.4)
+                        width: (pickerGridCol.width - units.gu(1.2)) / 3.0
+                        height: units.gu(3.6)
+                        radius: units.gu(1.8)
                         color: root.themeMode === modelData.id
                                ? (root.theme ? root.theme.accentBg : "#261E10")
                                : (chipMouse.pressed ? "#1E2024" : (root.theme ? root.theme.cardInner : "#0D0E0F"))
@@ -72,11 +72,11 @@ Column {
 
                         Row {
                             anchors.centerIn: parent
-                            spacing: units.gu(0.4)
+                            spacing: units.gu(0.5)
 
                             Rectangle {
-                                width: units.gu(0.8)
-                                height: units.gu(0.8)
+                                width: units.gu(0.9)
+                                height: units.gu(0.9)
                                 radius: width / 2
                                 color: modelData.previewColor
                                 anchors.verticalCenter: parent.verticalCenter
@@ -84,7 +84,7 @@ Column {
 
                             Label {
                                 text: modelData.name
-                                font.pixelSize: units.gu(1.0)
+                                font.pixelSize: units.gu(1.15)
                                 font.weight: root.themeMode === modelData.id ? Font.Bold : Font.DemiBold
                                 color: root.themeMode === modelData.id
                                        ? (root.theme ? root.theme.accent : "#D99B26")
@@ -108,8 +108,8 @@ Column {
         id: pickerDoneBtn
         anchors.horizontalCenter: parent.horizontalCenter
         width: parent.width
-        height: units.gu(4.4)
-        radius: units.gu(2.2)
+        height: units.gu(5.0)
+        radius: units.gu(2.5)
         color: pickerDoneMouse.pressed
                ? (root.theme ? root.theme.accentHover : "#BF8419")
                : (root.theme ? root.theme.accent : "#D99B26")
@@ -122,7 +122,7 @@ Column {
         Label {
             anchors.centerIn: parent
             text: i18n.tr("Done")
-            font.pixelSize: units.gu(1.4)
+            font.pixelSize: units.gu(1.5)
             font.weight: Font.Bold
             color: root.theme ? root.theme.accentText : "#0B0C0D"
         }

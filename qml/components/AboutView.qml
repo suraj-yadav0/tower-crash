@@ -18,7 +18,7 @@ Column {
         Label {
             anchors.horizontalCenter: parent.horizontalCenter
             text: i18n.tr("Tower Crash")
-            font.pixelSize: units.gu(2.4)
+            font.pixelSize: units.gu(2.6)
             font.weight: Font.Black
             color: "#F5F3EF"
         }
@@ -26,7 +26,7 @@ Column {
         Label {
             anchors.horizontalCenter: parent.horizontalCenter
             text: i18n.tr("Spiral ball jump game for Ubuntu Touch")
-            font.pixelSize: units.gu(1.1)
+            font.pixelSize: units.gu(1.2)
             font.weight: Font.Normal
             color: "#848890"
         }
@@ -36,8 +36,8 @@ Column {
     Rectangle {
         anchors.horizontalCenter: parent.horizontalCenter
         width: parent.width
-        height: specsCol.height + units.gu(2.0)
-        radius: units.gu(1.4)
+        height: specsCol.height + units.gu(2.4)
+        radius: units.gu(1.6)
         color: root.theme ? root.theme.cardOuter : "#141517"
         border.color: root.theme ? root.theme.cardBorder : "#2A2C30"
         border.width: units.gu(0.1)
@@ -46,19 +46,19 @@ Column {
             id: specsCol
             anchors.centerIn: parent
             width: parent.width - units.gu(2.4)
-            spacing: units.gu(0.8)
+            spacing: units.gu(1.0)
 
             Row {
                 width: parent.width
                 Label {
                     text: i18n.tr("Version")
-                    font.pixelSize: units.gu(1.1)
+                    font.pixelSize: units.gu(1.2)
                     color: "#848890"
                     width: parent.width / 2.0
                 }
                 Label {
                     text: "1.0.0"
-                    font.pixelSize: units.gu(1.1)
+                    font.pixelSize: units.gu(1.2)
                     font.weight: Font.Bold
                     color: "#F5F3EF"
                     horizontalAlignment: Text.AlignRight
@@ -76,13 +76,13 @@ Column {
                 width: parent.width
                 Label {
                     text: i18n.tr("Author")
-                    font.pixelSize: units.gu(1.1)
+                    font.pixelSize: units.gu(1.2)
                     color: "#848890"
                     width: parent.width / 2.0
                 }
                 Label {
                     text: "Suraj Yadav"
-                    font.pixelSize: units.gu(1.1)
+                    font.pixelSize: units.gu(1.2)
                     font.weight: Font.Bold
                     color: "#F5F3EF"
                     horizontalAlignment: Text.AlignRight
@@ -100,13 +100,13 @@ Column {
                 width: parent.width
                 Label {
                     text: i18n.tr("License")
-                    font.pixelSize: units.gu(1.1)
+                    font.pixelSize: units.gu(1.2)
                     color: "#848890"
                     width: parent.width / 2.0
                 }
                 Label {
                     text: "GPL-3.0-or-later"
-                    font.pixelSize: units.gu(1.1)
+                    font.pixelSize: units.gu(1.2)
                     font.weight: Font.Bold
                     color: "#F5F3EF"
                     horizontalAlignment: Text.AlignRight
@@ -124,13 +124,13 @@ Column {
                 width: parent.width
                 Label {
                     text: i18n.tr("Platform")
-                    font.pixelSize: units.gu(1.1)
+                    font.pixelSize: units.gu(1.2)
                     color: "#848890"
                     width: parent.width / 2.0
                 }
                 Label {
                     text: "Ubuntu Touch (Lomiri)"
-                    font.pixelSize: units.gu(1.1)
+                    font.pixelSize: units.gu(1.2)
                     font.weight: Font.Bold
                     color: root.theme ? root.theme.accent : "#D99B26"
                     horizontalAlignment: Text.AlignRight
@@ -145,8 +145,8 @@ Column {
         id: starCard
         anchors.horizontalCenter: parent.horizontalCenter
         width: parent.width
-        height: starCol.height + units.gu(2.4)
-        radius: units.gu(1.4)
+        height: starCol.height + units.gu(2.6)
+        radius: units.gu(1.6)
         color: root.theme ? root.theme.cardOuter : "#141517"
         border.color: root.theme ? root.theme.cardBorder : "#2A2C30"
         border.width: units.gu(0.1)
@@ -155,11 +155,11 @@ Column {
             id: starCol
             anchors.centerIn: parent
             width: parent.width - units.gu(2.4)
-            spacing: units.gu(0.8)
+            spacing: units.gu(1.0)
 
             Label {
                 text: i18n.tr("If you enjoy playing Tower Crash, consider giving it a star on GitHub. It helps other Ubuntu Touch users find the game and supports independent open-source development.")
-                font.pixelSize: units.gu(1.1)
+                font.pixelSize: units.gu(1.15)
                 color: "#D6D5D2"
                 wrapMode: Text.WordWrap
                 width: parent.width
@@ -168,8 +168,8 @@ Column {
             Rectangle {
                 anchors.horizontalCenter: parent.horizontalCenter
                 width: parent.width
-                height: units.gu(3.8)
-                radius: units.gu(1.9)
+                height: units.gu(4.4)
+                radius: units.gu(2.2)
                 color: starMouse.pressed ? "#1E2024" : (root.theme ? root.theme.accentBg : "#261E10")
                 border.color: starMouse.pressed
                               ? (root.theme ? root.theme.accent : "#D99B26")
@@ -185,7 +185,7 @@ Column {
 
                     Label {
                         text: i18n.tr("Star on GitHub")
-                        font.pixelSize: units.gu(1.2)
+                        font.pixelSize: units.gu(1.25)
                         font.weight: Font.Bold
                         color: root.theme ? root.theme.accent : "#D99B26"
                         anchors.verticalCenter: parent.verticalCenter
@@ -193,7 +193,7 @@ Column {
 
                     Label {
                         text: "•  github.com/suraj-yadav0/tower-crash"
-                        font.pixelSize: units.gu(0.95)
+                        font.pixelSize: units.gu(1.0)
                         color: "#848890"
                         anchors.verticalCenter: parent.verticalCenter
                     }
@@ -215,8 +215,8 @@ Column {
         id: backBtn
         anchors.horizontalCenter: parent.horizontalCenter
         width: parent.width
-        height: units.gu(4.4)
-        radius: units.gu(2.2)
+        height: units.gu(5.0)
+        radius: units.gu(2.5)
         color: backMouse.pressed
                ? (root.theme ? root.theme.accentHover : "#BF8419")
                : (root.theme ? root.theme.accent : "#D99B26")
@@ -229,7 +229,7 @@ Column {
         Label {
             anchors.centerIn: parent
             text: i18n.tr("Back")
-            font.pixelSize: units.gu(1.5)
+            font.pixelSize: units.gu(1.55)
             font.weight: Font.Bold
             color: root.theme ? root.theme.accentText : "#0B0C0D"
         }

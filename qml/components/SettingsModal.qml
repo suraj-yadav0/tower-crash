@@ -72,10 +72,10 @@ Rectangle {
     Rectangle {
         id: outerShell
         anchors.centerIn: parent
-        width: Math.min(parent.width - units.gu(3.2), units.gu(36))
+        width: Math.min(parent.width - units.gu(2.0), units.gu(42))
         height: Math.min(
-            parent.height - units.gu(2.4),
-            (root.showingThemePicker ? paletteContent.height : (root.showingAbout ? aboutContent.height : modalContent.height)) + units.gu(2.8)
+            parent.height - units.gu(1.6),
+            (root.showingThemePicker ? paletteContent.height : (root.showingAbout ? aboutContent.height : modalContent.height)) + units.gu(3.2)
         )
         radius: units.gu(2.0)
         color: root.theme ? root.theme.cardInner : "#0D0E0F"
@@ -97,7 +97,7 @@ Rectangle {
         Flickable {
             id: modalFlickable
             anchors.fill: parent
-            anchors.margins: units.gu(1.2)
+            anchors.margins: units.gu(1.6)
             contentWidth: width
             contentHeight: root.showingThemePicker ? paletteContent.height : (root.showingAbout ? aboutContent.height : modalContent.height)
             clip: true
@@ -108,14 +108,14 @@ Rectangle {
             Column {
                 id: modalContent
                 width: parent.width
-                spacing: units.gu(0.85)
+                spacing: units.gu(1.1)
                 visible: !root.showingThemePicker && !root.showingAbout
 
                 // Title
                 Label {
                     anchors.horizontalCenter: parent.horizontalCenter
                     text: i18n.tr("SETTINGS")
-                    font.pixelSize: units.gu(2.2)
+                    font.pixelSize: units.gu(2.4)
                     font.weight: Font.Black
                     color: "#F5F3EF"
                 }
@@ -125,8 +125,8 @@ Rectangle {
                     id: themeSummaryCard
                     anchors.horizontalCenter: parent.horizontalCenter
                     width: parent.width
-                    height: units.gu(4.8)
-                    radius: units.gu(1.4)
+                    height: units.gu(5.2)
+                    radius: units.gu(1.6)
                     color: themeCardMouse.pressed ? "#1E2024" : (root.theme ? root.theme.cardOuter : "#141517")
                     border.color: themeCardMouse.pressed
                                   ? (root.theme ? root.theme.accent : "#D99B26")
@@ -217,8 +217,8 @@ Rectangle {
                     id: speedCard
                     anchors.horizontalCenter: parent.horizontalCenter
                     width: parent.width
-                    height: speedCol.height + units.gu(1.6)
-                    radius: units.gu(1.4)
+                    height: speedCol.height + units.gu(2.0)
+                    radius: units.gu(1.6)
                     color: root.theme ? root.theme.cardOuter : "#141517"
                     border.color: root.theme ? root.theme.cardBorder : "#2A2C30"
                     border.width: units.gu(0.1)
@@ -228,12 +228,12 @@ Rectangle {
                         anchors.horizontalCenter: parent.horizontalCenter
                         anchors.verticalCenter: parent.verticalCenter
                         width: parent.width - units.gu(2.0)
-                        spacing: units.gu(0.5)
+                        spacing: units.gu(0.6)
 
                         Label {
                             anchors.horizontalCenter: parent.horizontalCenter
                             text: i18n.tr("FALL SPEED")
-                            font.pixelSize: units.gu(0.9)
+                            font.pixelSize: units.gu(0.95)
                             font.weight: Font.Bold
                             color: "#848890"
                         }
@@ -242,12 +242,12 @@ Rectangle {
                             id: speedRow
                             anchors.horizontalCenter: parent.horizontalCenter
                             width: parent.width
-                            spacing: units.gu(0.5)
+                            spacing: units.gu(0.6)
 
                             Rectangle {
-                                width: (speedRow.width - units.gu(1.0)) / 3.0
-                                height: units.gu(2.6)
-                                radius: units.gu(1.3)
+                                width: (speedRow.width - units.gu(1.2)) / 3.0
+                                height: units.gu(3.4)
+                                radius: units.gu(1.7)
                                 color: root.speedMode === 0
                                        ? (root.theme ? root.theme.accent : "#D99B26")
                                        : (slowMouse.pressed ? "#1E2024" : (root.theme ? root.theme.cardInner : "#0D0E0F"))
@@ -262,7 +262,7 @@ Rectangle {
                                 Label {
                                     anchors.centerIn: parent
                                     text: i18n.tr("Slow")
-                                    font.pixelSize: units.gu(1.1)
+                                    font.pixelSize: units.gu(1.2)
                                     font.weight: Font.Bold
                                     color: root.speedMode === 0
                                            ? (root.theme ? root.theme.accentText : "#0B0C0D")
@@ -277,9 +277,9 @@ Rectangle {
                             }
 
                             Rectangle {
-                                width: (speedRow.width - units.gu(1.0)) / 3.0
-                                height: units.gu(2.6)
-                                radius: units.gu(1.3)
+                                width: (speedRow.width - units.gu(1.2)) / 3.0
+                                height: units.gu(3.4)
+                                radius: units.gu(1.7)
                                 color: root.speedMode === 1
                                        ? (root.theme ? root.theme.accent : "#D99B26")
                                        : (normalMouse.pressed ? "#1E2024" : (root.theme ? root.theme.cardInner : "#0D0E0F"))
@@ -294,7 +294,7 @@ Rectangle {
                                 Label {
                                     anchors.centerIn: parent
                                     text: i18n.tr("Normal")
-                                    font.pixelSize: units.gu(1.1)
+                                    font.pixelSize: units.gu(1.2)
                                     font.weight: Font.Bold
                                     color: root.speedMode === 1
                                            ? (root.theme ? root.theme.accentText : "#0B0C0D")
@@ -309,9 +309,9 @@ Rectangle {
                             }
 
                             Rectangle {
-                                width: (speedRow.width - units.gu(1.0)) / 3.0
-                                height: units.gu(2.6)
-                                radius: units.gu(1.3)
+                                width: (speedRow.width - units.gu(1.2)) / 3.0
+                                height: units.gu(3.4)
+                                radius: units.gu(1.7)
                                 color: root.speedMode === 2
                                        ? (root.theme ? root.theme.accent : "#D99B26")
                                        : (fastMouse.pressed ? "#1E2024" : (root.theme ? root.theme.cardInner : "#0D0E0F"))
@@ -326,7 +326,7 @@ Rectangle {
                                 Label {
                                     anchors.centerIn: parent
                                     text: i18n.tr("Fast")
-                                    font.pixelSize: units.gu(1.1)
+                                    font.pixelSize: units.gu(1.2)
                                     font.weight: Font.Bold
                                     color: root.speedMode === 2
                                            ? (root.theme ? root.theme.accentText : "#0B0C0D")
@@ -348,8 +348,8 @@ Rectangle {
                     id: diffCard
                     anchors.horizontalCenter: parent.horizontalCenter
                     width: parent.width
-                    height: diffCol.height + units.gu(1.6)
-                    radius: units.gu(1.4)
+                    height: diffCol.height + units.gu(2.0)
+                    radius: units.gu(1.6)
                     color: root.theme ? root.theme.cardOuter : "#141517"
                     border.color: root.theme ? root.theme.cardBorder : "#2A2C30"
                     border.width: units.gu(0.1)
@@ -359,12 +359,12 @@ Rectangle {
                         anchors.horizontalCenter: parent.horizontalCenter
                         anchors.verticalCenter: parent.verticalCenter
                         width: parent.width - units.gu(2.0)
-                        spacing: units.gu(0.5)
+                        spacing: units.gu(0.6)
 
                         Label {
                             anchors.horizontalCenter: parent.horizontalCenter
                             text: root.isWelcomeOpen ? i18n.tr("DIFFICULTY MODE") : i18n.tr("DIFFICULTY MODE (Locked in Run)")
-                            font.pixelSize: units.gu(0.9)
+                            font.pixelSize: units.gu(0.95)
                             font.weight: Font.Bold
                             color: "#848890"
                         }
@@ -385,8 +385,8 @@ Rectangle {
 
                                 Rectangle {
                                     width: (diffRow.width - (3 * units.gu(0.4))) / 4.0
-                                    height: units.gu(2.6)
-                                    radius: units.gu(1.3)
+                                    height: units.gu(3.4)
+                                    radius: units.gu(1.7)
                                     opacity: (root.isWelcomeOpen || root.difficultyMode === modelData.mode) ? 1.0 : 0.45
                                     color: root.difficultyMode === modelData.mode
                                            ? modelData.color
@@ -402,7 +402,7 @@ Rectangle {
                                     Label {
                                         anchors.centerIn: parent
                                         text: modelData.label
-                                        font.pixelSize: units.gu(1.0)
+                                        font.pixelSize: units.gu(1.1)
                                         font.weight: Font.Bold
                                         color: root.difficultyMode === modelData.mode
                                                ? "#0B0C0D"
@@ -426,8 +426,8 @@ Rectangle {
                     id: sensCard
                     anchors.horizontalCenter: parent.horizontalCenter
                     width: parent.width
-                    height: sensCol.height + units.gu(1.6)
-                    radius: units.gu(1.4)
+                    height: sensCol.height + units.gu(2.0)
+                    radius: units.gu(1.6)
                     color: root.theme ? root.theme.cardOuter : "#141517"
                     border.color: root.theme ? root.theme.cardBorder : "#2A2C30"
                     border.width: units.gu(0.1)
@@ -437,12 +437,12 @@ Rectangle {
                         anchors.horizontalCenter: parent.horizontalCenter
                         anchors.verticalCenter: parent.verticalCenter
                         width: parent.width - units.gu(2.0)
-                        spacing: units.gu(0.5)
+                        spacing: units.gu(0.6)
 
                         Label {
                             anchors.horizontalCenter: parent.horizontalCenter
                             text: i18n.tr("TOUCH SENSITIVITY")
-                            font.pixelSize: units.gu(0.9)
+                            font.pixelSize: units.gu(0.95)
                             font.weight: Font.Bold
                             color: "#848890"
                         }
@@ -451,12 +451,12 @@ Rectangle {
                             id: sensRow
                             anchors.horizontalCenter: parent.horizontalCenter
                             width: parent.width
-                            spacing: units.gu(0.5)
+                            spacing: units.gu(0.6)
 
                             Rectangle {
-                                width: (sensRow.width - units.gu(1.0)) / 3.0
-                                height: units.gu(2.6)
-                                radius: units.gu(1.3)
+                                width: (sensRow.width - units.gu(1.2)) / 3.0
+                                height: units.gu(3.4)
+                                radius: units.gu(1.7)
                                 color: Math.abs(root.touchSensitivityMultiplier - 0.75) < 0.05
                                        ? (root.theme ? root.theme.accent : "#D99B26")
                                        : (sensLowMouse.pressed ? "#1E2024" : (root.theme ? root.theme.cardInner : "#0D0E0F"))
@@ -471,7 +471,7 @@ Rectangle {
                                 Label {
                                     anchors.centerIn: parent
                                     text: i18n.tr("Low")
-                                    font.pixelSize: units.gu(1.1)
+                                    font.pixelSize: units.gu(1.2)
                                     font.weight: Font.Bold
                                     color: Math.abs(root.touchSensitivityMultiplier - 0.75) < 0.05
                                            ? (root.theme ? root.theme.accentText : "#0B0C0D")
@@ -486,9 +486,9 @@ Rectangle {
                             }
 
                             Rectangle {
-                                width: (sensRow.width - units.gu(1.0)) / 3.0
-                                height: units.gu(2.6)
-                                radius: units.gu(1.3)
+                                width: (sensRow.width - units.gu(1.2)) / 3.0
+                                height: units.gu(3.4)
+                                radius: units.gu(1.7)
                                 color: Math.abs(root.touchSensitivityMultiplier - 1.0) < 0.05
                                        ? (root.theme ? root.theme.accent : "#D99B26")
                                        : (sensNormMouse.pressed ? "#1E2024" : (root.theme ? root.theme.cardInner : "#0D0E0F"))
@@ -503,7 +503,7 @@ Rectangle {
                                 Label {
                                     anchors.centerIn: parent
                                     text: i18n.tr("Normal")
-                                    font.pixelSize: units.gu(1.1)
+                                    font.pixelSize: units.gu(1.2)
                                     font.weight: Font.Bold
                                     color: Math.abs(root.touchSensitivityMultiplier - 1.0) < 0.05
                                            ? (root.theme ? root.theme.accentText : "#0B0C0D")
@@ -518,9 +518,9 @@ Rectangle {
                             }
 
                             Rectangle {
-                                width: (sensRow.width - units.gu(1.0)) / 3.0
-                                height: units.gu(2.6)
-                                radius: units.gu(1.3)
+                                width: (sensRow.width - units.gu(1.2)) / 3.0
+                                height: units.gu(3.4)
+                                radius: units.gu(1.7)
                                 color: Math.abs(root.touchSensitivityMultiplier - 1.35) < 0.05
                                        ? (root.theme ? root.theme.accent : "#D99B26")
                                        : (sensHighMouse.pressed ? "#1E2024" : (root.theme ? root.theme.cardInner : "#0D0E0F"))
@@ -535,7 +535,7 @@ Rectangle {
                                 Label {
                                     anchors.centerIn: parent
                                     text: i18n.tr("High")
-                                    font.pixelSize: units.gu(1.1)
+                                    font.pixelSize: units.gu(1.2)
                                     font.weight: Font.Bold
                                     color: Math.abs(root.touchSensitivityMultiplier - 1.35) < 0.05
                                            ? (root.theme ? root.theme.accentText : "#0B0C0D")
@@ -561,8 +561,8 @@ Rectangle {
                     Rectangle {
                         id: soundToggleBtn
                         width: (parent.width - units.gu(0.8)) / 2.0
-                        height: units.gu(3.6)
-                        radius: units.gu(1.8)
+                        height: units.gu(4.4)
+                        radius: units.gu(2.2)
                         color: soundToggleMouse.pressed ? "#1E2024" : (root.theme ? root.theme.cardOuter : "#141517")
                         border.color: root.soundEnabled
                                       ? (root.theme ? root.theme.accent : "#D99B26")
@@ -579,8 +579,8 @@ Rectangle {
                             spacing: units.gu(0.7)
 
                             Rectangle {
-                                width: units.gu(0.75)
-                                height: units.gu(0.75)
+                                width: units.gu(0.85)
+                                height: units.gu(0.85)
                                 radius: width / 2
                                 color: root.soundEnabled
                                        ? (root.theme ? root.theme.accent : "#D99B26")
@@ -590,7 +590,7 @@ Rectangle {
 
                             Label {
                                 text: root.soundEnabled ? i18n.tr("Audio ON") : i18n.tr("Audio OFF")
-                                font.pixelSize: units.gu(1.15)
+                                font.pixelSize: units.gu(1.25)
                                 font.weight: Font.DemiBold
                                 color: root.soundEnabled ? "#F5F3EF" : "#848890"
                                 anchors.verticalCenter: parent.verticalCenter
@@ -607,8 +607,8 @@ Rectangle {
                     Rectangle {
                         id: hapticsToggleBtn
                         width: (parent.width - units.gu(0.8)) / 2.0
-                        height: units.gu(3.6)
-                        radius: units.gu(1.8)
+                        height: units.gu(4.4)
+                        radius: units.gu(2.2)
                         color: hapticsToggleMouse.pressed ? "#1E2024" : (root.theme ? root.theme.cardOuter : "#141517")
                         border.color: root.hapticsEnabled
                                       ? (root.theme ? root.theme.accent : "#D99B26")
@@ -625,8 +625,8 @@ Rectangle {
                             spacing: units.gu(0.7)
 
                             Rectangle {
-                                width: units.gu(0.75)
-                                height: units.gu(0.75)
+                                width: units.gu(0.85)
+                                height: units.gu(0.85)
                                 radius: width / 2
                                 color: root.hapticsEnabled
                                        ? (root.theme ? root.theme.accent : "#D99B26")
@@ -636,7 +636,7 @@ Rectangle {
 
                             Label {
                                 text: root.hapticsEnabled ? i18n.tr("Haptic ON") : i18n.tr("Haptic OFF")
-                                font.pixelSize: units.gu(1.15)
+                                font.pixelSize: units.gu(1.25)
                                 font.weight: Font.DemiBold
                                 color: root.hapticsEnabled ? "#F5F3EF" : "#848890"
                                 anchors.verticalCenter: parent.verticalCenter
@@ -656,8 +656,8 @@ Rectangle {
                     id: volumeCard
                     anchors.horizontalCenter: parent.horizontalCenter
                     width: parent.width
-                    height: units.gu(4.4)
-                    radius: units.gu(1.4)
+                    height: units.gu(5.2)
+                    radius: units.gu(1.6)
                     color: root.theme ? root.theme.cardOuter : "#141517"
                     border.color: root.theme ? root.theme.cardBorder : "#2A2C30"
                     border.width: units.gu(0.1)
@@ -665,17 +665,17 @@ Rectangle {
                     Column {
                         anchors.centerIn: parent
                         width: parent.width - units.gu(2.4)
-                        spacing: units.gu(0.3)
+                        spacing: units.gu(0.4)
 
                         Item {
                             width: parent.width
-                            height: units.gu(1.4)
+                            height: units.gu(1.5)
 
                             Label {
                                 anchors.left: parent.left
                                 anchors.verticalCenter: parent.verticalCenter
                                 text: i18n.tr("SOUND VOLUME")
-                                font.pixelSize: units.gu(0.9)
+                                font.pixelSize: units.gu(0.95)
                                 font.weight: Font.Bold
                                 color: "#848890"
                             }
@@ -684,7 +684,7 @@ Rectangle {
                                 anchors.right: parent.right
                                 anchors.verticalCenter: parent.verticalCenter
                                 text: Math.round(root.soundVolume * 100) + "%"
-                                font.pixelSize: units.gu(0.9)
+                                font.pixelSize: units.gu(0.95)
                                 font.weight: Font.Bold
                                 color: root.soundEnabled ? (root.theme ? root.theme.accent : "#D99B26") : "#555A64"
                             }
@@ -693,8 +693,8 @@ Rectangle {
                         Rectangle {
                             id: volTrack
                             width: parent.width
-                            height: units.gu(1.6)
-                            radius: units.gu(0.8)
+                            height: units.gu(2.0)
+                            radius: units.gu(1.0)
                             color: root.theme ? root.theme.cardInner : "#0D0E0F"
                             border.color: root.theme ? root.theme.cardBorder : "#2A2C30"
                             border.width: units.gu(0.08)
@@ -727,8 +727,8 @@ Rectangle {
                     id: statsCard
                     anchors.horizontalCenter: parent.horizontalCenter
                     width: parent.width
-                    height: units.gu(4.0)
-                    radius: units.gu(1.4)
+                    height: units.gu(4.8)
+                    radius: units.gu(1.6)
                     color: root.theme ? root.theme.cardOuter : "#141517"
                     border.color: root.theme ? root.theme.cardBorder : "#2A2C30"
                     border.width: units.gu(0.1)
@@ -742,12 +742,12 @@ Rectangle {
 
                             Column {
                                 anchors.centerIn: parent
-                                spacing: units.gu(0.15)
+                                spacing: units.gu(0.2)
 
                                 Label {
                                     anchors.horizontalCenter: parent.horizontalCenter
                                     text: i18n.tr("BEST RECORD")
-                                    font.pixelSize: units.gu(0.8)
+                                    font.pixelSize: units.gu(0.85)
                                     font.weight: Font.Bold
                                     color: "#848890"
                                 }
@@ -755,7 +755,7 @@ Rectangle {
                                 Label {
                                     anchors.horizontalCenter: parent.horizontalCenter
                                     text: root.bestScore.toString()
-                                    font.pixelSize: units.gu(1.3)
+                                    font.pixelSize: units.gu(1.4)
                                     font.weight: Font.Black
                                     color: root.theme ? root.theme.ballMid : "#E6D7BA"
                                 }
@@ -765,7 +765,7 @@ Rectangle {
                         Rectangle {
                             anchors.verticalCenter: parent.verticalCenter
                             width: units.dp(1)
-                            height: parent.height - units.gu(1.4)
+                            height: parent.height - units.gu(1.6)
                             color: root.theme ? root.theme.cardBorder : "#2A2C30"
                         }
 
@@ -775,12 +775,12 @@ Rectangle {
 
                             Column {
                                 anchors.centerIn: parent
-                                spacing: units.gu(0.15)
+                                spacing: units.gu(0.2)
 
                                 Label {
                                     anchors.horizontalCenter: parent.horizontalCenter
                                     text: i18n.tr("TOTAL SMASHED")
-                                    font.pixelSize: units.gu(0.8)
+                                    font.pixelSize: units.gu(0.85)
                                     font.weight: Font.Bold
                                     color: "#848890"
                                 }
@@ -788,7 +788,7 @@ Rectangle {
                                 Label {
                                     anchors.horizontalCenter: parent.horizontalCenter
                                     text: root.totalRings.toString()
-                                    font.pixelSize: units.gu(1.3)
+                                    font.pixelSize: units.gu(1.4)
                                     font.weight: Font.Black
                                     color: root.theme ? root.theme.accent : "#D99B26"
                                 }
@@ -802,8 +802,8 @@ Rectangle {
                     id: aboutSummaryCard
                     anchors.horizontalCenter: parent.horizontalCenter
                     width: parent.width
-                    height: units.gu(4.4)
-                    radius: units.gu(1.4)
+                    height: units.gu(5.0)
+                    radius: units.gu(1.6)
                     color: aboutCardMouse.pressed ? "#1E2024" : (root.theme ? root.theme.cardOuter : "#141517")
                     border.color: aboutCardMouse.pressed
                                   ? (root.theme ? root.theme.accent : "#D99B26")
@@ -821,19 +821,19 @@ Rectangle {
 
                         Column {
                             anchors.verticalCenter: parent.verticalCenter
-                            spacing: units.gu(0.15)
+                            spacing: units.gu(0.2)
                             width: parent.width - arrowLabel.width - units.gu(2.4)
 
                             Label {
                                 text: i18n.tr("About Tower Crash")
-                                font.pixelSize: units.gu(1.15)
+                                font.pixelSize: units.gu(1.25)
                                 font.weight: Font.Bold
                                 color: "#F5F3EF"
                             }
 
                             Label {
                                 text: i18n.tr("v1.0.0 • Credits & Info")
-                                font.pixelSize: units.gu(0.85)
+                                font.pixelSize: units.gu(0.95)
                                 color: "#848890"
                             }
                         }
@@ -842,7 +842,7 @@ Rectangle {
                             id: arrowLabel
                             anchors.verticalCenter: parent.verticalCenter
                             text: ">"
-                            font.pixelSize: units.gu(1.2)
+                            font.pixelSize: units.gu(1.3)
                             font.weight: Font.Bold
                             color: "#848890"
                         }
@@ -862,8 +862,8 @@ Rectangle {
                     id: doneBtn
                     anchors.horizontalCenter: parent.horizontalCenter
                     width: parent.width
-                    height: units.gu(4.4)
-                    radius: units.gu(2.2)
+                    height: units.gu(5.0)
+                    radius: units.gu(2.5)
                     color: doneMouse.pressed
                            ? (root.theme ? root.theme.accentHover : "#BF8419")
                            : (root.theme ? root.theme.accent : "#D99B26")
@@ -876,7 +876,7 @@ Rectangle {
                     Label {
                         anchors.centerIn: parent
                         text: i18n.tr("Apply & Close")
-                        font.pixelSize: units.gu(1.4)
+                        font.pixelSize: units.gu(1.5)
                         font.weight: Font.Bold
                         color: root.theme ? root.theme.accentText : "#0B0C0D"
                     }
@@ -893,8 +893,8 @@ Rectangle {
                     id: exitMenuBtn
                     anchors.horizontalCenter: parent.horizontalCenter
                     width: parent.width
-                    height: units.gu(4.4)
-                    radius: units.gu(2.2)
+                    height: units.gu(4.8)
+                    radius: units.gu(2.4)
                     visible: !root.isWelcomeOpen
                     color: exitMenuMouse.pressed ? "#1E2024" : (root.theme ? root.theme.cardOuter : "#141517")
                     border.color: root.theme ? root.theme.cardBorder : "#2A2C30"
@@ -908,7 +908,7 @@ Rectangle {
                     Label {
                         anchors.centerIn: parent
                         text: i18n.tr("Exit to Main Menu")
-                        font.pixelSize: units.gu(1.4)
+                        font.pixelSize: units.gu(1.45)
                         font.weight: Font.DemiBold
                         color: "#D6D5D2"
                     }

@@ -37,8 +37,8 @@ Rectangle {
     Rectangle {
         id: outerShell
         anchors.centerIn: parent
-        width: Math.min(parent.width - units.gu(4.0), units.gu(34))
-        height: Math.min(parent.height - units.gu(2.4), modalContent.height + units.gu(2.8))
+        width: Math.min(parent.width - units.gu(2.0), units.gu(42))
+        height: Math.min(parent.height - units.gu(2.4), modalContent.height + units.gu(3.2))
         radius: units.gu(2.0)
         color: root.theme ? root.theme.cardInner : "#0D0E0F"
         border.color: root.isGrandVictory
@@ -62,7 +62,7 @@ Rectangle {
         Flickable {
             id: stageClearFlickable
             anchors.fill: parent
-            anchors.margins: units.gu(1.4)
+            anchors.margins: units.gu(1.6)
             contentWidth: width
             contentHeight: modalContent.height
             clip: true
@@ -73,7 +73,7 @@ Rectangle {
                 id: modalContent
                 anchors.horizontalCenter: parent.horizontalCenter
                 width: parent.width
-                spacing: units.gu(1.1)
+                spacing: units.gu(1.3)
 
 
                 Label {
@@ -81,7 +81,7 @@ Rectangle {
                     text: root.isGrandVictory
                           ? i18n.tr("VICTORY!")
                           : i18n.tr("STAGE %1").arg(root.stageNumber)
-                    font.pixelSize: units.gu(2.6)
+                    font.pixelSize: units.gu(2.8)
                     font.weight: Font.Black
                     color: "#F5F3EF"
                 }
@@ -91,7 +91,7 @@ Rectangle {
                     text: root.isGrandVictory
                           ? i18n.tr("100 LEVELS COMPLETE")
                           : Progression.getZoneTitle(root.stageNumber).toUpperCase()
-                    font.pixelSize: units.gu(1.1)
+                    font.pixelSize: units.gu(1.2)
                     font.weight: Font.Bold
                     color: root.isGrandVictory
                            ? "#FFD700"
@@ -101,8 +101,8 @@ Rectangle {
                 Rectangle {
                     anchors.horizontalCenter: parent.horizontalCenter
                     width: parent.width
-                    height: units.gu(7.2)
-                    radius: units.gu(1.4)
+                    height: units.gu(8.0)
+                    radius: units.gu(1.6)
                     color: root.theme ? root.theme.cardOuter : "#141517"
                     border.color: root.theme ? root.theme.cardBorder : "#2A2C30"
                     border.width: units.gu(0.1)
@@ -114,7 +114,7 @@ Rectangle {
                         Label {
                             anchors.horizontalCenter: parent.horizontalCenter
                             text: i18n.tr("TOTAL SCORE")
-                            font.pixelSize: units.gu(1.0)
+                            font.pixelSize: units.gu(1.05)
                             font.weight: Font.DemiBold
                             color: "#848890"
                         }
@@ -122,7 +122,7 @@ Rectangle {
                         Label {
                             anchors.horizontalCenter: parent.horizontalCenter
                             text: root.score.toString()
-                            font.pixelSize: units.gu(3.4)
+                            font.pixelSize: units.gu(3.8)
                             font.weight: Font.Black
                             color: "#F5F3EF"
                         }
@@ -130,8 +130,8 @@ Rectangle {
                         Rectangle {
                             anchors.horizontalCenter: parent.horizontalCenter
                             width: bonusLabel.width + units.gu(1.6)
-                            height: units.gu(1.8)
-                            radius: units.gu(0.9)
+                            height: units.gu(2.0)
+                            radius: units.gu(1.0)
                             color: root.theme ? root.theme.accentBg : "#261E10"
                             border.color: root.theme ? root.theme.accent : "#D99B26"
                             border.width: units.gu(0.08)
@@ -140,7 +140,7 @@ Rectangle {
                                 id: bonusLabel
                                 anchors.centerIn: parent
                                 text: i18n.tr("+%1 STAGE BONUS").arg(root.bonusPoints)
-                                font.pixelSize: units.gu(0.85)
+                                font.pixelSize: units.gu(0.9)
                                 font.weight: Font.Bold
                                 color: root.theme ? root.theme.accent : "#D99B26"
                             }
@@ -155,20 +155,20 @@ Rectangle {
 
                     Rectangle {
                         width: (parent.width - units.gu(1.0)) / 2.0
-                        height: units.gu(4.8)
-                        radius: units.gu(1.2)
+                        height: units.gu(5.4)
+                        radius: units.gu(1.4)
                         color: root.theme ? root.theme.cardOuter : "#141517"
                         border.color: root.theme ? root.theme.cardBorder : "#2A2C30"
                         border.width: units.gu(0.1)
 
                         Column {
                             anchors.centerIn: parent
-                            spacing: units.gu(0.1)
+                            spacing: units.gu(0.15)
 
                             Label {
                                 anchors.horizontalCenter: parent.horizontalCenter
                                 text: i18n.tr("STREAK")
-                                font.pixelSize: units.gu(0.95)
+                                font.pixelSize: units.gu(1.0)
                                 font.weight: Font.DemiBold
                                 color: "#848890"
                             }
@@ -176,7 +176,7 @@ Rectangle {
                             Label {
                                 anchors.horizontalCenter: parent.horizontalCenter
                                 text: root.streak > 0 ? (root.streak.toString() + "x") : "-"
-                                font.pixelSize: units.gu(1.7)
+                                font.pixelSize: units.gu(1.8)
                                 font.weight: Font.Bold
                                 color: root.theme ? root.theme.ballMid : "#E6D7BA"
                             }
@@ -185,20 +185,20 @@ Rectangle {
 
                     Rectangle {
                         width: (parent.width - units.gu(1.0)) / 2.0
-                        height: units.gu(4.8)
-                        radius: units.gu(1.2)
+                        height: units.gu(5.4)
+                        radius: units.gu(1.4)
                         color: root.theme ? root.theme.cardOuter : "#141517"
                         border.color: root.theme ? root.theme.cardBorder : "#2A2C30"
                         border.width: units.gu(0.1)
 
                         Column {
                             anchors.centerIn: parent
-                            spacing: units.gu(0.1)
+                            spacing: units.gu(0.15)
 
                             Label {
                                 anchors.horizontalCenter: parent.horizontalCenter
                                 text: i18n.tr("NEXT STAGE")
-                                font.pixelSize: units.gu(0.95)
+                                font.pixelSize: units.gu(1.0)
                                 font.weight: Font.DemiBold
                                 color: "#848890"
                             }
@@ -206,7 +206,7 @@ Rectangle {
                             Label {
                                 anchors.horizontalCenter: parent.horizontalCenter
                                 text: (root.stageNumber + 1 <= 100) ? (root.stageNumber + 1).toString() : i18n.tr("End")
-                                font.pixelSize: units.gu(1.7)
+                                font.pixelSize: units.gu(1.8)
                                 font.weight: Font.Bold
                                 color: root.theme ? root.theme.accent : "#D99B26"
                             }
@@ -217,8 +217,8 @@ Rectangle {
                 Rectangle {
                     anchors.horizontalCenter: parent.horizontalCenter
                     width: parent.width
-                    height: units.gu(3.4)
-                    radius: units.gu(1.0)
+                    height: units.gu(3.8)
+                    radius: units.gu(1.2)
                     visible: root.isCheckpoint
                     color: root.theme ? root.theme.accentBg : "#261E10"
                     border.color: root.theme ? root.theme.accent : "#D99B26"
@@ -231,7 +231,7 @@ Rectangle {
                         Label {
                             anchors.verticalCenter: parent.verticalCenter
                             text: i18n.tr("Checkpoint Saved (Stage %1 • %2)").arg(root.nextCheckpoint).arg(Progression.getZoneName(root.nextCheckpoint))
-                            font.pixelSize: units.gu(1.1)
+                            font.pixelSize: units.gu(1.2)
                             font.weight: Font.DemiBold
                             color: root.theme ? root.theme.accent : "#D99B26"
                         }
@@ -242,8 +242,8 @@ Rectangle {
                     id: continueBtn
                     anchors.horizontalCenter: parent.horizontalCenter
                     width: parent.width
-                    height: units.gu(5.0)
-                    radius: units.gu(2.5)
+                    height: units.gu(5.6)
+                    radius: units.gu(2.8)
                     color: continueMouse.pressed
                            ? (root.theme ? root.theme.accentHover : "#BF8419")
                            : (root.theme ? root.theme.accent : "#D99B26")
@@ -258,7 +258,7 @@ Rectangle {
                         anchors.leftMargin: units.gu(2.6)
                         anchors.verticalCenter: parent.verticalCenter
                         text: (root.stageNumber >= 100) ? i18n.tr("Finish") : i18n.tr("Next Level")
-                        font.pixelSize: units.gu(1.6)
+                        font.pixelSize: units.gu(1.75)
                         font.weight: Font.Bold
                         color: root.theme ? root.theme.accentText : "#0B0C0D"
                     }
@@ -267,16 +267,16 @@ Rectangle {
                         anchors.right: parent.right
                         anchors.rightMargin: units.gu(0.8)
                         anchors.verticalCenter: parent.verticalCenter
-                        width: units.gu(3.4)
-                        height: units.gu(3.4)
-                        radius: units.gu(1.7)
+                        width: units.gu(3.8)
+                        height: units.gu(3.8)
+                        radius: units.gu(1.9)
                         color: "#1A000000"
 
                         Canvas {
                             id: continueIconCanvas
                             anchors.centerIn: parent
-                            width: units.gu(1.4)
-                            height: units.gu(1.4)
+                            width: units.gu(1.5)
+                            height: units.gu(1.5)
                             onPaint: {
                                 var ctx = getContext("2d");
                                 ctx.clearRect(0, 0, width, height);
@@ -307,8 +307,8 @@ Rectangle {
                     id: restartBtn
                     anchors.horizontalCenter: parent.horizontalCenter
                     width: parent.width
-                    height: units.gu(4.4)
-                    radius: units.gu(2.2)
+                    height: units.gu(4.8)
+                    radius: units.gu(2.4)
                     color: restartMouse.pressed ? "#1E2024" : (root.theme ? root.theme.cardOuter : "#141517")
                     border.color: root.theme ? root.theme.cardBorder : "#2A2C30"
                     border.width: units.gu(0.12)
@@ -340,8 +340,8 @@ Rectangle {
                     id: restartBeginningBtn
                     anchors.horizontalCenter: parent.horizontalCenter
                     width: parent.width
-                    height: units.gu(4.4)
-                    radius: units.gu(2.2)
+                    height: units.gu(4.8)
+                    radius: units.gu(2.4)
                     visible: root.checkpointLevel > 1
                     color: restartBeginMouse.pressed ? "#1E2024" : (root.theme ? root.theme.cardOuter : "#141517")
                     border.color: root.theme ? root.theme.cardBorder : "#2A2C30"
@@ -371,8 +371,8 @@ Rectangle {
                     id: menuBtn
                     anchors.horizontalCenter: parent.horizontalCenter
                     width: parent.width
-                    height: units.gu(4.4)
-                    radius: units.gu(2.2)
+                    height: units.gu(4.8)
+                    radius: units.gu(2.4)
                     color: menuMouse.pressed ? "#1E2024" : (root.theme ? root.theme.cardOuter : "#141517")
                     border.color: root.theme ? root.theme.cardBorder : "#2A2C30"
                     border.width: units.gu(0.12)
