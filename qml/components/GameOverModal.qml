@@ -68,27 +68,6 @@ Rectangle {
                 width: parent.width
                 spacing: units.gu(1.3)
 
-                // Status Tag
-                Rectangle {
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    width: eyebrowLabel.width + units.gu(2.0)
-                    height: units.gu(2.2)
-                    radius: units.gu(1.1)
-                    color: root.theme ? root.theme.cardOuter : "#1A1414"
-                    border.color: root.theme ? root.theme.sideHazard : "#4A2222"
-                    border.width: units.gu(0.1)
-
-                    Label {
-                        id: eyebrowLabel
-                        anchors.centerIn: parent
-                        text: (root.difficultyMode === 3)
-                              ? i18n.tr("PERMADEATH")
-                              : i18n.tr("TRY AGAIN")
-                        font.pixelSize: units.gu(1.0)
-                        font.weight: Font.Bold
-                        color: root.theme ? root.theme.topHazard : "#BA3C3C"
-                    }
-                }
 
                 // Title
                 Label {

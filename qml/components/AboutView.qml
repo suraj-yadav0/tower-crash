@@ -158,13 +158,6 @@ Column {
             spacing: units.gu(0.8)
 
             Label {
-                text: i18n.tr("OPEN SOURCE")
-                font.pixelSize: units.gu(0.9)
-                font.weight: Font.Bold
-                color: root.theme ? root.theme.accent : "#D99B26"
-            }
-
-            Label {
                 text: i18n.tr("If you enjoy playing Tower Crash, consider giving it a star on GitHub. It helps other Ubuntu Touch users find the game and supports independent open-source development.")
                 font.pixelSize: units.gu(1.1)
                 color: "#D6D5D2"

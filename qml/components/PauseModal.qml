@@ -72,25 +72,6 @@ Rectangle {
                 width: parent.width
                 spacing: units.gu(1.2)
 
-                // Eyebrow Tag
-                Rectangle {
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    width: eyebrowLabel.width + units.gu(2.0)
-                    height: units.gu(2.2)
-                    radius: units.gu(1.1)
-                    color: root.difficultyMode === 3 ? "#261010" : (root.theme ? root.theme.accentBg : "#261E10")
-                    border.color: root.difficultyMode === 3 ? "#7A2E2E" : (root.theme ? root.theme.accentBorder : "#544020")
-                    border.width: units.gu(0.1)
-
-                    Label {
-                        id: eyebrowLabel
-                        anchors.centerIn: parent
-                        text: root.difficultyMode === 3 ? i18n.tr("INSANE • PERMADEATH") : i18n.tr("DESCENT SUSPENDED")
-                        font.pixelSize: units.gu(1.0)
-                        font.weight: Font.Bold
-                        color: root.difficultyMode === 3 ? "#F87171" : (root.theme ? root.theme.accent : "#D99B26")
-                    }
-                }
 
                 // Title
                 Label {

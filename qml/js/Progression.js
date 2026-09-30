@@ -73,22 +73,6 @@ function getZoneTitle(lvl) {
     return "Zone " + z + ": " + getZoneName(lvl);
 }
 
-function getZoneDescription(lvl) {
-    var zone = getZoneIndex(lvl);
-    switch (zone) {
-        case 1: return "Foundations & Flow";
-        case 2: return "Rhythmic Descent";
-        case 3: return "Precision Navigation";
-        case 4: return "Shifting Sectors";
-        case 5: return "Midpoint Gauntlet";
-        case 6: return "Narrow Margins";
-        case 7: return "Pulse Velocity";
-        case 8: return "Complex Labyrinth";
-        case 9: return "Grandmaster Trial";
-        case 10: return "The Summit Finale";
-        default: return "Foundations & Flow";
-    }
-}
 
 function getNearestCheckpoint(lvl, unlockedCheckpoints, mode) {
     if (mode === 3) return 1;

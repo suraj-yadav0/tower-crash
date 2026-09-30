@@ -75,32 +75,6 @@ Rectangle {
                 width: parent.width
                 spacing: units.gu(1.1)
 
-                Rectangle {
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    width: eyebrowLabel.width + units.gu(2.0)
-                    height: units.gu(2.2)
-                    radius: units.gu(1.1)
-                    color: root.theme ? root.theme.cardOuter : "#141517"
-                    border.color: root.isGrandVictory
-                                  ? "#FFD700"
-                                  : (root.isCheckpoint ? (root.theme ? root.theme.accent : "#D99B26")
-                                                       : (root.theme ? root.theme.topSafe : "#2EAA58"))
-                    border.width: units.gu(0.1)
-
-                    Label {
-                        id: eyebrowLabel
-                        anchors.centerIn: parent
-                        text: root.isGrandVictory
-                              ? i18n.tr("ALL STAGES COMPLETE")
-                              : (root.isCheckpoint ? i18n.tr("CHECKPOINT") : i18n.tr("STAGE CLEAR"))
-                        font.pixelSize: units.gu(1.0)
-                        font.weight: Font.Bold
-                        color: root.isGrandVictory
-                               ? "#FFD700"
-                               : (root.isCheckpoint ? (root.theme ? root.theme.accent : "#D99B26")
-                                                    : (root.theme ? root.theme.topSafe : "#2EAA58"))
-                    }
-                }
 
                 Label {
                     anchors.horizontalCenter: parent.horizontalCenter

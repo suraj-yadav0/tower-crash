@@ -50,8 +50,6 @@ function createRing(index, ringSpacing, prevRing, difficultyMode) {
         var maxOffset = 1;
 
         if (level <= 10) {
-            // Zone 1 (Levels 1-10): Foundations & Flow
-            // Wide openings (2-3 segments), 0-1 hazards placed far from landing zones.
             if (level <= 5) {
                 gapWidth = (posInLevel <= 6 || Math.random() < 0.5) ? 3 : 2;
                 hazardCount = (posInLevel <= 8) ? 0 : (Math.random() < 0.6 ? 0 : 1);
@@ -62,56 +60,38 @@ function createRing(index, ringSpacing, prevRing, difficultyMode) {
                 maxOffset = 1;
             }
         } else if (level <= 20) {
-            // Zone 2 (Levels 11-20): Rhythmic Descent
-            // 2-segment openings, 1-2 hazards per ring.
             gapWidth = 2;
             hazardCount = (Math.random() < 0.5) ? 1 : 2;
             maxOffset = 2;
         } else if (level <= 30) {
-            // Zone 3 (Levels 21-30): Precision Navigation
-            // 1-2 segment openings, 2 hazards per ring.
             gapWidth = (Math.random() < 0.5) ? 2 : 1;
             hazardCount = 2;
             maxOffset = 2;
         } else if (level <= 40) {
-            // Zone 4 (Levels 31-40): Sector Shifts
-            // 1-segment openings standard, 2-3 hazards per ring.
             gapWidth = (Math.random() < 0.2) ? 2 : 1;
             hazardCount = (Math.random() < 0.5) ? 2 : 3;
             maxOffset = 3;
         } else if (level <= 50) {
-            // Zone 5 (Levels 41-50): Midpoint Gauntlet
-            // Strict 1-segment gaps, 3 hazards per ring.
             gapWidth = 1;
             hazardCount = 3;
             maxOffset = 3;
         } else if (level <= 60) {
-            // Zone 6 (Levels 51-60): Narrow Margins
-            // 1-segment gaps with 3 to 4 hazards.
             gapWidth = 1;
             hazardCount = (Math.random() < 0.6) ? 3 : 4;
             maxOffset = 3;
         } else if (level <= 70) {
-            // Zone 7 (Levels 61-70): Apex Velocity
-            // 3-4 hazards per ring with tight hazard placement flanking gap slots.
             gapWidth = 1;
             hazardCount = (Math.random() < 0.5) ? 3 : 4;
             maxOffset = 4;
         } else if (level <= 80) {
-            // Zone 8 (Levels 71-80): Complex Labyrinth
-            // 4 hazards per ring (50% coverage).
             gapWidth = 1;
             hazardCount = 4;
             maxOffset = 4;
         } else if (level <= 90) {
-            // Zone 9 (Levels 81-90): Grandmaster Trial
-            // 4 to 5 hazards per ring. Minimal safe landing surface.
             gapWidth = 1;
             hazardCount = (Math.random() < 0.5) ? 4 : 5;
             maxOffset = 4;
         } else {
-            // Zone 10 (Levels 91-100): Tower Summit
-            // Apex challenge leading to Level 100 finale.
             gapWidth = 1;
             hazardCount = (Math.random() < 0.4) ? 4 : 5;
             maxOffset = 4;

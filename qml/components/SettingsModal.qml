@@ -822,7 +822,7 @@ Rectangle {
                         Column {
                             anchors.verticalCenter: parent.verticalCenter
                             spacing: units.gu(0.15)
-                            width: parent.width - badgeRect.width - arrowLabel.width - units.gu(2.4)
+                            width: parent.width - arrowLabel.width - units.gu(2.4)
 
                             Label {
                                 text: i18n.tr("About Tower Crash")
@@ -835,25 +835,6 @@ Rectangle {
                                 text: i18n.tr("v1.0.0 • Credits & Info")
                                 font.pixelSize: units.gu(0.85)
                                 color: "#848890"
-                            }
-                        }
-
-                        Rectangle {
-                            id: badgeRect
-                            anchors.verticalCenter: parent.verticalCenter
-                            width: units.gu(4.4)
-                            height: units.gu(1.8)
-                            radius: units.gu(0.9)
-                            color: root.theme ? root.theme.accentBg : "#261E10"
-                            border.color: root.theme ? root.theme.accentBorder : "#544020"
-                            border.width: units.gu(0.08)
-
-                            Label {
-                                anchors.centerIn: parent
-                                text: "INFO"
-                                font.pixelSize: units.gu(0.75)
-                                font.weight: Font.Bold
-                                color: root.theme ? root.theme.accent : "#D99B26"
                             }
                         }
 

@@ -52,23 +52,22 @@ test('Progression - zone transition identification', () => {
 
 test('Progression - 10 thematic zones lookup', () => {
     const expectedZones = [
-        { level: 1, index: 1, name: 'Outer Terrace', desc: 'Foundations & Flow' },
-        { level: 10, index: 1, name: 'Outer Terrace', desc: 'Foundations & Flow' },
-        { level: 11, index: 2, name: 'Clockwork Shaft', desc: 'Rhythmic Descent' },
-        { level: 25, index: 3, name: 'Prism Corridors', desc: 'Precision Navigation' },
-        { level: 35, index: 4, name: 'Sector Shifts', desc: 'Shifting Sectors' },
-        { level: 45, index: 5, name: 'The Crucible', desc: 'Midpoint Gauntlet' },
-        { level: 55, index: 6, name: 'Shadow Spiral', desc: 'Narrow Margins' },
-        { level: 70, index: 7, name: 'Pulse Conduit', desc: 'Pulse Velocity' },
-        { level: 75, index: 8, name: 'The Labyrinth', desc: 'Complex Labyrinth' },
-        { level: 85, index: 9, name: 'Inferno Core', desc: 'Grandmaster Trial' },
-        { level: 100, index: 10, name: 'The Monolith', desc: 'The Summit Finale' }
+        { level: 1, index: 1, name: 'Outer Terrace' },
+        { level: 10, index: 1, name: 'Outer Terrace' },
+        { level: 11, index: 2, name: 'Clockwork Shaft' },
+        { level: 25, index: 3, name: 'Prism Corridors' },
+        { level: 35, index: 4, name: 'Sector Shifts' },
+        { level: 45, index: 5, name: 'The Crucible' },
+        { level: 55, index: 6, name: 'Shadow Spiral' },
+        { level: 70, index: 7, name: 'Pulse Conduit' },
+        { level: 75, index: 8, name: 'The Labyrinth' },
+        { level: 85, index: 9, name: 'Inferno Core' },
+        { level: 100, index: 10, name: 'The Monolith' }
     ];
 
     for (const z of expectedZones) {
         assert.strictEqual(Progression.getZoneIndex(z.level), z.index);
         assert.strictEqual(Progression.getZoneName(z.level), z.name);
-        assert.strictEqual(Progression.getZoneDescription(z.level), z.desc);
         assert.strictEqual(Progression.getZoneTitle(z.level), `Zone ${z.index}: ${z.name}`);
     }
 });
