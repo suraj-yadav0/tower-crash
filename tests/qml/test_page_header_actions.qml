@@ -16,54 +16,101 @@ Item {
     property bool soundEnabled: true
     property var currentTheme: ({
         accent: "#D99B26",
+        accentHover: "#BF8419",
+        accentText: "#0B0C0D",
         accentBg: "#261E10"
     })
 
     PageHeader {
         id: pageHeader
-        title: "Tower Crash"
+        width: parent.width
+
+        StyleHints {
+            backgroundColor: "#111317"
+            dividerColor: "#1F232D"
+        }
+
+        contents: Item {
+            anchors.fill: parent
+
+            Column {
+                anchors {
+                    left: parent.left
+                    leftMargin: units.gu(1.5)
+                    verticalCenter: parent.verticalCenter
+                }
+                spacing: units.dp(2)
+
+                Label {
+                    text: i18n.tr("Tower Crash")
+                    font.pixelSize: units.gu(1.8)
+                    font.weight: Font.Bold
+                    color: "#FFFFFF"
+                }
+
+                Label {
+                    text: root.isWelcomeOpen ? i18n.tr("Arcade Edition") : "Level 1 • Tower Dawn • Normal (1/5)"
+                    font.pixelSize: units.gu(1.15)
+                    color: "#8E95A5"
+                    elide: Text.ElideRight
+                }
+            }
+        }
+
         trailingActionBar.numberOfSlots: 5
         trailingActionBar.delegate: Component {
             AbstractButton {
                 id: actionButton
                 action: modelData
                 objectName: (action && action.objectName) ? (action.objectName + "_button") : "action_button"
-                width: units.gu(5)
-                height: parent ? parent.height : units.gu(5)
+                width: units.gu(4.4)
+                height: units.gu(4.4)
                 activeFocusOnTab: true
 
                 readonly property bool isSelected: Boolean(action && action.selected)
-                readonly property bool isHighlighted: isSelected || actionButton.pressed
                 readonly property var activeTheme: root.currentTheme
+
+                scale: actionButton.pressed ? 0.92 : 1.0
+                Behavior on scale {
+                    NumberAnimation { duration: 100 }
+                }
 
                 Rectangle {
                     id: highlightBg
                     anchors.centerIn: parent
                     width: units.gu(4.2)
                     height: units.gu(4.2)
-                    radius: units.dp(8)
+                    radius: units.dp(10)
                     color: actionButton.isSelected
-                           ? (actionButton.activeTheme ? actionButton.activeTheme.accentBg : "#261E10")
-                           : (actionButton.pressed ? theme.palette.highlighted.background : "transparent")
+                           ? (actionButton.activeTheme ? actionButton.activeTheme.accent : "#D99B26")
+                           : (actionButton.pressed ? "#282E3D" : "#1B1F2A")
                     border.color: actionButton.isSelected
-                                  ? (actionButton.activeTheme ? actionButton.activeTheme.accent : "#D99B26")
-                                  : (actionButton.pressed ? "#5D5D5D" : "transparent")
-                    border.width: actionButton.isSelected ? units.dp(1.5) : (actionButton.pressed ? units.dp(1) : 0)
-                    opacity: actionButton.isHighlighted ? 1.0 : 0.0
+                                  ? (actionButton.activeTheme ? actionButton.activeTheme.accentHover : "#BF8419")
+                                  : (actionButton.pressed ? "#3C4458" : "#282E3D")
+                    border.width: units.dp(1.5)
+
+                    Behavior on color {
+                        ColorAnimation { duration: 150 }
+                    }
+                    Behavior on border.color {
+                        ColorAnimation { duration: 150 }
+                    }
                 }
 
                 Icon {
                     id: actionIcon
                     anchors.centerIn: parent
-                    width: units.gu(2.4)
-                    height: units.gu(2.4)
+                    width: units.gu(2.2)
+                    height: units.gu(2.2)
                     name: action ? (action.iconName || "") : ""
                     source: action ? (action.iconSource || "") : ""
                     color: actionButton.isSelected
-                           ? (actionButton.activeTheme ? actionButton.activeTheme.accent : "#D99B26")
-                           : (actionButton.pressed
-                              ? theme.palette.highlighted.backgroundText
-                              : (actionButton.enabled ? theme.palette.normal.backgroundText : theme.palette.disabled.backgroundText))
+                           ? (actionButton.activeTheme ? actionButton.activeTheme.accentText : "#0B0C0D")
+                           : (actionButton.enabled ? "#DCE1EC" : "#505666")
+
+                    Behavior on color {
+                        ColorAnimation { duration: 150 }
+                    }
                 }
             }
         }
