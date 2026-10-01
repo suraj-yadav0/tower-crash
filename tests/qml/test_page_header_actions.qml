@@ -24,38 +24,8 @@ Item {
     PageHeader {
         id: pageHeader
         width: parent.width
-
-        StyleHints {
-            backgroundColor: "#111317"
-            dividerColor: "#1F232D"
-        }
-
-        contents: Item {
-            anchors.fill: parent
-
-            Column {
-                anchors {
-                    left: parent.left
-                    leftMargin: units.gu(1.5)
-                    verticalCenter: parent.verticalCenter
-                }
-                spacing: units.dp(2)
-
-                Label {
-                    text: i18n.tr("Tower Crash")
-                    font.pixelSize: units.gu(1.8)
-                    font.weight: Font.Bold
-                    color: "#FFFFFF"
-                }
-
-                Label {
-                    text: root.isWelcomeOpen ? i18n.tr("Arcade Edition") : "Level 1 • Tower Dawn • Normal (1/5)"
-                    font.pixelSize: units.gu(1.15)
-                    color: "#8E95A5"
-                    elide: Text.ElideRight
-                }
-            }
-        }
+        title: "Tower Crash"
+        subtitle: root.isWelcomeOpen ? "Arcade Edition" : "Level 1 • Tower Dawn • Normal (1/5)"
 
         trailingActionBar.numberOfSlots: 5
         trailingActionBar.delegate: Component {
@@ -63,54 +33,40 @@ Item {
                 id: actionButton
                 action: modelData
                 objectName: (action && action.objectName) ? (action.objectName + "_button") : "action_button"
-                width: units.gu(4.4)
-                height: units.gu(4.4)
+                width: units.gu(5)
+                height: parent ? parent.height : units.gu(5)
                 activeFocusOnTab: true
 
                 readonly property bool isSelected: Boolean(action && action.selected)
-                readonly property var activeTheme: root.currentTheme
-
-                scale: actionButton.pressed ? 0.92 : 1.0
-                Behavior on scale {
-                    NumberAnimation { duration: 100 }
-                }
 
                 Rectangle {
-                    id: highlightBg
-                    anchors.centerIn: parent
-                    width: units.gu(4.2)
-                    height: units.gu(4.2)
-                    radius: units.dp(10)
-                    color: actionButton.isSelected
-                           ? (actionButton.activeTheme ? actionButton.activeTheme.accent : "#D99B26")
-                           : (actionButton.pressed ? "#282E3D" : "#1B1F2A")
-                    border.color: actionButton.isSelected
-                                  ? (actionButton.activeTheme ? actionButton.activeTheme.accentHover : "#BF8419")
-                                  : (actionButton.pressed ? "#3C4458" : "#282E3D")
-                    border.width: units.dp(1.5)
-
-                    Behavior on color {
-                        ColorAnimation { duration: 150 }
-                    }
-                    Behavior on border.color {
-                        ColorAnimation { duration: 150 }
-                    }
+                    id: background
+                    anchors.fill: parent
+                    color: actionButton.pressed ?
+                               theme.palette.highlighted.background :
+                               (actionButton.isSelected ? theme.palette.selected.background : "transparent")
                 }
 
                 Icon {
-                    id: actionIcon
+                    id: icon
                     anchors.centerIn: parent
-                    width: units.gu(2.2)
-                    height: units.gu(2.2)
+                    width: units.gu(2.5)
+                    height: units.gu(2.5)
                     name: action ? (action.iconName || "") : ""
                     source: action ? (action.iconSource || "") : ""
-                    color: actionButton.isSelected
-                           ? (actionButton.activeTheme ? actionButton.activeTheme.accentText : "#0B0C0D")
-                           : (actionButton.enabled ? "#DCE1EC" : "#505666")
+                    color: actionButton.enabled ? theme.palette.normal.backgroundText : theme.palette.disabled.backgroundText
+                }
 
-                    Behavior on color {
-                        ColorAnimation { duration: 150 }
+                Rectangle {
+                    id: activeIndicator
+                    anchors {
+                        bottom: parent.bottom
+                        horizontalCenter: parent.horizontalCenter
                     }
+                    width: units.gu(3)
+                    height: units.dp(3)
+                    color: theme.palette.selected.focus
+                    visible: actionButton.isSelected
                 }
             }
         }
