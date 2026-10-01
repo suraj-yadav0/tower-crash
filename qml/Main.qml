@@ -88,8 +88,57 @@ MainView {
             visible: true
 
             trailingActionBar.numberOfSlots: 5
+            trailingActionBar.delegate: Component {
+                AbstractButton {
+                    id: actionButton
+                    action: modelData
+                    objectName: (action && action.objectName) ? (action.objectName + "_button") : "action_button"
+                    width: units.gu(5)
+                    height: parent ? parent.height : units.gu(5)
+                    activeFocusOnTab: true
+
+                    readonly property bool isSelected: Boolean(action && action.selected)
+                    readonly property bool isHighlighted: isSelected || actionButton.pressed
+                    readonly property var activeTheme: gameContainer.currentTheme
+
+                    Rectangle {
+                        id: highlightBg
+                        anchors.centerIn: parent
+                        width: units.gu(4.2)
+                        height: units.gu(4.2)
+                        radius: units.dp(8)
+                        color: actionButton.isSelected
+                               ? (actionButton.activeTheme ? actionButton.activeTheme.accentBg : "#261E10")
+                               : (actionButton.pressed ? theme.palette.highlighted.background : "transparent")
+                        border.color: actionButton.isSelected
+                                      ? (actionButton.activeTheme ? actionButton.activeTheme.accent : "#D99B26")
+                                      : (actionButton.pressed ? "#5D5D5D" : "transparent")
+                        border.width: actionButton.isSelected ? units.dp(1.5) : (actionButton.pressed ? units.dp(1) : 0)
+                        opacity: actionButton.isHighlighted ? 1.0 : 0.0
+
+                        Behavior on opacity {
+                            NumberAnimation { duration: 150 }
+                        }
+                    }
+
+                    Icon {
+                        id: actionIcon
+                        anchors.centerIn: parent
+                        width: units.gu(2.4)
+                        height: units.gu(2.4)
+                        name: action ? (action.iconName || "") : ""
+                        source: action ? (action.iconSource || "") : ""
+                        color: actionButton.isSelected
+                               ? (actionButton.activeTheme ? actionButton.activeTheme.accent : "#D99B26")
+                               : (actionButton.pressed
+                                  ? theme.palette.highlighted.backgroundText
+                                  : (actionButton.enabled ? theme.palette.normal.backgroundText : theme.palette.disabled.backgroundText))
+                    }
+                }
+            }
             trailingActionBar.actions: [
                 Action {
+                    objectName: "action_main_menu"
                     iconName: "go-home"
                     text: i18n.tr("Main Menu")
                     visible: !gameContainer.isWelcomeOpen && !gameContainer.isStageClearOpen && !gameContainer.isStageClearCelebrating
@@ -99,8 +148,10 @@ MainView {
                     }
                 },
                 Action {
+                    objectName: "action_pause"
                     iconName: gameContainer.isPaused ? "media-playback-start" : "media-playback-pause"
                     text: gameContainer.isPaused ? i18n.tr("Resume") : i18n.tr("Pause")
+                    property bool selected: gameContainer.isPaused && !gameContainer.isSettingsOpen && !gameContainer.gameOver && !gameContainer.isWelcomeOpen && !gameContainer.isStageClearOpen
                     visible: !gameContainer.isWelcomeOpen && !gameContainer.isStageClearOpen && !gameContainer.isStageClearCelebrating
                     onTriggered: {
                         if (!gameContainer.gameOver && !gameContainer.isStageClearOpen && !gameContainer.isStageClearCelebrating) {
@@ -110,11 +161,20 @@ MainView {
                     }
                 },
                 Action {
+                    objectName: "action_settings"
                     iconName: "settings"
                     text: i18n.tr("Settings")
+                    property bool selected: gameContainer.isSettingsOpen
                     visible: true
                     onTriggered: {
                         soundManager.buttonHaptic();
+                        if (gameContainer.isSettingsOpen) {
+                            gameContainer.isSettingsOpen = false;
+                            if (!gameContainer.wasPausedBeforeSettings && !gameContainer.gameOver && !gameContainer.isWelcomeOpen && !gameContainer.isStageClearOpen) {
+                                gameContainer.isPaused = false;
+                            }
+                            return;
+                        }
                         gameContainer.wasPausedBeforeSettings = gameContainer.isPaused;
                         if (!gameContainer.gameOver && !gameContainer.isWelcomeOpen && !gameContainer.isStageClearOpen && !gameContainer.isStageClearCelebrating) {
                             gameContainer.isPaused = true;
@@ -123,8 +183,10 @@ MainView {
                     }
                 },
                 Action {
+                    objectName: "action_sound"
                     iconName: gameContainer.soundEnabled ? "audio-volume-high" : "audio-volume-muted"
                     text: gameContainer.soundEnabled ? i18n.tr("Sound") : i18n.tr("Muted")
+                    property bool selected: !gameContainer.soundEnabled
                     visible: !gameContainer.isWelcomeOpen
                     onTriggered: {
                         soundManager.buttonHaptic();
@@ -133,6 +195,7 @@ MainView {
                     }
                 },
                 Action {
+                    objectName: "action_restart"
                     iconName: "view-refresh"
                     text: i18n.tr("Restart")
                     visible: !gameContainer.isWelcomeOpen
