@@ -125,7 +125,7 @@ Rectangle {
                     id: themeSummaryCard
                     anchors.horizontalCenter: parent.horizontalCenter
                     width: parent.width
-                    height: units.gu(5.2)
+                    height: units.gu(5.4)
                     radius: units.gu(1.6)
                     color: themeCardMouse.pressed ? "#1E2024" : (root.theme ? root.theme.cardOuter : "#141517")
                     border.color: themeCardMouse.pressed
@@ -170,14 +170,14 @@ Rectangle {
 
                             Label {
                                 text: i18n.tr("MATERIAL PALETTE")
-                                font.pixelSize: units.gu(0.85)
+                                textSize: Label.Small
                                 font.weight: Font.Bold
                                 color: "#848890"
                             }
 
                             Label {
                                 text: root.themeMode === 0 ? i18n.tr("Dynamic (Adaptive)") : getSelectedThemeOption().name
-                                font.pixelSize: units.gu(1.2)
+                                textSize: Label.Medium
                                 font.weight: Font.Bold
                                 color: "#F5F3EF"
                                 elide: Text.ElideRight
@@ -188,8 +188,8 @@ Rectangle {
                         Rectangle {
                             anchors.verticalCenter: parent.verticalCenter
                             width: changeLabel.width + units.gu(1.8)
-                            height: units.gu(2.6)
-                            radius: units.gu(1.3)
+                            height: units.gu(2.8)
+                            radius: units.gu(1.4)
                             color: root.theme ? root.theme.accentBg : "#261E10"
                             border.color: root.theme ? root.theme.accent : "#D99B26"
                             border.width: units.gu(0.1)
@@ -198,7 +198,7 @@ Rectangle {
                                 id: changeLabel
                                 anchors.centerIn: parent
                                 text: i18n.tr("Change")
-                                font.pixelSize: units.gu(0.95)
+                                textSize: Label.Small
                                 font.weight: Font.Bold
                                 color: root.theme ? root.theme.accent : "#D99B26"
                             }
@@ -233,7 +233,7 @@ Rectangle {
                         Label {
                             anchors.horizontalCenter: parent.horizontalCenter
                             text: i18n.tr("FALL SPEED")
-                            font.pixelSize: units.gu(0.95)
+                            textSize: Label.Small
                             font.weight: Font.Bold
                             color: "#848890"
                         }
@@ -262,7 +262,7 @@ Rectangle {
                                 Label {
                                     anchors.centerIn: parent
                                     text: i18n.tr("Slow")
-                                    font.pixelSize: units.gu(1.2)
+                                    textSize: Label.Medium
                                     font.weight: Font.Bold
                                     color: root.speedMode === 0
                                            ? (root.theme ? root.theme.accentText : "#0B0C0D")
@@ -294,7 +294,7 @@ Rectangle {
                                 Label {
                                     anchors.centerIn: parent
                                     text: i18n.tr("Normal")
-                                    font.pixelSize: units.gu(1.2)
+                                    textSize: Label.Medium
                                     font.weight: Font.Bold
                                     color: root.speedMode === 1
                                            ? (root.theme ? root.theme.accentText : "#0B0C0D")
@@ -326,7 +326,7 @@ Rectangle {
                                 Label {
                                     anchors.centerIn: parent
                                     text: i18n.tr("Fast")
-                                    font.pixelSize: units.gu(1.2)
+                                    textSize: Label.Medium
                                     font.weight: Font.Bold
                                     color: root.speedMode === 2
                                            ? (root.theme ? root.theme.accentText : "#0B0C0D")
@@ -364,7 +364,7 @@ Rectangle {
                         Label {
                             anchors.horizontalCenter: parent.horizontalCenter
                             text: root.isWelcomeOpen ? i18n.tr("DIFFICULTY MODE") : i18n.tr("DIFFICULTY MODE (Locked in Run)")
-                            font.pixelSize: units.gu(0.95)
+                            textSize: Label.Small
                             font.weight: Font.Bold
                             color: "#848890"
                         }
@@ -402,7 +402,7 @@ Rectangle {
                                     Label {
                                         anchors.centerIn: parent
                                         text: modelData.label
-                                        font.pixelSize: units.gu(1.1)
+                                        textSize: Label.Small
                                         font.weight: Font.Bold
                                         color: root.difficultyMode === modelData.mode
                                                ? "#0B0C0D"
@@ -442,7 +442,7 @@ Rectangle {
                         Label {
                             anchors.horizontalCenter: parent.horizontalCenter
                             text: i18n.tr("TOUCH SENSITIVITY")
-                            font.pixelSize: units.gu(0.95)
+                            textSize: Label.Small
                             font.weight: Font.Bold
                             color: "#848890"
                         }
@@ -471,7 +471,7 @@ Rectangle {
                                 Label {
                                     anchors.centerIn: parent
                                     text: i18n.tr("Low")
-                                    font.pixelSize: units.gu(1.2)
+                                    textSize: Label.Medium
                                     font.weight: Font.Bold
                                     color: Math.abs(root.touchSensitivityMultiplier - 0.75) < 0.05
                                            ? (root.theme ? root.theme.accentText : "#0B0C0D")
@@ -503,7 +503,7 @@ Rectangle {
                                 Label {
                                     anchors.centerIn: parent
                                     text: i18n.tr("Normal")
-                                    font.pixelSize: units.gu(1.2)
+                                    textSize: Label.Medium
                                     font.weight: Font.Bold
                                     color: Math.abs(root.touchSensitivityMultiplier - 1.0) < 0.05
                                            ? (root.theme ? root.theme.accentText : "#0B0C0D")
@@ -535,7 +535,7 @@ Rectangle {
                                 Label {
                                     anchors.centerIn: parent
                                     text: i18n.tr("High")
-                                    font.pixelSize: units.gu(1.2)
+                                    textSize: Label.Medium
                                     font.weight: Font.Bold
                                     color: Math.abs(root.touchSensitivityMultiplier - 1.35) < 0.05
                                            ? (root.theme ? root.theme.accentText : "#0B0C0D")
@@ -590,7 +590,7 @@ Rectangle {
 
                             Label {
                                 text: root.soundEnabled ? i18n.tr("Audio ON") : i18n.tr("Audio OFF")
-                                font.pixelSize: units.gu(1.25)
+                                textSize: Label.Medium
                                 font.weight: Font.DemiBold
                                 color: root.soundEnabled ? "#F5F3EF" : "#848890"
                                 anchors.verticalCenter: parent.verticalCenter
@@ -636,7 +636,7 @@ Rectangle {
 
                             Label {
                                 text: root.hapticsEnabled ? i18n.tr("Haptic ON") : i18n.tr("Haptic OFF")
-                                font.pixelSize: units.gu(1.25)
+                                textSize: Label.Medium
                                 font.weight: Font.DemiBold
                                 color: root.hapticsEnabled ? "#F5F3EF" : "#848890"
                                 anchors.verticalCenter: parent.verticalCenter
@@ -656,7 +656,7 @@ Rectangle {
                     id: volumeCard
                     anchors.horizontalCenter: parent.horizontalCenter
                     width: parent.width
-                    height: units.gu(5.2)
+                    height: units.gu(5.6)
                     radius: units.gu(1.6)
                     color: root.theme ? root.theme.cardOuter : "#141517"
                     border.color: root.theme ? root.theme.cardBorder : "#2A2C30"
@@ -669,13 +669,13 @@ Rectangle {
 
                         Item {
                             width: parent.width
-                            height: units.gu(1.5)
+                            height: units.gu(1.8)
 
                             Label {
                                 anchors.left: parent.left
                                 anchors.verticalCenter: parent.verticalCenter
                                 text: i18n.tr("SOUND VOLUME")
-                                font.pixelSize: units.gu(0.95)
+                                textSize: Label.Small
                                 font.weight: Font.Bold
                                 color: "#848890"
                             }
@@ -684,7 +684,7 @@ Rectangle {
                                 anchors.right: parent.right
                                 anchors.verticalCenter: parent.verticalCenter
                                 text: Math.round(root.soundVolume * 100) + "%"
-                                font.pixelSize: units.gu(0.95)
+                                textSize: Label.Small
                                 font.weight: Font.Bold
                                 color: root.soundEnabled ? (root.theme ? root.theme.accent : "#D99B26") : "#555A64"
                             }
@@ -727,7 +727,7 @@ Rectangle {
                     id: statsCard
                     anchors.horizontalCenter: parent.horizontalCenter
                     width: parent.width
-                    height: units.gu(4.8)
+                    height: units.gu(5.2)
                     radius: units.gu(1.6)
                     color: root.theme ? root.theme.cardOuter : "#141517"
                     border.color: root.theme ? root.theme.cardBorder : "#2A2C30"
@@ -747,7 +747,7 @@ Rectangle {
                                 Label {
                                     anchors.horizontalCenter: parent.horizontalCenter
                                     text: i18n.tr("BEST RECORD")
-                                    font.pixelSize: units.gu(0.85)
+                                    textSize: Label.Small
                                     font.weight: Font.Bold
                                     color: "#848890"
                                 }
@@ -755,7 +755,7 @@ Rectangle {
                                 Label {
                                     anchors.horizontalCenter: parent.horizontalCenter
                                     text: root.bestScore.toString()
-                                    font.pixelSize: units.gu(1.4)
+                                    textSize: Label.Large
                                     font.weight: Font.Black
                                     color: root.theme ? root.theme.ballMid : "#E6D7BA"
                                 }
@@ -780,7 +780,7 @@ Rectangle {
                                 Label {
                                     anchors.horizontalCenter: parent.horizontalCenter
                                     text: i18n.tr("TOTAL SMASHED")
-                                    font.pixelSize: units.gu(0.85)
+                                    textSize: Label.Small
                                     font.weight: Font.Bold
                                     color: "#848890"
                                 }
@@ -788,7 +788,7 @@ Rectangle {
                                 Label {
                                     anchors.horizontalCenter: parent.horizontalCenter
                                     text: root.totalRings.toString()
-                                    font.pixelSize: units.gu(1.4)
+                                    textSize: Label.Large
                                     font.weight: Font.Black
                                     color: root.theme ? root.theme.accent : "#D99B26"
                                 }
@@ -826,14 +826,14 @@ Rectangle {
 
                             Label {
                                 text: i18n.tr("About Tower Crash")
-                                font.pixelSize: units.gu(1.25)
+                                textSize: Label.Medium
                                 font.weight: Font.Bold
                                 color: "#F5F3EF"
                             }
 
                             Label {
                                 text: i18n.tr("v1.0.0 • Credits & Info")
-                                font.pixelSize: units.gu(0.95)
+                                textSize: Label.Small
                                 color: "#848890"
                             }
                         }
@@ -842,7 +842,7 @@ Rectangle {
                             id: arrowLabel
                             anchors.verticalCenter: parent.verticalCenter
                             text: ">"
-                            font.pixelSize: units.gu(1.3)
+                            textSize: Label.Medium
                             font.weight: Font.Bold
                             color: "#848890"
                         }

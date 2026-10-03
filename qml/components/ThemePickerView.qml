@@ -24,7 +24,7 @@ Column {
     Label {
         anchors.horizontalCenter: parent.horizontalCenter
         text: i18n.tr("Select a color theme for the tower")
-        font.pixelSize: units.gu(1.0)
+        textSize: Label.Medium
         font.weight: Font.Normal
         color: "#848890"
         horizontalAlignment: Text.AlignHCenter

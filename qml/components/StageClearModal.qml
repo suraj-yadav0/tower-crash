@@ -114,7 +114,7 @@ Rectangle {
                         Label {
                             anchors.horizontalCenter: parent.horizontalCenter
                             text: i18n.tr("TOTAL SCORE")
-                            font.pixelSize: units.gu(1.05)
+                            textSize: Label.Small
                             font.weight: Font.DemiBold
                             color: "#848890"
                         }
@@ -130,8 +130,8 @@ Rectangle {
                         Rectangle {
                             anchors.horizontalCenter: parent.horizontalCenter
                             width: bonusLabel.width + units.gu(1.6)
-                            height: units.gu(2.0)
-                            radius: units.gu(1.0)
+                            height: units.gu(2.4)
+                            radius: units.gu(1.2)
                             color: root.theme ? root.theme.accentBg : "#261E10"
                             border.color: root.theme ? root.theme.accent : "#D99B26"
                             border.width: units.gu(0.08)
@@ -140,7 +140,7 @@ Rectangle {
                                 id: bonusLabel
                                 anchors.centerIn: parent
                                 text: i18n.tr("+%1 STAGE BONUS").arg(root.bonusPoints)
-                                font.pixelSize: units.gu(0.9)
+                                textSize: Label.Small
                                 font.weight: Font.Bold
                                 color: root.theme ? root.theme.accent : "#D99B26"
                             }
@@ -155,7 +155,7 @@ Rectangle {
 
                     Rectangle {
                         width: (parent.width - units.gu(1.0)) / 2.0
-                        height: units.gu(5.4)
+                        height: units.gu(5.8)
                         radius: units.gu(1.4)
                         color: root.theme ? root.theme.cardOuter : "#141517"
                         border.color: root.theme ? root.theme.cardBorder : "#2A2C30"
@@ -168,7 +168,7 @@ Rectangle {
                             Label {
                                 anchors.horizontalCenter: parent.horizontalCenter
                                 text: i18n.tr("STREAK")
-                                font.pixelSize: units.gu(1.0)
+                                textSize: Label.Small
                                 font.weight: Font.DemiBold
                                 color: "#848890"
                             }
@@ -185,7 +185,7 @@ Rectangle {
 
                     Rectangle {
                         width: (parent.width - units.gu(1.0)) / 2.0
-                        height: units.gu(5.4)
+                        height: units.gu(5.8)
                         radius: units.gu(1.4)
                         color: root.theme ? root.theme.cardOuter : "#141517"
                         border.color: root.theme ? root.theme.cardBorder : "#2A2C30"
@@ -198,7 +198,7 @@ Rectangle {
                             Label {
                                 anchors.horizontalCenter: parent.horizontalCenter
                                 text: i18n.tr("NEXT STAGE")
-                                font.pixelSize: units.gu(1.0)
+                                textSize: Label.Small
                                 font.weight: Font.DemiBold
                                 color: "#848890"
                             }
