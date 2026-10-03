@@ -193,7 +193,7 @@ Column {
 
                     Label {
                         text: "•  github.com/suraj-yadav0/tower-crash"
-                        font.pixelSize: units.gu(1.0)
+                        font.pixelSize: units.gu(1.05)
                         color: "#848890"
                         anchors.verticalCenter: parent.verticalCenter
                     }

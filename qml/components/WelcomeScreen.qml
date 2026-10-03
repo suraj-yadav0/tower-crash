@@ -263,7 +263,7 @@ Rectangle {
                                           : ((root.selectedCheckpoint === 1)
                                              ? i18n.tr("Start from Level 1")
                                              : i18n.tr("Start at Level %1 • %2 pts").arg(root.selectedCheckpoint).arg(Progression.getCheckpointBaseScore(root.selectedCheckpoint, root.difficultyMode)))
-                                    font.pixelSize: units.gu(0.85)
+                                    font.pixelSize: units.gu(1.0)
                                     font.weight: Font.DemiBold
                                     color: (root.difficultyMode === 3) ? "#D68080" : "#848890"
                                     elide: Text.ElideRight
@@ -555,7 +555,7 @@ Rectangle {
                                 Label {
                                     anchors.horizontalCenter: parent.horizontalCenter
                                     text: i18n.tr("BEST (%1)").arg(Progression.getDifficultyName(root.difficultyMode).toUpperCase())
-                                    font.pixelSize: units.gu(0.9)
+                                    font.pixelSize: units.gu(1.05)
                                     font.weight: Font.Bold
                                     color: "#848890"
                                 }
@@ -566,7 +566,7 @@ Rectangle {
                                     font.pixelSize: units.gu(1.7)
                                     font.weight: Font.Black
                                     color: root.theme ? root.theme.ballMid : "#E6D7BA"
-                                }
+                                 }
                             }
                         }
 
@@ -589,7 +589,7 @@ Rectangle {
                                 Label {
                                     anchors.horizontalCenter: parent.horizontalCenter
                                     text: i18n.tr("RINGS CRASHED")
-                                    font.pixelSize: units.gu(0.9)
+                                    font.pixelSize: units.gu(1.05)
                                     font.weight: Font.Bold
                                     color: "#848890"
                                 }
@@ -636,7 +636,7 @@ Rectangle {
 
                         Label {
                             text: "•  v1.0.0"
-                            font.pixelSize: units.gu(1.05)
+                            font.pixelSize: units.gu(1.1)
                             color: root.theme ? root.theme.accent : "#D99B26"
                             font.weight: Font.Bold
                             anchors.verticalCenter: parent.verticalCenter

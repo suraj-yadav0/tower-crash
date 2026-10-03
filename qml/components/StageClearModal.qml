@@ -140,7 +140,7 @@ Rectangle {
                                 id: bonusLabel
                                 anchors.centerIn: parent
                                 text: i18n.tr("+%1 STAGE BONUS").arg(root.bonusPoints)
-                                font.pixelSize: units.gu(0.9)
+                                font.pixelSize: units.gu(1.0)
                                 font.weight: Font.Bold
                                 color: root.theme ? root.theme.accent : "#D99B26"
                             }
@@ -168,7 +168,7 @@ Rectangle {
                             Label {
                                 anchors.horizontalCenter: parent.horizontalCenter
                                 text: i18n.tr("STREAK")
-                                font.pixelSize: units.gu(1.0)
+                                font.pixelSize: units.gu(1.05)
                                 font.weight: Font.DemiBold
                                 color: "#848890"
                             }
@@ -198,7 +198,7 @@ Rectangle {
                             Label {
                                 anchors.horizontalCenter: parent.horizontalCenter
                                 text: i18n.tr("NEXT STAGE")
-                                font.pixelSize: units.gu(1.0)
+                                font.pixelSize: units.gu(1.05)
                                 font.weight: Font.DemiBold
                                 color: "#848890"
                             }

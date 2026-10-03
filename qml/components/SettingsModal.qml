@@ -170,7 +170,7 @@ Rectangle {
 
                             Label {
                                 text: i18n.tr("MATERIAL PALETTE")
-                                font.pixelSize: units.gu(0.85)
+                                font.pixelSize: units.gu(1.0)
                                 font.weight: Font.Bold
                                 color: "#848890"
                             }
@@ -198,7 +198,7 @@ Rectangle {
                                 id: changeLabel
                                 anchors.centerIn: parent
                                 text: i18n.tr("Change")
-                                font.pixelSize: units.gu(0.95)
+                                font.pixelSize: units.gu(1.05)
                                 font.weight: Font.Bold
                                 color: root.theme ? root.theme.accent : "#D99B26"
                             }
@@ -233,7 +233,7 @@ Rectangle {
                         Label {
                             anchors.horizontalCenter: parent.horizontalCenter
                             text: i18n.tr("FALL SPEED")
-                            font.pixelSize: units.gu(0.95)
+                            font.pixelSize: units.gu(1.05)
                             font.weight: Font.Bold
                             color: "#848890"
                         }
@@ -364,7 +364,7 @@ Rectangle {
                         Label {
                             anchors.horizontalCenter: parent.horizontalCenter
                             text: root.isWelcomeOpen ? i18n.tr("DIFFICULTY MODE") : i18n.tr("DIFFICULTY MODE (Locked in Run)")
-                            font.pixelSize: units.gu(0.95)
+                            font.pixelSize: units.gu(1.05)
                             font.weight: Font.Bold
                             color: "#848890"
                         }
@@ -442,7 +442,7 @@ Rectangle {
                         Label {
                             anchors.horizontalCenter: parent.horizontalCenter
                             text: i18n.tr("TOUCH SENSITIVITY")
-                            font.pixelSize: units.gu(0.95)
+                            font.pixelSize: units.gu(1.05)
                             font.weight: Font.Bold
                             color: "#848890"
                         }
@@ -675,7 +675,7 @@ Rectangle {
                                 anchors.left: parent.left
                                 anchors.verticalCenter: parent.verticalCenter
                                 text: i18n.tr("SOUND VOLUME")
-                                font.pixelSize: units.gu(0.95)
+                                font.pixelSize: units.gu(1.05)
                                 font.weight: Font.Bold
                                 color: "#848890"
                             }
@@ -684,7 +684,7 @@ Rectangle {
                                 anchors.right: parent.right
                                 anchors.verticalCenter: parent.verticalCenter
                                 text: Math.round(root.soundVolume * 100) + "%"
-                                font.pixelSize: units.gu(0.95)
+                                font.pixelSize: units.gu(1.05)
                                 font.weight: Font.Bold
                                 color: root.soundEnabled ? (root.theme ? root.theme.accent : "#D99B26") : "#555A64"
                             }
@@ -747,7 +747,7 @@ Rectangle {
                                 Label {
                                     anchors.horizontalCenter: parent.horizontalCenter
                                     text: i18n.tr("BEST RECORD")
-                                    font.pixelSize: units.gu(0.85)
+                                    font.pixelSize: units.gu(1.0)
                                     font.weight: Font.Bold
                                     color: "#848890"
                                 }
@@ -780,7 +780,7 @@ Rectangle {
                                 Label {
                                     anchors.horizontalCenter: parent.horizontalCenter
                                     text: i18n.tr("TOTAL SMASHED")
-                                    font.pixelSize: units.gu(0.85)
+                                    font.pixelSize: units.gu(1.0)
                                     font.weight: Font.Bold
                                     color: "#848890"
                                 }
@@ -833,7 +833,7 @@ Rectangle {
 
                             Label {
                                 text: i18n.tr("v1.0.0 • Credits & Info")
-                                font.pixelSize: units.gu(0.95)
+                                font.pixelSize: units.gu(1.05)
                                 color: "#848890"
                             }
                         }

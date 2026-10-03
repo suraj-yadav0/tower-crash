@@ -123,7 +123,7 @@ Rectangle {
                                 id: newBestLabel
                                 anchors.centerIn: parent
                                 text: i18n.tr("NEW PERSONAL RECORD")
-                                font.pixelSize: units.gu(0.9)
+                                font.pixelSize: units.gu(1.0)
                                 font.weight: Font.Bold
                                 color: root.theme ? root.theme.accent : "#D99B26"
                             }
@@ -152,7 +152,7 @@ Rectangle {
                             Label {
                                 anchors.horizontalCenter: parent.horizontalCenter
                                 text: i18n.tr("BEST (%1)").arg(Progression.getDifficultyName(root.difficultyMode).toUpperCase())
-                                font.pixelSize: units.gu(0.9)
+                                font.pixelSize: units.gu(1.05)
                                 font.weight: Font.DemiBold
                                 color: "#848890"
                             }
@@ -183,7 +183,7 @@ Rectangle {
                             Label {
                                 anchors.horizontalCenter: parent.horizontalCenter
                                 text: i18n.tr("STAGE REACHED")
-                                font.pixelSize: units.gu(0.9)
+                                font.pixelSize: units.gu(1.05)
                                 font.weight: Font.DemiBold
                                 color: "#848890"
                             }
@@ -199,7 +199,7 @@ Rectangle {
                             Label {
                                 anchors.horizontalCenter: parent.horizontalCenter
                                 text: Progression.getZoneName(root.levelReached)
-                                font.pixelSize: units.gu(0.9)
+                                font.pixelSize: units.gu(1.05)
                                 font.weight: Font.DemiBold
                                 color: "#848890"
                                 elide: Text.ElideRight

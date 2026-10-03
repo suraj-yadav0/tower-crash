@@ -272,7 +272,7 @@ Rectangle {
                         Label {
                             anchors.horizontalCenter: parent.horizontalCenter
                             text: i18n.tr("FALL SPEED")
-                            font.pixelSize: units.gu(0.95)
+                            font.pixelSize: units.gu(1.05)
                             font.weight: Font.Bold
                             color: "#848890"
                         }
