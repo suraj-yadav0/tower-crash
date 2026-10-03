@@ -272,7 +272,7 @@ Rectangle {
                         Label {
                             anchors.horizontalCenter: parent.horizontalCenter
                             text: i18n.tr("FALL SPEED")
-                            textSize: Label.Small
+                            font.pixelSize: units.gu(0.95)
                             font.weight: Font.Bold
                             color: "#848890"
                         }
@@ -301,7 +301,7 @@ Rectangle {
                                 Label {
                                     anchors.centerIn: parent
                                     text: i18n.tr("Slow")
-                                    textSize: Label.Medium
+                                    font.pixelSize: units.gu(1.2)
                                     font.weight: Font.Bold
                                     color: root.speedMode === 0
                                            ? (root.theme ? root.theme.accentText : "#0B0C0D")
@@ -333,7 +333,7 @@ Rectangle {
                                 Label {
                                     anchors.centerIn: parent
                                     text: i18n.tr("Normal")
-                                    textSize: Label.Medium
+                                    font.pixelSize: units.gu(1.2)
                                     font.weight: Font.Bold
                                     color: root.speedMode === 1
                                            ? (root.theme ? root.theme.accentText : "#0B0C0D")
@@ -365,7 +365,7 @@ Rectangle {
                                 Label {
                                     anchors.centerIn: parent
                                     text: i18n.tr("Fast")
-                                    textSize: Label.Medium
+                                    font.pixelSize: units.gu(1.2)
                                     font.weight: Font.Bold
                                     color: root.speedMode === 2
                                            ? (root.theme ? root.theme.accentText : "#0B0C0D")
@@ -420,7 +420,7 @@ Rectangle {
 
                             Label {
                                 text: root.soundEnabled ? i18n.tr("Audio ON") : i18n.tr("Audio OFF")
-                                textSize: Label.Medium
+                                font.pixelSize: units.gu(1.25)
                                 font.weight: Font.DemiBold
                                 color: root.soundEnabled ? "#F5F3EF" : "#848890"
                                 anchors.verticalCenter: parent.verticalCenter
@@ -466,7 +466,7 @@ Rectangle {
 
                             Label {
                                 text: root.hapticsEnabled ? i18n.tr("Haptic ON") : i18n.tr("Haptic OFF")
-                                textSize: Label.Medium
+                                font.pixelSize: units.gu(1.25)
                                 font.weight: Font.DemiBold
                                 color: root.hapticsEnabled ? "#F5F3EF" : "#848890"
                                 anchors.verticalCenter: parent.verticalCenter

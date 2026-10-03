@@ -95,7 +95,7 @@ Rectangle {
                         Label {
                             anchors.horizontalCenter: parent.horizontalCenter
                             text: i18n.tr("FINAL SCORE")
-                            textSize: Label.Small
+                            font.pixelSize: units.gu(1.05)
                             font.weight: Font.DemiBold
                             color: "#848890"
                         }
@@ -112,8 +112,8 @@ Rectangle {
                         Rectangle {
                             anchors.horizontalCenter: parent.horizontalCenter
                             width: newBestLabel.width + units.gu(1.6)
-                            height: units.gu(2.4)
-                            radius: units.gu(1.2)
+                            height: units.gu(2.0)
+                            radius: units.gu(1.0)
                             color: root.theme ? root.theme.accentBg : "#261E10"
                             border.color: root.theme ? root.theme.accent : "#D99B26"
                             border.width: units.gu(0.08)
@@ -123,7 +123,7 @@ Rectangle {
                                 id: newBestLabel
                                 anchors.centerIn: parent
                                 text: i18n.tr("NEW PERSONAL RECORD")
-                                textSize: Label.Small
+                                font.pixelSize: units.gu(0.9)
                                 font.weight: Font.Bold
                                 color: root.theme ? root.theme.accent : "#D99B26"
                             }
@@ -139,7 +139,7 @@ Rectangle {
                     // Best Score
                     Rectangle {
                         width: (parent.width - units.gu(1.0)) / 2.0
-                        height: units.gu(6.0)
+                        height: units.gu(5.6)
                         radius: units.gu(1.4)
                         color: root.theme ? root.theme.cardOuter : "#141517"
                         border.color: root.theme ? root.theme.cardBorder : "#2A2C30"
@@ -152,7 +152,7 @@ Rectangle {
                             Label {
                                 anchors.horizontalCenter: parent.horizontalCenter
                                 text: i18n.tr("BEST (%1)").arg(Progression.getDifficultyName(root.difficultyMode).toUpperCase())
-                                textSize: Label.Small
+                                font.pixelSize: units.gu(0.9)
                                 font.weight: Font.DemiBold
                                 color: "#848890"
                             }
@@ -170,7 +170,7 @@ Rectangle {
                     // Level Reached
                     Rectangle {
                         width: (parent.width - units.gu(1.0)) / 2.0
-                        height: units.gu(6.0)
+                        height: units.gu(5.6)
                         radius: units.gu(1.4)
                         color: root.theme ? root.theme.cardOuter : "#141517"
                         border.color: root.theme ? root.theme.cardBorder : "#2A2C30"
@@ -183,7 +183,7 @@ Rectangle {
                             Label {
                                 anchors.horizontalCenter: parent.horizontalCenter
                                 text: i18n.tr("STAGE REACHED")
-                                textSize: Label.Small
+                                font.pixelSize: units.gu(0.9)
                                 font.weight: Font.DemiBold
                                 color: "#848890"
                             }
@@ -199,7 +199,7 @@ Rectangle {
                             Label {
                                 anchors.horizontalCenter: parent.horizontalCenter
                                 text: Progression.getZoneName(root.levelReached)
-                                textSize: Label.Small
+                                font.pixelSize: units.gu(0.9)
                                 font.weight: Font.DemiBold
                                 color: "#848890"
                                 elide: Text.ElideRight

@@ -179,7 +179,7 @@ Rectangle {
                     id: checkpointSelector
                     anchors.horizontalCenter: parent.horizontalCenter
                     width: parent.width
-                    height: units.gu(5.4)
+                    height: units.gu(5.0)
                     radius: units.gu(1.6)
                     color: root.difficultyMode === 3 ? "#1F1212" : (root.theme ? root.theme.cardOuter : "#141517")
                     border.color: root.difficultyMode === 3 ? "#7A2E2E" : (root.theme ? root.theme.cardBorder : "#2A2C30")
@@ -247,7 +247,7 @@ Rectangle {
                                     text: (root.difficultyMode === 3)
                                           ? i18n.tr("PERMADEATH")
                                           : i18n.tr("STAGE %1 • %2").arg(root.selectedCheckpoint).arg(Progression.getZoneName(root.selectedCheckpoint).toUpperCase())
-                                    textSize: Label.Medium
+                                    font.pixelSize: units.gu(1.2)
                                     font.weight: Font.Black
                                     color: (root.difficultyMode === 3)
                                            ? "#F87171"
@@ -263,7 +263,7 @@ Rectangle {
                                           : ((root.selectedCheckpoint === 1)
                                              ? i18n.tr("Start from Level 1")
                                              : i18n.tr("Start at Level %1 • %2 pts").arg(root.selectedCheckpoint).arg(Progression.getCheckpointBaseScore(root.selectedCheckpoint, root.difficultyMode)))
-                                    textSize: Label.Small
+                                    font.pixelSize: units.gu(0.85)
                                     font.weight: Font.DemiBold
                                     color: (root.difficultyMode === 3) ? "#D68080" : "#848890"
                                     elide: Text.ElideRight
@@ -555,7 +555,7 @@ Rectangle {
                                 Label {
                                     anchors.horizontalCenter: parent.horizontalCenter
                                     text: i18n.tr("BEST (%1)").arg(Progression.getDifficultyName(root.difficultyMode).toUpperCase())
-                                    textSize: Label.Small
+                                    font.pixelSize: units.gu(0.9)
                                     font.weight: Font.Bold
                                     color: "#848890"
                                 }
@@ -589,7 +589,7 @@ Rectangle {
                                 Label {
                                     anchors.horizontalCenter: parent.horizontalCenter
                                     text: i18n.tr("RINGS CRASHED")
-                                    textSize: Label.Small
+                                    font.pixelSize: units.gu(0.9)
                                     font.weight: Font.Bold
                                     color: "#848890"
                                 }
@@ -611,8 +611,8 @@ Rectangle {
                     id: welcomeAboutBtn
                     anchors.horizontalCenter: parent.horizontalCenter
                     width: parent.width
-                    height: units.gu(4.4)
-                    radius: units.gu(2.2)
+                    height: units.gu(4.2)
+                    radius: units.gu(2.1)
                     color: welcomeAboutMouse.pressed ? "#1E2024" : (root.theme ? root.theme.cardOuter : "#141517")
                     border.color: welcomeAboutMouse.pressed
                                   ? (root.theme ? root.theme.accent : "#D99B26")
@@ -628,7 +628,7 @@ Rectangle {
 
                         Label {
                             text: i18n.tr("About Tower Crash")
-                            textSize: Label.Medium
+                            font.pixelSize: units.gu(1.2)
                             font.weight: Font.DemiBold
                             color: "#D6D5D2"
                             anchors.verticalCenter: parent.verticalCenter
@@ -636,7 +636,7 @@ Rectangle {
 
                         Label {
                             text: "•  v1.0.0"
-                            textSize: Label.Small
+                            font.pixelSize: units.gu(1.05)
                             color: root.theme ? root.theme.accent : "#D99B26"
                             font.weight: Font.Bold
                             anchors.verticalCenter: parent.verticalCenter

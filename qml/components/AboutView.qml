@@ -26,7 +26,7 @@ Column {
         Label {
             anchors.horizontalCenter: parent.horizontalCenter
             text: i18n.tr("Spiral ball jump game for Ubuntu Touch")
-            textSize: Label.Medium
+            font.pixelSize: units.gu(1.2)
             font.weight: Font.Normal
             color: "#848890"
         }
@@ -193,7 +193,7 @@ Column {
 
                     Label {
                         text: "•  github.com/suraj-yadav0/tower-crash"
-                        textSize: Label.Small
+                        font.pixelSize: units.gu(1.0)
                         color: "#848890"
                         anchors.verticalCenter: parent.verticalCenter
                     }
