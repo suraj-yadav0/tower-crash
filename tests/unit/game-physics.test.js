@@ -237,3 +237,60 @@ test('GamePhysics - collision: goal ring triggers stage completion and checkpoin
     assert.strictEqual(game.stageClearStage, 5);
     assert.strictEqual(game.stageClearNextCheckpoint, 6);
 });
+
+test('GamePhysics - projectSpherePoint transforms coordinates within sphere radius', () => {
+    const { GamePhysics } = setupPhysics();
+
+    assert.ok(GamePhysics.SEAM_COORDS.length > 0, 'Seam coords should be precalculated');
+    assert.ok(GamePhysics.EQUATOR_COORDS.length > 0, 'Equator coords should be precalculated');
+
+    const radius = 25;
+    for (const pt of GamePhysics.SEAM_COORDS) {
+        const proj = GamePhysics.projectSpherePoint(pt, 0.5, 1.2, radius);
+        assert.ok(!isNaN(proj.x) && !isNaN(proj.y) && !isNaN(proj.z));
+        const dist2d = Math.sqrt(proj.x * proj.x + proj.y * proj.y);
+        assert.ok(dist2d <= radius + 0.001, `Projected point must lie within sphere radius: ${dist2d}`);
+    }
+});
+
+test('GamePhysics - physics step updates ball pitch and yaw rotation', () => {
+    const { GamePhysics, Storage, Progression, units, i18n } = setupPhysics();
+    const { game, soundManager, stageClearTimer } = createMockGame({
+        ballY: 100,
+        ballVy: 200,
+        angularVelocity: 0.05,
+        ballRadius: 20,
+        outerRadius: 160
+    });
+
+    const particles = { updateParticles: () => {} };
+    GamePhysics.updatePhysicsStep(game, 0.016, soundManager, stageClearTimer, units, Storage, Progression, i18n, particles);
+
+    assert.ok(game.ballRotationX > 0, 'Vertical fall should increase ball pitch rotation');
+    assert.ok(game.ballRotationY !== 0, 'Tower angular velocity should update ball yaw rotation');
+});
+
+test('GamePhysics - bounce impact squash scales with velocity', () => {
+    const { GamePhysics, Storage, Progression, units, i18n } = setupPhysics();
+    const { game: slowGame, soundManager, stageClearTimer } = createMockGame({
+        ballVy: 50,
+        maxFallSpeed: 500,
+        rings: [{ y: 100, segments: [0, 0, 0, 0, 0, 0, 0, 0], broken: false, isGoal: false }]
+    });
+
+    GamePhysics.checkBallCollision(slowGame, 90, 110, 1.0, soundManager, stageClearTimer, units, Storage, Progression, i18n);
+    const slowSquash = slowGame.squash;
+
+    const { game: fastGame } = createMockGame({
+        ballVy: 500,
+        maxFallSpeed: 500,
+        rings: [{ y: 100, segments: [0, 0, 0, 0, 0, 0, 0, 0], broken: false, isGoal: false }]
+    });
+
+    GamePhysics.checkBallCollision(fastGame, 90, 110, 1.0, soundManager, stageClearTimer, units, Storage, Progression, i18n);
+    const fastSquash = fastGame.squash;
+
+    assert.ok(fastSquash < slowSquash, `High velocity impact should squash more deeply (${fastSquash} < ${slowSquash})`);
+    assert.ok(fastSquash >= 0.35, 'Squash should be clamped to a stable lower bound');
+});
+

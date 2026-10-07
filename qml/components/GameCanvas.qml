@@ -1,6 +1,7 @@
 import QtQuick 2.9
 import Lomiri.Components 1.3
 import "../js/Themes.js" as Themes
+import "../js/GamePhysics.js" as GamePhysics
 
 Canvas {
     id: root
@@ -530,46 +531,83 @@ Canvas {
         }
 
         var renderSquash = game.squash;
-        if (game.squash >= 1.0) {
-            var flightStretch = 1.0;
-            if (game.ballVy < 0) {
-                flightStretch += 0.22 * Math.min(1.0, Math.abs(game.ballVy) / game.bounceSpeed);
-            } else {
-                var stretchFactor = game.isSuperFall ? 0.34 : 0.18;
-                flightStretch += stretchFactor * Math.min(1.0, game.ballVy / game.maxFallSpeed);
-            }
-            renderSquash = game.squash * flightStretch;
+        var velStretch = 1.0;
+        if (game.ballVy < 0) {
+            velStretch += 0.22 * Math.min(1.0, Math.abs(game.ballVy) / game.bounceSpeed);
+        } else {
+            var stretchFactor = game.isSuperFall ? 0.38 : 0.20;
+            velStretch += stretchFactor * Math.min(1.0, game.ballVy / game.maxFallSpeed);
+        }
+
+        if (game.squash < 1.0) {
+            renderSquash = game.squash;
+        } else {
+            renderSquash = 1.0 + (game.squash - 1.0) * 1.15 + (velStretch - 1.0);
         }
 
         for (var sr = 0; sr < game.rings.length; sr++) {
             var targetRing = game.rings[sr];
             if (targetRing.broken) continue;
             if (targetRing.y >= bY) {
+                var hitInfo = GamePhysics.getSegmentIndex(game.towerAngle, targetRing.angleOffset);
+                var segUnderBall = targetRing.segments[hitInfo.index];
+                if (segUnderBall === 1 && !targetRing.isGoal) {
+                    continue;
+                }
+
                 var dist = targetRing.y - bY;
-                if (dist < rSpacing * 1.6) {
+                var maxShadowDist = rSpacing * 1.6;
+                if (dist < maxShadowDist) {
                     var shadowY = bScreenY + (targetRing.y - camY) + (targetRing.recoil || 0) + midR * tilt;
-                    var distFraction = Math.min(1.0, dist / (rSpacing * 1.6));
+                    var distFraction = Math.max(0.0, Math.min(1.0, dist / maxShadowDist));
                     var proximity = 1.0 - distFraction;
-                    var alpha = Math.max(0.06, 0.65 * Math.pow(proximity, 1.8));
-                    var shadowScale = Math.max(0.40, 1.0 - distFraction * 0.50);
-                    var shadowSx = (1.0 / Math.sqrt(renderSquash)) * shadowScale;
-                    var shadowSy = shadowScale;
+
+                    var squashHoriz = 1.0 / Math.sqrt(Math.max(0.2, renderSquash));
+
+                    var penumbraAlpha = 0.42 * Math.pow(proximity, 1.4);
+                    var penumbraRadius = game.ballRadius * (1.1 + 0.55 * distFraction);
+                    var penumbraSx = squashHoriz * (0.85 + 0.25 * proximity);
+                    var penumbraSy = 0.85 + 0.25 * proximity;
 
                     ctx.save();
                     ctx.translate(centerX, shadowY);
-                    ctx.scale(shadowSx, shadowSy * tilt);
+                    ctx.scale(penumbraSx, penumbraSy * tilt);
 
-                    var sRadius = game.ballRadius * 1.4;
-                    var sGrad = ctx.createRadialGradient(0, 0, 0, 0, 0, sRadius);
-                    sGrad.addColorStop(0.0, "rgba(0, 0, 0, " + alpha.toFixed(2) + ")");
-                    sGrad.addColorStop(0.5, "rgba(0, 0, 0, " + (alpha * 0.5).toFixed(2) + ")");
-                    sGrad.addColorStop(1.0, "rgba(0, 0, 0, 0.0)");
+                    var penumbraGrad = ctx.createRadialGradient(0, 0, 0, 0, 0, penumbraRadius);
+                    penumbraGrad.addColorStop(0.0, "rgba(0, 0, 0, " + penumbraAlpha.toFixed(3) + ")");
+                    penumbraGrad.addColorStop(0.45, "rgba(0, 0, 0, " + (penumbraAlpha * 0.45).toFixed(3) + ")");
+                    penumbraGrad.addColorStop(1.0, "rgba(0, 0, 0, 0.0)");
 
                     ctx.beginPath();
-                    ctx.arc(0, 0, sRadius, 0, Math.PI * 2.0);
-                    ctx.fillStyle = sGrad;
+                    ctx.arc(0, 0, penumbraRadius, 0, Math.PI * 2.0);
+                    ctx.fillStyle = penumbraGrad;
                     ctx.fill();
                     ctx.restore();
+
+                    if (distFraction < 0.35) {
+                        var contactProximity = 1.0 - (distFraction / 0.35);
+                        var contactTightness = Math.pow(contactProximity, 1.6);
+                        var contactAlpha = 0.88 * contactTightness;
+                        var contactRadius = game.ballRadius * (0.65 + 0.25 * (1.0 - contactTightness));
+                        var contactSx = squashHoriz;
+                        var contactSy = 1.0;
+
+                        ctx.save();
+                        ctx.translate(centerX, shadowY);
+                        ctx.scale(contactSx, contactSy * tilt);
+
+                        var umbraGrad = ctx.createRadialGradient(0, 0, 0, 0, 0, contactRadius);
+                        umbraGrad.addColorStop(0.0, "rgba(0, 0, 0, " + contactAlpha.toFixed(3) + ")");
+                        umbraGrad.addColorStop(0.55, "rgba(0, 0, 0, " + (contactAlpha * 0.75).toFixed(3) + ")");
+                        umbraGrad.addColorStop(0.85, "rgba(0, 0, 0, " + (contactAlpha * 0.30).toFixed(3) + ")");
+                        umbraGrad.addColorStop(1.0, "rgba(0, 0, 0, 0.0)");
+
+                        ctx.beginPath();
+                        ctx.arc(0, 0, contactRadius, 0, Math.PI * 2.0);
+                        ctx.fillStyle = umbraGrad;
+                        ctx.fill();
+                        ctx.restore();
+                    }
                 }
                 break;
             }
@@ -613,23 +651,103 @@ Canvas {
         ctx.translate(centerX, actualBallScreenY);
         ctx.scale(1.0 / Math.sqrt(renderSquash), renderSquash);
 
-        var ballGrad = ctx.createRadialGradient(
+        ctx.beginPath();
+        ctx.arc(0, 0, bRadius, 0, Math.PI * 2.0);
+        ctx.clip();
+
+        ctx.fillStyle = theme.ballMid;
+        ctx.fill();
+
+        var rotX = game.ballRotationX || 0.0;
+        var rotY = game.ballRotationY || 0.0;
+
+        ctx.beginPath();
+        for (var eq = 0; eq < GamePhysics.EQUATOR_COORDS.length; eq++) {
+            var eq1 = GamePhysics.projectSpherePoint(GamePhysics.EQUATOR_COORDS[eq], rotX, rotY, bRadius);
+            var eq2 = GamePhysics.projectSpherePoint(GamePhysics.EQUATOR_COORDS[(eq + 1) % GamePhysics.EQUATOR_COORDS.length], rotX, rotY, bRadius);
+            if (eq1.z > 0 && eq2.z > 0) {
+                ctx.moveTo(eq1.x, eq1.y);
+                ctx.lineTo(eq2.x, eq2.y);
+            } else if (eq1.z > 0 && eq2.z <= 0) {
+                var fracE = eq1.z / (eq1.z - eq2.z);
+                ctx.moveTo(eq1.x, eq1.y);
+                ctx.lineTo(eq1.x + (eq2.x - eq1.x) * fracE, eq1.y + (eq2.y - eq1.y) * fracE);
+            } else if (eq1.z <= 0 && eq2.z > 0) {
+                var fracE2 = -eq1.z / (eq2.z - eq1.z);
+                ctx.moveTo(eq1.x + (eq2.x - eq1.x) * fracE2, eq1.y + (eq2.y - eq1.y) * fracE2);
+                ctx.lineTo(eq2.x, eq2.y);
+            }
+        }
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.16)";
+        ctx.lineWidth = units.gu(0.12);
+        ctx.stroke();
+
+        ctx.beginPath();
+        for (var sm = 0; sm < GamePhysics.SEAM_COORDS.length; sm++) {
+            var sm1 = GamePhysics.projectSpherePoint(GamePhysics.SEAM_COORDS[sm], rotX, rotY, bRadius);
+            var sm2 = GamePhysics.projectSpherePoint(GamePhysics.SEAM_COORDS[(sm + 1) % GamePhysics.SEAM_COORDS.length], rotX, rotY, bRadius);
+            if (sm1.z > 0 && sm2.z > 0) {
+                ctx.moveTo(sm1.x, sm1.y);
+                ctx.lineTo(sm2.x, sm2.y);
+            } else if (sm1.z > 0 && sm2.z <= 0) {
+                var fracS = sm1.z / (sm1.z - sm2.z);
+                ctx.moveTo(sm1.x, sm1.y);
+                ctx.lineTo(sm1.x + (sm2.x - sm1.x) * fracS, sm1.y + (sm2.y - sm1.y) * fracS);
+            } else if (sm1.z <= 0 && sm2.z > 0) {
+                var fracS2 = -sm1.z / (sm2.z - sm1.z);
+                ctx.moveTo(sm1.x + (sm2.x - sm1.x) * fracS2, sm1.y + (sm2.y - sm1.y) * fracS2);
+                ctx.lineTo(sm2.x, sm2.y);
+            }
+        }
+        ctx.strokeStyle = "rgba(0, 0, 0, 0.32)";
+        ctx.lineWidth = units.gu(0.20);
+        ctx.stroke();
+
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.30)";
+        ctx.lineWidth = units.gu(0.08);
+        ctx.stroke();
+
+        var pips = [
+            { x: 0, y: 1, z: 0 },
+            { x: 0, y: -1, z: 0 },
+            { x: 1, y: 0, z: 0 },
+            { x: -1, y: 0, z: 0 }
+        ];
+        for (var pi = 0; pi < pips.length; pi++) {
+            var pProj = GamePhysics.projectSpherePoint(pips[pi], rotX, rotY, bRadius);
+            if (pProj.z > 0.08) {
+                var pipR = bRadius * 0.16 * Math.sqrt(pProj.z);
+                ctx.beginPath();
+                ctx.arc(pProj.x, pProj.y, pipR, 0, Math.PI * 2.0);
+                ctx.fillStyle = theme.ballLight;
+                ctx.globalAlpha = Math.min(1.0, pProj.z * 1.3) * 0.70;
+                ctx.fill();
+
+                ctx.beginPath();
+                ctx.arc(pProj.x, pProj.y, pipR * 0.45, 0, Math.PI * 2.0);
+                ctx.fillStyle = theme.ballDark;
+                ctx.fill();
+            }
+        }
+        ctx.globalAlpha = 1.0;
+
+        var lightingGrad = ctx.createRadialGradient(
             -bRadius * 0.35,
             -bRadius * 0.38,
-            bRadius * 0.08,
+            bRadius * 0.06,
             0,
             0,
             bRadius
         );
-        ballGrad.addColorStop(0.0, "#FFFFFF");
-        ballGrad.addColorStop(0.18, theme.ballLight);
-        ballGrad.addColorStop(0.55, theme.ballMid);
-        ballGrad.addColorStop(0.90, theme.ballDark);
-        ballGrad.addColorStop(1.00, "rgba(0, 0, 0, 0.65)");
+        lightingGrad.addColorStop(0.0, "rgba(255, 255, 255, 0.45)");
+        lightingGrad.addColorStop(0.20, "rgba(255, 255, 255, 0.15)");
+        lightingGrad.addColorStop(0.55, "rgba(0, 0, 0, 0.0)");
+        lightingGrad.addColorStop(0.85, "rgba(0, 0, 0, 0.38)");
+        lightingGrad.addColorStop(1.0, "rgba(0, 0, 0, 0.75)");
 
+        ctx.fillStyle = lightingGrad;
         ctx.beginPath();
         ctx.arc(0, 0, bRadius, 0, Math.PI * 2.0);
-        ctx.fillStyle = ballGrad;
         ctx.fill();
 
         var fresnelGrad = ctx.createRadialGradient(
@@ -649,7 +767,7 @@ Canvas {
 
         ctx.beginPath();
         ctx.arc(-bRadius * 0.35, -bRadius * 0.38, bRadius * 0.16, 0, Math.PI * 2.0);
-        ctx.fillStyle = "rgba(255, 255, 255, 0.90)";
+        ctx.fillStyle = "rgba(255, 255, 255, 0.92)";
         ctx.fill();
 
         ctx.restore();

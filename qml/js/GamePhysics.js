@@ -1,5 +1,55 @@
 .pragma library
 
+var SEAM_COORDS = (function() {
+    var coords = [];
+    var count = 36;
+    for (var i = 0; i < count; i++) {
+        var t = (i / count) * Math.PI * 2.0;
+        var u = Math.cos(t) + 0.38 * Math.cos(3.0 * t);
+        var v = Math.sin(t) - 0.38 * Math.sin(3.0 * t);
+        var w = 0.82 * Math.sin(2.0 * t);
+        var invLen = 1.0 / Math.sqrt(u * u + v * v + w * w);
+        coords.push({ x: u * invLen, y: v * invLen, z: w * invLen });
+    }
+    return coords;
+})();
+
+var EQUATOR_COORDS = (function() {
+    var coords = [];
+    var count = 24;
+    for (var i = 0; i < count; i++) {
+        var t = (i / count) * Math.PI * 2.0;
+        coords.push({ x: Math.cos(t), y: 0.0, z: Math.sin(t) });
+    }
+    return coords;
+})();
+
+function projectSpherePoint(p, rotX, rotY, bRadius) {
+    var cosY = Math.cos(rotY);
+    var sinY = Math.sin(rotY);
+    var x1 = p.x * cosY + p.z * sinY;
+    var y1 = p.y;
+    var z1 = -p.x * sinY + p.z * cosY;
+
+    var cosX = Math.cos(rotX);
+    var sinX = Math.sin(rotX);
+    var x2 = x1;
+    var y2 = y1 * cosX - z1 * sinX;
+    var z2 = y1 * sinX + z1 * cosX;
+
+    var tiltAngle = 0.22;
+    var cosZ = Math.cos(tiltAngle);
+    var sinZ = Math.sin(tiltAngle);
+    var x3 = x2 * cosZ - y2 * sinZ;
+    var y3 = x2 * sinZ + y2 * cosZ;
+
+    return {
+        x: x3 * bRadius,
+        y: y3 * bRadius,
+        z: z2
+    };
+}
+
 function getSegmentIndex(towerAngle, ringOffset) {
     var effectiveAngle = towerAngle + (ringOffset || 0.0);
     var fullCircle = 2.0 * Math.PI;
@@ -34,8 +84,8 @@ function updateCamera(cameraY, ballY, activePlatformY, isSuperFall, dt, maxLag) 
 }
 
 function updateSquash(squash, squashVelocity, dt) {
-    var springK = 360.0;
-    var damping = 22.0;
+    var springK = 380.0;
+    var damping = 15.0;
     var force = -springK * (squash - 1.0) - damping * squashVelocity;
     var nextVel = squashVelocity + force * dt;
     var nextSquash = squash + nextVel * dt;
@@ -164,8 +214,8 @@ function checkBallCollision(game, prevY, nextY, speedScale, soundManager, stageC
                 game.ballVy = -game.bounceSpeed * speedScale * 0.95;
                 game.cameraY = ring.y;
                 game.activePlatformY = ring.y;
-                game.squash = 0.45;
-                game.squashVelocity = (1.0 - game.squash) * 40.0;
+                game.squash = 0.38;
+                game.squashVelocity = (1.0 - game.squash) * 26.0;
                 nextY = ring.y;
 
                 if (nextLvl > game.highestLevelReached) {
@@ -229,8 +279,8 @@ function checkBallCollision(game, prevY, nextY, speedScale, soundManager, stageC
                 game.ballY = ring.y;
                 game.ballVy = -game.bounceSpeed * speedScale;
                 game.activePlatformY = ring.y;
-                game.squash = 0.48;
-                game.squashVelocity = (1.0 - game.squash) * 38.0;
+                game.squash = 0.36;
+                game.squashVelocity = (1.0 - game.squash) * 28.0;
                 nextY = ring.y;
 
                 if (game.score > game.bestScore) {
@@ -252,8 +302,8 @@ function checkBallCollision(game, prevY, nextY, speedScale, soundManager, stageC
                 game.activePlatformY = ring.y;
                 game.streak = 0;
                 game.isSuperFall = false;
-                game.squash = 0.54;
-                game.squashVelocity = (1.0 - game.squash) * 36.0;
+                game.squash = Math.max(0.38, 0.60 - normSpeed * 0.22);
+                game.squashVelocity = (1.0 - game.squash) * 24.0;
                 nextY = ring.y;
 
                 if (segType === 3) {
@@ -372,7 +422,12 @@ function updatePhysicsStep(game, dt, soundManager, stageClearTimer, units, Stora
     }
 
     if (!game.isDragging && Math.abs(game.angularVelocity) > 0.0001) {
-        game.towerAngle += game.angularVelocity;
+        var dAngle = game.angularVelocity;
+        game.towerAngle += dAngle;
+        var rOuter = game.outerRadius || (units ? units.gu(20) : 160);
+        var rBall = game.ballRadius || (units ? units.gu(2.4) : 19.2);
+        var rollRatio = (rOuter / rBall) * 0.65;
+        game.ballRotationY = ((game.ballRotationY || 0.0) - dAngle * rollRatio) % (Math.PI * 2.0);
         game.angularVelocity *= Math.pow(0.04, dt);
     }
     if (game.towerAngle > Math.PI * 2.0) {
@@ -398,20 +453,22 @@ function updatePhysicsStep(game, dt, soundManager, stageClearTimer, units, Stora
         game.ballVy = 0.0;
     }
 
-    if (game.ballVy > 0) {
-        game.ballTrail.push({
-            y: game.ballY,
-            isSuper: game.isSuperFall,
-            alpha: 0.7
-        });
-        if (game.ballTrail.length > 5) {
+    if (game.ballTrail) {
+        if (game.ballVy > 0) {
+            game.ballTrail.push({
+                y: game.ballY,
+                isSuper: game.isSuperFall,
+                alpha: 0.7
+            });
+            if (game.ballTrail.length > 5) {
+                game.ballTrail.shift();
+            }
+        } else if (game.ballTrail.length > 0) {
             game.ballTrail.shift();
         }
-    } else if (game.ballTrail.length > 0) {
-        game.ballTrail.shift();
-    }
-    for (var t = 0; t < game.ballTrail.length; t++) {
-        game.ballTrail[t].alpha -= dt * 3.5;
+        for (var t = 0; t < game.ballTrail.length; t++) {
+            game.ballTrail[t].alpha -= dt * 3.5;
+        }
     }
 
     if (game.bannerOpacity > 0) {
@@ -427,6 +484,15 @@ function updatePhysicsStep(game, dt, soundManager, stageClearTimer, units, Stora
     }
 
     game.ballY = nextY;
+    var dy = nextY - prevY;
+    var bRadius = game.ballRadius || (units ? units.gu(2.4) : 19.2);
+    if (game.ballVy > 0) {
+        var rollDelta = (dy / bRadius) * 0.90;
+        game.ballRotationX = ((game.ballRotationX || 0.0) + rollDelta) % (Math.PI * 2.0);
+    } else {
+        var idleRoll = 2.4 * dt;
+        game.ballRotationX = ((game.ballRotationX || 0.0) + idleRoll) % (Math.PI * 2.0);
+    }
     game.cameraY = updateCamera(
         game.cameraY,
         game.ballY,
@@ -440,18 +506,24 @@ function updatePhysicsStep(game, dt, soundManager, stageClearTimer, units, Stora
     game.squash = sq.squash;
     game.squashVelocity = sq.velocity;
 
-    updateRings(game.rings, dt);
-    Particles.updateParticles(game.particles, dt, game.gravity, game.poleRadius, units);
-
-    var lastRing = game.rings[game.rings.length - 1];
-    while (lastRing && lastRing.y < game.cameraY + game.ringSpacing * 8) {
-        game.generateRing();
-        lastRing = game.rings[game.rings.length - 1];
+    if (game.rings) {
+        updateRings(game.rings, dt);
+    }
+    if (game.particles && Particles && Particles.updateParticles) {
+        Particles.updateParticles(game.particles, dt, game.gravity, game.poleRadius, units);
     }
 
-    while (game.rings.length > 0 &&
-           game.rings[0].y < game.cameraY - game.ringSpacing * 3) {
-        game.rings.shift();
+    if (game.rings) {
+        var lastRing = game.rings[game.rings.length - 1];
+        while (lastRing && lastRing.y < game.cameraY + game.ringSpacing * 8) {
+            game.generateRing();
+            lastRing = game.rings[game.rings.length - 1];
+        }
+
+        while (game.rings.length > 0 &&
+               game.rings[0].y < game.cameraY - game.ringSpacing * 3) {
+            game.rings.shift();
+        }
     }
 
     return true;

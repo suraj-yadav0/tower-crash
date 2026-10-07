@@ -21,6 +21,13 @@ function createMockGame(overrides = {}) {
         activePlatformY: 0,
         gameOver: false,
         towerAngle: 0.0,
+        ballRotationX: 0.0,
+        ballRotationY: 0.0,
+        ballRadius: 19.2,
+        outerRadius: 160.0,
+        innerRadius: 38.4,
+        ballTrail: [],
+        rings: [],
         currentTheme: {
             accent: "#D99B26",
             accentBg: "#261E10",

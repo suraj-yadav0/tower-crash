@@ -278,6 +278,8 @@ MainView {
             property real squash: 1.0
             property real squashVelocity: 0.0
             property bool isSuperFall: false
+            property real ballRotationX: 0.0
+            property real ballRotationY: 0.0
 
             property real ringSpacing: units.gu(26)
             property real outerRadius: units.gu(20)
@@ -429,6 +431,8 @@ MainView {
                 rings = [];
                 particles = [];
                 ballTrail = [];
+                ballRotationX = 0.0;
+                ballRotationY = 0.0;
                 squash = 1.0;
                 squashVelocity = 0.0;
                 isSuperFall = false;
@@ -471,8 +475,8 @@ MainView {
                 var currentDepth = Math.floor(ballY / ringSpacing);
                 var speedScale = 1.0 + Math.min(0.35, currentDepth * 0.005);
                 ballVy = -bounceSpeed * speedScale * 0.9;
-                squash = 0.52;
-                squashVelocity = (1.0 - squash) * 36.0;
+                squash = 0.44;
+                squashVelocity = (1.0 - squash) * 24.0;
                 lastPhysicsTime = 0.0;
                 soundManager.play("bounce");
                 soundManager.buttonHaptic();
@@ -587,12 +591,14 @@ MainView {
                 if (event.key === Qt.Key_A) {
                     if (!gameOver && !isPaused && !isSettingsOpen && !isWelcomeOpen && !isStageClearOpen && !isStageClearCelebrating) {
                         towerAngle += 0.12;
+                        ballRotationY = (ballRotationY - 0.12 * (outerRadius / ballRadius * 0.65)) % (Math.PI * 2.0);
                         gameCanvas.requestPaint();
                         event.accepted = true;
                     }
                 } else if (event.key === Qt.Key_D) {
                     if (!gameOver && !isPaused && !isSettingsOpen && !isWelcomeOpen && !isStageClearOpen && !isStageClearCelebrating) {
                         towerAngle -= 0.12;
+                        ballRotationY = (ballRotationY + 0.12 * (outerRadius / ballRadius * 0.65)) % (Math.PI * 2.0);
                         gameCanvas.requestPaint();
                         event.accepted = true;
                     }
@@ -601,6 +607,7 @@ MainView {
             Keys.onLeftPressed: {
                 if (!gameOver && !isPaused && !isSettingsOpen && !isWelcomeOpen && !isStageClearOpen && !isStageClearCelebrating) {
                     towerAngle += 0.12;
+                    ballRotationY = (ballRotationY - 0.12 * (outerRadius / ballRadius * 0.65)) % (Math.PI * 2.0);
                     gameCanvas.requestPaint();
                     event.accepted = true;
                 }
@@ -608,6 +615,7 @@ MainView {
             Keys.onRightPressed: {
                 if (!gameOver && !isPaused && !isSettingsOpen && !isWelcomeOpen && !isStageClearOpen && !isStageClearCelebrating) {
                     towerAngle -= 0.12;
+                    ballRotationY = (ballRotationY + 0.12 * (outerRadius / ballRadius * 0.65)) % (Math.PI * 2.0);
                     gameCanvas.requestPaint();
                     event.accepted = true;
                 }
@@ -731,6 +739,7 @@ MainView {
                 onTriggered: {
                     if (gameContainer.isWelcomeOpen) {
                         gameContainer.towerAngle -= 0.005;
+                        gameContainer.ballRotationY = (gameContainer.ballRotationY + 0.005 * (gameContainer.outerRadius / gameContainer.ballRadius * 0.65)) % (Math.PI * 2.0);
                         gameCanvas.requestPaint();
                         return;
                     }
@@ -792,7 +801,10 @@ MainView {
                         var dx = mouse.x - gameContainer.lastDragX;
 
                         var sens = gameContainer.touchSensitivityMultiplier;
-                        gameContainer.towerAngle -= dx * 0.014 * sens;
+                        var deltaAngle = -dx * 0.014 * sens;
+                        gameContainer.towerAngle += deltaAngle;
+                        var rollRatio = (gameContainer.outerRadius / gameContainer.ballRadius) * 0.65;
+                        gameContainer.ballRotationY = (gameContainer.ballRotationY - deltaAngle * rollRatio) % (Math.PI * 2.0);
                         var fling = -(dx / elapsed) * 0.12 * sens;
                         gameContainer.angularVelocity = Math.max(-0.25, Math.min(0.25, fling));
 
