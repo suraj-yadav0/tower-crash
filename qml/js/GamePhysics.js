@@ -24,6 +24,14 @@ var EQUATOR_COORDS = (function() {
     return coords;
 })();
 
+var HAZARD_SPIKE_LAYOUT = [
+    { u: 0.30, v: 0.30 },
+    { u: 0.30, v: 0.70 },
+    { u: 0.70, v: 0.18 },
+    { u: 0.70, v: 0.50 },
+    { u: 0.70, v: 0.82 }
+];
+
 function projectSpherePoint(p, rotX, rotY, bRadius) {
     var cosY = Math.cos(rotY);
     var sinY = Math.sin(rotY);

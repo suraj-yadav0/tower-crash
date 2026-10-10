@@ -294,3 +294,16 @@ test('GamePhysics - bounce impact squash scales with velocity', () => {
     assert.ok(fastSquash >= 0.35, 'Squash should be clamped to a stable lower bound');
 });
 
+test('GamePhysics - HAZARD_SPIKE_LAYOUT contains valid geometric bounds', () => {
+    const { GamePhysics } = setupPhysics();
+
+    assert.ok(Array.isArray(GamePhysics.HAZARD_SPIKE_LAYOUT), 'HAZARD_SPIKE_LAYOUT must be an array');
+    assert.strictEqual(GamePhysics.HAZARD_SPIKE_LAYOUT.length, 5, 'Must define 5 spikes per hazard segment');
+
+    for (let i = 0; i < GamePhysics.HAZARD_SPIKE_LAYOUT.length; i++) {
+        const spike = GamePhysics.HAZARD_SPIKE_LAYOUT[i];
+        assert.ok(spike.u >= 0.20 && spike.u <= 0.80, `Spike ${i} radial coordinate out of bounds: ${spike.u}`);
+        assert.ok(spike.v >= 0.10 && spike.v <= 0.90, `Spike ${i} angular coordinate out of bounds: ${spike.v}`);
+    }
+});
+

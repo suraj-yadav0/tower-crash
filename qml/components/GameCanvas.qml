@@ -263,6 +263,130 @@ Canvas {
             }
         }
 
+        function drawHazardSpikes(ringScreenY, startAngle, topColor, sideColor, wantFront) {
+            var layout = GamePhysics.HAZARD_SPIKE_LAYOUT;
+            if (!layout || layout.length === 0) return;
+
+            var segArc = Math.PI / 4.0;
+            var rSpan = outR - inR;
+            var visibleSpikes = [];
+
+            for (var sp = 0; sp < layout.length; sp++) {
+                var pat = layout[sp];
+                var sTheta = startAngle + pat.v * segArc;
+                var sSin = Math.sin(sTheta);
+                var isFront = (sSin >= 0);
+                if (isFront !== wantFront) continue;
+
+                var sR = inR + pat.u * rSpan;
+                var sX = centerX + sR * Math.cos(sTheta);
+                var sY = ringScreenY + sR * sSin * tilt;
+
+                visibleSpikes.push({
+                    x: sX,
+                    y: sY
+                });
+            }
+
+            if (visibleSpikes.length === 0) return;
+
+            visibleSpikes.sort(function(a, b) {
+                return a.y - b.y;
+            });
+
+            var spikeHeight = units.gu(2.4);
+            var baseRadius = units.gu(1.15);
+            var baseRy = baseRadius * tilt;
+
+            for (var vs = 0; vs < visibleSpikes.length; vs++) {
+                var cur = visibleSpikes[vs];
+                var bx = cur.x;
+                var by = cur.y;
+
+                var tipX = bx;
+                var tipY = by - spikeHeight;
+                var leftX = bx - baseRadius;
+                var leftY = by;
+                var rightX = bx + baseRadius;
+                var rightY = by;
+                var frontX = bx;
+                var frontY = by + baseRy;
+
+                ctx.save();
+                ctx.translate(bx, by);
+                ctx.scale(1.0, tilt);
+                var aoGrad = ctx.createRadialGradient(0, 0, baseRadius * 0.3, 0, 0, baseRadius * 1.35);
+                aoGrad.addColorStop(0.0, "rgba(0, 0, 0, 0.45)");
+                aoGrad.addColorStop(0.65, "rgba(0, 0, 0, 0.18)");
+                aoGrad.addColorStop(1.0, "rgba(0, 0, 0, 0.0)");
+                ctx.fillStyle = aoGrad;
+                ctx.beginPath();
+                ctx.arc(0, 0, baseRadius * 1.35, 0, Math.PI * 2.0);
+                ctx.fill();
+                ctx.restore();
+
+                ctx.save();
+                ctx.translate(bx, by);
+                ctx.scale(1.0, tilt);
+                ctx.beginPath();
+                ctx.arc(0, 0, baseRadius, 0, Math.PI * 2.0);
+                ctx.fillStyle = "rgba(0, 0, 0, 0.28)";
+                ctx.fill();
+                ctx.strokeStyle = "rgba(0, 0, 0, 0.45)";
+                ctx.lineWidth = units.gu(0.08) / tilt;
+                ctx.stroke();
+                ctx.restore();
+
+                ctx.beginPath();
+                ctx.moveTo(tipX, tipY);
+                ctx.lineTo(leftX, leftY);
+                ctx.quadraticCurveTo(leftX, frontY, frontX, frontY);
+                ctx.lineTo(tipX, tipY);
+                ctx.closePath();
+
+                var leftGrad = ctx.createLinearGradient(leftX, tipY, frontX, frontY);
+                leftGrad.addColorStop(0.0, "#FFFFFF");
+                leftGrad.addColorStop(0.25, topColor);
+                leftGrad.addColorStop(1.0, sideColor);
+                ctx.fillStyle = leftGrad;
+                ctx.fill();
+
+                ctx.beginPath();
+                ctx.moveTo(tipX, tipY);
+                ctx.lineTo(frontX, frontY);
+                ctx.quadraticCurveTo(rightX, frontY, rightX, rightY);
+                ctx.lineTo(tipX, tipY);
+                ctx.closePath();
+
+                var rightGrad = ctx.createLinearGradient(frontX, tipY, rightX, rightY);
+                rightGrad.addColorStop(0.0, topColor);
+                rightGrad.addColorStop(0.40, sideColor);
+                rightGrad.addColorStop(1.0, "rgba(20, 10, 10, 0.85)");
+                ctx.fillStyle = rightGrad;
+                ctx.fill();
+
+                ctx.beginPath();
+                ctx.moveTo(tipX, tipY);
+                ctx.lineTo(frontX, frontY);
+                ctx.strokeStyle = "rgba(255, 255, 255, 0.45)";
+                ctx.lineWidth = units.gu(0.09);
+                ctx.stroke();
+
+                ctx.beginPath();
+                ctx.moveTo(leftX, leftY);
+                ctx.lineTo(tipX, tipY);
+                ctx.lineTo(rightX, rightY);
+                ctx.strokeStyle = "rgba(10, 15, 20, 0.40)";
+                ctx.lineWidth = units.gu(0.08);
+                ctx.stroke();
+
+                ctx.beginPath();
+                ctx.arc(tipX, tipY + units.gu(0.10), units.gu(0.16), 0, Math.PI * 2.0);
+                ctx.fillStyle = "rgba(255, 255, 255, 0.95)";
+                ctx.fill();
+            }
+        }
+
         function drawOuterRim(ringScreenY, startAngle, endAngle, sideColor) {
             var samples = 6;
             var startS = -1;
@@ -388,6 +512,10 @@ Canvas {
                 if (nextSeg1 === 1 && Math.cos(endAngle1) > -0.02 && Math.sin(endAngle1) < 0) {
                     drawRadialCutWall(r1ScreenY, endAngle1, false, sideColor1);
                 }
+
+                if (seg1Type === 2 && !ring1.isGoal) {
+                    drawHazardSpikes(r1ScreenY, startAngle1, topColor1, sideColor1, false);
+                }
             }
         }
 
@@ -456,6 +584,10 @@ Canvas {
                     }
 
                     drawSegmentTop(r2ScreenY, startAngle2, endAngle2, topColor2, true);
+
+                    if (seg2Type === 2 && !ring2.isGoal) {
+                        drawHazardSpikes(r2ScreenY, startAngle2, topColor2, sideColor2, true);
+                    }
 
                     var midAngle2 = (startAngle2 + endAngle2) * 0.5;
                     if ((ring2.rotationSpeed !== 0 || ring2.isOscillating) && Math.sin(midAngle2) > 0.15) {
