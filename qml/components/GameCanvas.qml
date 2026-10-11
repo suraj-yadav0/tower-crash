@@ -294,8 +294,8 @@ Canvas {
                 return a.y - b.y;
             });
 
-            var spikeHeight = units.gu(2.4);
-            var baseRadius = units.gu(1.15);
+            var spikeHeight = units.gu(0.72);
+            var baseRadius = units.gu(0.38);
             var baseRy = baseRadius * tilt;
 
             for (var vs = 0; vs < visibleSpikes.length; vs++) {
@@ -315,13 +315,13 @@ Canvas {
                 ctx.save();
                 ctx.translate(bx, by);
                 ctx.scale(1.0, tilt);
-                var aoGrad = ctx.createRadialGradient(0, 0, baseRadius * 0.3, 0, 0, baseRadius * 1.35);
-                aoGrad.addColorStop(0.0, "rgba(0, 0, 0, 0.45)");
-                aoGrad.addColorStop(0.65, "rgba(0, 0, 0, 0.18)");
+                var aoGrad = ctx.createRadialGradient(0, 0, baseRadius * 0.25, 0, 0, baseRadius * 1.3);
+                aoGrad.addColorStop(0.0, "rgba(0, 0, 0, 0.30)");
+                aoGrad.addColorStop(0.65, "rgba(0, 0, 0, 0.10)");
                 aoGrad.addColorStop(1.0, "rgba(0, 0, 0, 0.0)");
                 ctx.fillStyle = aoGrad;
                 ctx.beginPath();
-                ctx.arc(0, 0, baseRadius * 1.35, 0, Math.PI * 2.0);
+                ctx.arc(0, 0, baseRadius * 1.3, 0, Math.PI * 2.0);
                 ctx.fill();
                 ctx.restore();
 
@@ -330,10 +330,10 @@ Canvas {
                 ctx.scale(1.0, tilt);
                 ctx.beginPath();
                 ctx.arc(0, 0, baseRadius, 0, Math.PI * 2.0);
-                ctx.fillStyle = "rgba(0, 0, 0, 0.28)";
+                ctx.fillStyle = "rgba(0, 0, 0, 0.20)";
                 ctx.fill();
-                ctx.strokeStyle = "rgba(0, 0, 0, 0.45)";
-                ctx.lineWidth = units.gu(0.08) / tilt;
+                ctx.strokeStyle = "rgba(0, 0, 0, 0.35)";
+                ctx.lineWidth = units.gu(0.04) / tilt;
                 ctx.stroke();
                 ctx.restore();
 
@@ -345,8 +345,8 @@ Canvas {
                 ctx.closePath();
 
                 var leftGrad = ctx.createLinearGradient(leftX, tipY, frontX, frontY);
-                leftGrad.addColorStop(0.0, "#FFFFFF");
-                leftGrad.addColorStop(0.25, topColor);
+                leftGrad.addColorStop(0.0, "rgba(255, 255, 255, 0.88)");
+                leftGrad.addColorStop(0.32, topColor);
                 leftGrad.addColorStop(1.0, sideColor);
                 ctx.fillStyle = leftGrad;
                 ctx.fill();
@@ -361,28 +361,28 @@ Canvas {
                 var rightGrad = ctx.createLinearGradient(frontX, tipY, rightX, rightY);
                 rightGrad.addColorStop(0.0, topColor);
                 rightGrad.addColorStop(0.40, sideColor);
-                rightGrad.addColorStop(1.0, "rgba(20, 10, 10, 0.85)");
+                rightGrad.addColorStop(1.0, "rgba(20, 10, 10, 0.70)");
                 ctx.fillStyle = rightGrad;
                 ctx.fill();
 
                 ctx.beginPath();
                 ctx.moveTo(tipX, tipY);
                 ctx.lineTo(frontX, frontY);
-                ctx.strokeStyle = "rgba(255, 255, 255, 0.45)";
-                ctx.lineWidth = units.gu(0.09);
+                ctx.strokeStyle = "rgba(255, 255, 255, 0.38)";
+                ctx.lineWidth = units.gu(0.04);
                 ctx.stroke();
 
                 ctx.beginPath();
                 ctx.moveTo(leftX, leftY);
                 ctx.lineTo(tipX, tipY);
                 ctx.lineTo(rightX, rightY);
-                ctx.strokeStyle = "rgba(10, 15, 20, 0.40)";
-                ctx.lineWidth = units.gu(0.08);
+                ctx.strokeStyle = "rgba(10, 15, 20, 0.28)";
+                ctx.lineWidth = units.gu(0.035);
                 ctx.stroke();
 
                 ctx.beginPath();
-                ctx.arc(tipX, tipY + units.gu(0.10), units.gu(0.16), 0, Math.PI * 2.0);
-                ctx.fillStyle = "rgba(255, 255, 255, 0.95)";
+                ctx.arc(tipX, tipY + units.gu(0.03), units.gu(0.06), 0, Math.PI * 2.0);
+                ctx.fillStyle = "rgba(255, 255, 255, 0.88)";
                 ctx.fill();
             }
         }

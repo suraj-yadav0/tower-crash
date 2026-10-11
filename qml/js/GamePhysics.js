@@ -25,11 +25,11 @@ var EQUATOR_COORDS = (function() {
 })();
 
 var HAZARD_SPIKE_LAYOUT = [
-    { u: 0.30, v: 0.30 },
-    { u: 0.30, v: 0.70 },
-    { u: 0.70, v: 0.18 },
-    { u: 0.70, v: 0.50 },
-    { u: 0.70, v: 0.82 }
+    { u: 0.35, v: 0.30 },
+    { u: 0.35, v: 0.70 },
+    { u: 0.65, v: 0.18 },
+    { u: 0.65, v: 0.50 },
+    { u: 0.65, v: 0.82 }
 ];
 
 function projectSpherePoint(p, rotX, rotY, bRadius) {
