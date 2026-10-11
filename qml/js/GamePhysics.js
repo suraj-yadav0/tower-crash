@@ -468,7 +468,7 @@ function updatePhysicsStep(game, dt, soundManager, stageClearTimer, units, Stora
                 isSuper: game.isSuperFall,
                 alpha: 0.7
             });
-            if (game.ballTrail.length > 5) {
+            if (game.ballTrail.length > 8) {
                 game.ballTrail.shift();
             }
         } else if (game.ballTrail.length > 0) {
