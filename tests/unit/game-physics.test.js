@@ -142,6 +142,7 @@ test('GamePhysics - collision: gap fall increases streak and activates superfall
     GamePhysics.checkBallCollision(game, 290, 310, 1.0, soundManager, stageClearTimer, units, Storage, Progression, i18n);
     assert.strictEqual(game.streak, 3);
     assert.strictEqual(game.isSuperFall, true, 'Streak of 3 should activate superfall overdrive');
+    assert.strictEqual(soundManager.superfalls, 1, 'Streak of 3 should trigger superfall charge sound');
 });
 
 test('GamePhysics - collision: normal safe bounce and score scaling', () => {
@@ -208,7 +209,34 @@ test('GamePhysics - collision: superfall destroys hazard without dying', () => {
     assert.strictEqual(game.gameOver, false);
     assert.strictEqual(ring.broken, true);
     assert.ok(game.shatterEvents.length >= 1);
+    assert.strictEqual(soundManager.crashes, 1, 'Superfall smash should play punchy crash sound');
     assert.strictEqual(game.isSuperFall, false, 'Superfall ends after smashing a platform');
+});
+
+test('GamePhysics - collision: fragile segment break triggers crash sound', () => {
+    const { GamePhysics, Storage, Progression, units, i18n } = setupPhysics();
+    const { game, soundManager, stageClearTimer } = createMockGame({ difficultyMode: 1, currentLevel: 45 });
+
+    // Segment 2 is fragile (3)
+    const ring = {
+        y: 100,
+        segments: [0, 0, 3, 0, 0, 0, 0, 0],
+        broken: false,
+        isGoal: false,
+        recoil: 0,
+        recoilVelocity: 0
+    };
+    game.rings = [ring];
+
+    let segmentShattered = false;
+    game.spawnSegmentShatter = () => { segmentShattered = true; };
+
+    const collided = GamePhysics.checkBallCollision(game, 90, 110, 1.0, soundManager, stageClearTimer, units, Storage, Progression, i18n);
+    assert.strictEqual(collided.gameOver, false);
+    assert.strictEqual(ring.segments[2], 1, 'Fragile segment should turn into gap after impact');
+    assert.strictEqual(segmentShattered, true, 'Fragile segment should spawn segment shatter debris');
+    assert.strictEqual(soundManager.crashes, 1, 'Fragile segment break should play crash sound');
+    assert.strictEqual(soundManager.bounces, 1, 'Ball should still bounce off fragile segment');
 });
 
 test('GamePhysics - collision: goal ring triggers stage completion and checkpoint timer', () => {

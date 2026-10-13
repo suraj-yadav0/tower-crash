@@ -272,7 +272,13 @@ function checkBallCollision(game, prevY, nextY, speedScale, soundManager, stageC
             if (game.isSuperFall && segType !== 1) {
                 ring.broken = true;
                 game.spawnShatterDebris(ring.y, false, false, game.currentTheme, true);
-                soundManager.playBounce(1.0);
+                if (soundManager.playCrash) {
+                    soundManager.playCrash();
+                } else if (soundManager.playSmash) {
+                    soundManager.playSmash();
+                } else {
+                    soundManager.playBounce(1.0);
+                }
                 soundManager.haptic(true);
 
                 var tier = Progression.getLevelTier ? Progression.getLevelTier(game.currentLevel) : 1;
@@ -317,6 +323,11 @@ function checkBallCollision(game, prevY, nextY, speedScale, soundManager, stageC
                 if (segType === 3) {
                     ring.segments[segmentIdx] = 1;
                     game.spawnSegmentShatter(ring.y, relAngle, game.currentTheme.topSafe, game.currentTheme.sideSafe);
+                    if (soundManager.playCrash) {
+                        soundManager.playCrash();
+                    } else if (soundManager.playSmash) {
+                        soundManager.playSmash();
+                    }
                 }
                 soundManager.playBounce(normSpeed);
                 soundManager.haptic(false);
@@ -397,6 +408,9 @@ function checkBallCollision(game, prevY, nextY, speedScale, soundManager, stageC
 
                     if (game.streak >= 3) {
                         soundManager.haptic(true);
+                        if (game.streak === 3 && soundManager.playSuperfall) {
+                            soundManager.playSuperfall();
+                        }
                         if (game.ballVy > game.gravity * 0.35) {
                             game.isSuperFall = true;
                         }

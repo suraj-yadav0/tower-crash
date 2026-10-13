@@ -70,9 +70,33 @@ Item {
         playRoundCleared();
     }
 
+    function playCrash() {
+        if (!soundEnabled || !multimediaLoader.item) return;
+        try {
+            multimediaLoader.item.playCrash();
+        } catch (e) {}
+    }
+
+    function playSmash(streak) {
+        if (!soundEnabled || !multimediaLoader.item) return;
+        try {
+            multimediaLoader.item.playSmash(streak);
+        } catch (e) {}
+    }
+
+    function playShatter() {
+        playCrash();
+    }
+
+    function playSuperfall() {
+        if (!soundEnabled || !multimediaLoader.item) return;
+        try {
+            multimediaLoader.item.playSuperfall();
+        } catch (e) {}
+    }
+
     // No-op compatibility methods
     function playPass(streak) {}
-    function playSmash(streak) {}
     function playGameOver() {}
     function playWhoosh() {}
     function stopWhoosh() {}
@@ -89,6 +113,8 @@ Item {
         if (!soundEnabled) return;
         if (type === "bounce") playBounce(0.6);
         else if (type === "fanfare" || type === "roundCleared") playRoundCleared();
+        else if (type === "crash" || type === "smash" || type === "shatter") playCrash();
+        else if (type === "superfall" || type === "charge") playSuperfall();
     }
 
     function haptic(heavy) {
