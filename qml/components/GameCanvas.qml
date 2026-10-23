@@ -78,11 +78,180 @@ Canvas {
         sharedBotAoGrad.addColorStop(0.0, "rgba(0, 0, 0, 0.14)");
         sharedBotAoGrad.addColorStop(1.0, "rgba(0, 0, 0, 0.0)");
 
+        function drawFallingBlock(pt) {
+            var bInR = pt.innerRadius || inR;
+            var bOutR = pt.outerRadius || outR;
+            var bH = pt.height || rHeight;
+            var arc = pt.segArc || (Math.PI / 4.0);
+            var hArc = arc * 0.5;
+            var midAngle = pt.midAngle;
+            var midR = (bInR + bOutR) * 0.5;
+
+            var screenCenterY = bScreenY + (pt.y - camY) + (pt.z || 0) * tilt;
+            if (screenCenterY < -bOutR * 2.0 || screenCenterY > h + bOutR * 2.0) {
+                return;
+            }
+
+            var cosX = Math.cos(pt.rotX || 0);
+            var sinX = Math.sin(pt.rotX || 0);
+            var cosY = Math.cos(pt.rotY || 0);
+            var sinY = Math.sin(pt.rotY || 0);
+            var cosZ = Math.cos(pt.rotZ || 0);
+            var sinZ = Math.sin(pt.rotZ || 0);
+
+            var origCenterX = Math.cos(midAngle) * midR;
+            var origCenterZ = Math.sin(midAngle) * midR;
+
+            function getScreenVertex(r, da, yLocal) {
+                var lx = r * Math.cos(midAngle + da) - origCenterX;
+                var ly = yLocal - bH * 0.5;
+                var lz = r * Math.sin(midAngle + da) - origCenterZ;
+
+                var x1 = lx * cosY + lz * sinY;
+                var y1 = ly;
+                var z1 = -lx * sinY + lz * cosY;
+
+                var x2 = x1;
+                var y2 = y1 * cosX - z1 * sinX;
+                var z2 = y1 * sinX + z1 * cosX;
+
+                var rx = x2 * cosZ - y2 * sinZ;
+                var ry = x2 * sinZ + y2 * cosZ;
+                var rz = z2;
+
+                var wx = pt.x + rx;
+                var wy = pt.y + ry;
+                var wz = pt.z + rz;
+
+                return {
+                    x: centerX + wx,
+                    y: bScreenY + (wy - camY) + wz * tilt,
+                    z: wz
+                };
+            }
+
+            var daList = [-hArc, 0, hArc];
+            var tIn = [];
+            var tOut = [];
+            var bIn = [];
+            var bOut = [];
+
+            for (var i = 0; i < 3; i++) {
+                var da = daList[i];
+                tIn.push(getScreenVertex(bInR, da, 0));
+                tOut.push(getScreenVertex(bOutR, da, 0));
+                bIn.push(getScreenVertex(bInR, da, bH));
+                bOut.push(getScreenVertex(bOutR, da, bH));
+            }
+
+            var topClr = pt.topColor || theme.topSafe;
+            var sideClr = pt.sideColor || theme.sideSafe;
+            var botClr = pt.bottomColor || "rgba(25, 25, 30, 0.85)";
+            var cutClr = pt.cutColor || sideClr;
+
+            var faces = [
+                {
+                    pts: [tIn[0], tIn[1], tIn[2], tOut[2], tOut[1], tOut[0]],
+                    fill: topClr,
+                    isTop: true
+                },
+                {
+                    pts: [bOut[0], bOut[1], bOut[2], bIn[2], bIn[1], bIn[0]],
+                    fill: botClr,
+                    isTop: false
+                },
+                {
+                    pts: [tOut[0], tOut[1], bOut[1], bOut[0]],
+                    fill: sideClr,
+                    isTop: false
+                },
+                {
+                    pts: [tOut[1], tOut[2], bOut[2], bOut[1]],
+                    fill: sideClr,
+                    isTop: false
+                },
+                {
+                    pts: [tIn[1], tIn[0], bIn[0], bIn[1]],
+                    fill: sideClr,
+                    isTop: false
+                },
+                {
+                    pts: [tIn[2], tIn[1], bIn[1], bIn[2]],
+                    fill: sideClr,
+                    isTop: false
+                },
+                {
+                    pts: [tIn[0], tOut[0], bOut[0], bIn[0]],
+                    fill: cutClr,
+                    isTop: false
+                },
+                {
+                    pts: [tOut[2], tIn[2], bIn[2], bOut[2]],
+                    fill: cutClr,
+                    isTop: false
+                }
+            ];
+
+            var visibleFaces = [];
+            for (var f = 0; f < faces.length; f++) {
+                var face = faces[f];
+                var fPts = face.pts;
+                var area = 0;
+                var zSum = 0;
+                var n = fPts.length;
+                for (var p = 0; p < n; p++) {
+                    var nextP = (p + 1) % n;
+                    area += fPts[p].x * fPts[nextP].y - fPts[nextP].x * fPts[p].y;
+                    zSum += fPts[p].z;
+                }
+                if (area > 0.05) {
+                    face.avgZ = zSum / n;
+                    visibleFaces.push(face);
+                }
+            }
+
+            visibleFaces.sort(function(a, b) {
+                return a.avgZ - b.avgZ;
+            });
+
+            ctx.save();
+            ctx.globalAlpha = Math.max(0, Math.min(1.0, pt.alpha));
+
+            for (var vf = 0; vf < visibleFaces.length; vf++) {
+                var vFace = visibleFaces[vf];
+                var pts = vFace.pts;
+
+                ctx.beginPath();
+                ctx.moveTo(pts[0].x, pts[0].y);
+                for (var k = 1; k < pts.length; k++) {
+                    ctx.lineTo(pts[k].x, pts[k].y);
+                }
+                ctx.closePath();
+                ctx.fillStyle = vFace.fill;
+                ctx.fill();
+
+                if (vFace.isTop) {
+                    if (pt.isGoal) {
+                        ctx.fillStyle = "rgba(255, 255, 255, 0.28)";
+                        ctx.fill();
+                    }
+                }
+
+                ctx.strokeStyle = "rgba(10, 15, 20, 0.35)";
+                ctx.lineWidth = units.gu(0.06);
+                ctx.stroke();
+            }
+
+            ctx.restore();
+        }
+
         function drawParticle(pt) {
             var partScreenY = bScreenY + (pt.y - camY) + (pt.z || 0) * tilt;
             var partScreenX = centerX + pt.x;
 
-            if (pt.kind === "shockwave") {
+            if (pt.kind === "block") {
+                drawFallingBlock(pt);
+            } else if (pt.kind === "shockwave") {
                 ctx.save();
                 ctx.translate(partScreenX, partScreenY);
                 ctx.scale(1.0, tilt);

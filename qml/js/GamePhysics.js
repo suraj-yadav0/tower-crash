@@ -184,25 +184,25 @@ function checkBallCollision(game, prevY, nextY, speedScale, soundManager, stageC
                 var earned = Math.round(baseEarned * diffMult);
 
                 if (isGrand) {
-                    game.spawnShatterDebris(ring.y, true, true, game.currentTheme, false);
+                    game.spawnShatterDebris(ring.y, true, true, game.currentTheme, false, ring, game.towerAngle);
                     game.score += earned;
                     game.bannerText = i18n.tr("TOWER CONQUERED! 100 LEVELS COMPLETE!");
                     Storage.saveStat("gameCleared", "1");
                     soundManager.milestoneHaptic();
                 } else if (isZone) {
-                    game.spawnShatterDebris(ring.y, true, false, game.currentTheme, false);
+                    game.spawnShatterDebris(ring.y, true, false, game.currentTheme, false, ring, game.towerAngle);
                     game.score += earned;
                     var zoneIdx = Progression.getZoneIndex(nextLvl);
                     var zoneName = Progression.getZoneName(nextLvl);
                     game.bannerText = i18n.tr("ZONE %1: %2").arg(zoneIdx).arg(zoneName.toUpperCase());
                     soundManager.milestoneHaptic();
                 } else if (isCp) {
-                    game.spawnShatterDebris(ring.y, true, false, game.currentTheme, false);
+                    game.spawnShatterDebris(ring.y, true, false, game.currentTheme, false, ring, game.towerAngle);
                     game.score += earned;
                     game.bannerText = i18n.tr("CHECKPOINT STAGE %1!").arg(nextLvl);
                     soundManager.milestoneHaptic();
                 } else {
-                    game.spawnShatterDebris(ring.y, true, false, game.currentTheme, false);
+                    game.spawnShatterDebris(ring.y, true, false, game.currentTheme, false, ring, game.towerAngle);
                     game.score += earned;
                     game.bannerText = i18n.tr("LEVEL %1 COMPLETE!").arg(goalLevel);
                     soundManager.haptic(true);
@@ -271,7 +271,7 @@ function checkBallCollision(game, prevY, nextY, speedScale, soundManager, stageC
 
             if (game.isSuperFall && segType !== 1) {
                 ring.broken = true;
-                game.spawnShatterDebris(ring.y, false, false, game.currentTheme, true);
+                game.spawnShatterDebris(ring.y, false, false, game.currentTheme, true, ring, game.towerAngle);
                 if (soundManager.playCrash) {
                     soundManager.playCrash();
                 } else if (soundManager.playSmash) {
@@ -322,7 +322,7 @@ function checkBallCollision(game, prevY, nextY, speedScale, soundManager, stageC
 
                 if (segType === 3) {
                     ring.segments[segmentIdx] = 1;
-                    game.spawnSegmentShatter(ring.y, relAngle, game.currentTheme.topSafe, game.currentTheme.sideSafe);
+                    game.spawnSegmentShatter(ring.y, relAngle, game.currentTheme.topSafe, game.currentTheme.sideSafe, segmentIdx, game.towerAngle, ring);
                     if (soundManager.playCrash) {
                         soundManager.playCrash();
                     } else if (soundManager.playSmash) {

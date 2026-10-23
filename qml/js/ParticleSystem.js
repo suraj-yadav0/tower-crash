@@ -41,10 +41,11 @@ function spawnBounceDust(particles, units, outerRadius, innerRadius, y, color1, 
     }
 }
 
-function spawnShatterDebris(particles, units, outerRadius, innerRadius, ringY, isGoal, isGrand, theme, isSuper) {
+function spawnShatterDebris(particles, units, outerRadius, innerRadius, ringY, isGoal, isGrand, theme, isSuper, ring, towerAngle, ringHeight) {
     var midR = (outerRadius + innerRadius) / 2.0;
-    var topClr = isGoal ? (isGrand ? "#FFD700" : (theme.goalTop || "#E8C872")) : (isSuper ? theme.topSafe : theme.topSafe);
-    var edgeClr = isGoal ? (isGrand ? "#B8860B" : (theme.goalSide || "#B09242")) : (isSuper ? theme.sideSafe : theme.sideSafe);
+    var rH = ringHeight || units.gu(2.8);
+    var ringAngle = (towerAngle || 0.0) + (ring && ring.angleOffset ? ring.angleOffset : 0.0);
+    var segments = (ring && ring.segments) ? ring.segments : [0, 0, 0, 0, 0, 0, 0, 0];
 
     particles.push({
         kind: "shockwave",
@@ -63,139 +64,200 @@ function spawnShatterDebris(particles, units, outerRadius, innerRadius, ringY, i
         decay: 3.2
     });
 
-    var chunkCount = isGrand ? 5 : 3;
-    for (var c = 0; c < chunkCount; c++) {
-        var chunkAngle = (c / chunkCount) * Math.PI * 2.0 + (Math.random() - 0.5) * 0.35;
-        var chunkR = midR + (Math.random() - 0.5) * units.gu(2.2);
-        var radialSpeed = (units.gu(9) + Math.random() * units.gu(12)) * (isSuper ? 1.4 : 1.0);
-        var cw = units.gu(2.6 + Math.random() * 1.6);
-        var ch = units.gu(1.8 + Math.random() * 1.0);
+    for (var s = 0; s < 8; s++) {
+        var segType = segments[s];
+        if (segType === 1) continue;
+
+        var isHazard = (segType === 2 && !isGoal);
+        var isFragile = (segType === 3);
+
+        var topClr = isGoal ? (isGrand ? "#FFF275" : (theme.goalTop || "#E8C872")) : (isHazard ? (theme.topHazard || "#BA3C3C") : (theme.topSafe || "#D99B26"));
+        var sideClr = isGoal ? (isGrand ? "#D4AF37" : (theme.goalSide || "#B09242")) : (isHazard ? (theme.sideHazard || "#8E2A2A") : (theme.sideSafe || "#A06B15"));
+
+        var segStart = ringAngle + s * (Math.PI / 4.0);
+        var segMid = segStart + (Math.PI / 8.0);
+
+        var radX = Math.cos(segMid);
+        var radZ = Math.sin(segMid);
+        var tanX = -Math.sin(segMid);
+        var tanZ = Math.cos(segMid);
+
+        var blastSpeed = (units.gu(7.0 + Math.random() * 5.0)) * (isSuper ? 1.35 : 1.0);
+        var tanSpeed = (ring && ring.rotationSpeed ? ring.rotationSpeed * midR * 0.6 : 0) + (Math.random() - 0.5) * units.gu(3.0);
+        var downSpeed = units.gu(3.0 + Math.random() * 5.5) * (isSuper ? 1.3 : 1.0);
 
         particles.push({
-            kind: "chunk",
-            x: Math.cos(chunkAngle) * chunkR,
-            y: ringY,
-            z: Math.sin(chunkAngle) * chunkR,
-            vx: Math.cos(chunkAngle) * radialSpeed,
-            vy: -units.gu(4 + Math.random() * 8) * (isSuper ? 1.3 : 1.0),
-            vz: Math.sin(chunkAngle) * radialSpeed,
-            rotX: Math.random() * Math.PI * 2.0,
-            rotY: Math.random() * Math.PI * 2.0,
-            rotZ: Math.random() * Math.PI * 2.0,
-            vrotX: (Math.random() - 0.5) * 8.0,
-            vrotY: (Math.random() - 0.5) * 9.0,
-            vrotZ: (Math.random() - 0.5) * 8.0,
-            width: cw,
-            height: ch,
-            depth: units.gu(1.0),
+            kind: "block",
+            x: radX * midR,
+            y: ringY + rH * 0.5,
+            z: radZ * midR,
+            vx: radX * blastSpeed + tanX * tanSpeed,
+            vy: downSpeed,
+            vz: radZ * blastSpeed + tanZ * tanSpeed,
+            rotX: (Math.random() - 0.5) * 0.25,
+            rotY: (Math.random() - 0.5) * 0.25,
+            rotZ: (Math.random() - 0.5) * 0.25,
+            vrotX: (Math.random() - 0.5) * 5.5 + (isSuper ? 2.5 : 1.5),
+            vrotY: (Math.random() - 0.5) * 4.5,
+            vrotZ: (Math.random() - 0.5) * 5.5,
+            startAngle: segStart,
+            midAngle: segMid,
+            segArc: Math.PI / 4.0,
+            outerRadius: outerRadius,
+            innerRadius: innerRadius,
+            height: rH,
             topColor: topClr,
-            edgeColor: edgeClr,
-            specular: isGoal,
+            sideColor: sideClr,
+            bottomColor: "rgba(25, 25, 30, 0.85)",
+            cutColor: sideClr,
+            isHazard: isHazard,
+            isGoal: isGoal,
+            isGrand: isGrand,
             alpha: 1.0,
-            decay: 0.9
+            decay: 0.70
         });
     }
 
-    var shardCount = isGrand ? 8 : 5;
-    for (var s = 0; s < shardCount; s++) {
+    var shardCount = isGrand ? 6 : 4;
+    for (var sh = 0; sh < shardCount; sh++) {
         var shardAngle = Math.random() * Math.PI * 2.0;
         var shardR = innerRadius + Math.random() * (outerRadius - innerRadius);
-        var shardSpeed = (units.gu(11) + Math.random() * units.gu(15)) * (isSuper ? 1.4 : 1.0);
-        var sw = units.gu(1.4 + Math.random() * 0.9);
-        var sh = units.gu(1.1 + Math.random() * 0.7);
-
+        var shardSpeed = (units.gu(10) + Math.random() * units.gu(13)) * (isSuper ? 1.3 : 1.0);
         particles.push({
             kind: "shard",
             x: Math.cos(shardAngle) * shardR,
             y: ringY,
             z: Math.sin(shardAngle) * shardR,
             vx: Math.cos(shardAngle) * shardSpeed,
-            vy: -units.gu(5 + Math.random() * 9),
+            vy: -units.gu(4 + Math.random() * 7),
             vz: Math.sin(shardAngle) * shardSpeed,
-            rotX: Math.random() * Math.PI * 2.0,
-            rotY: Math.random() * Math.PI * 2.0,
-            rotZ: Math.random() * Math.PI * 2.0,
-            vrotX: (Math.random() - 0.5) * 14.0,
-            vrotY: (Math.random() - 0.5) * 16.0,
-            vrotZ: (Math.random() - 0.5) * 14.0,
-            width: sw,
-            height: sh,
-            depth: units.gu(0.6),
-            topColor: topClr,
-            edgeColor: edgeClr,
-            specular: isGoal,
-            alpha: 1.0,
-            decay: 1.2
-        });
-    }
-
-    var sparkCount = isGrand ? 16 : 10;
-    for (var sp = 0; sp < sparkCount; sp++) {
-        var spAngle = Math.random() * Math.PI * 2.0;
-        var spSpeed = units.gu(14) + Math.random() * units.gu(18);
-        particles.push({
-            kind: "spark",
-            x: Math.cos(spAngle) * midR,
-            y: ringY,
-            z: Math.sin(spAngle) * midR,
-            vx: Math.cos(spAngle) * spSpeed,
-            vy: -units.gu(8 + Math.random() * 14),
-            vz: Math.sin(spAngle) * spSpeed,
-            size: units.gu(0.35 + Math.random() * 0.3),
-            color: isGoal ? "#FFFFFF" : (isSuper ? "#FFEAA7" : topClr),
-            alpha: 1.0,
-            decay: 2.2
-        });
-    }
-
-    for (var d = 0; d < 6; d++) {
-        var dustAngle = Math.random() * Math.PI * 2.0;
-        var dustR = midR + (Math.random() - 0.5) * units.gu(2.4);
-        particles.push({
-            kind: "dust",
-            x: Math.cos(dustAngle) * dustR,
-            y: ringY,
-            z: Math.sin(dustAngle) * dustR,
-            vx: Math.cos(dustAngle) * units.gu(3 + Math.random() * 4),
-            vy: -units.gu(1.5 + Math.random() * 3),
-            vz: Math.sin(dustAngle) * units.gu(3 + Math.random() * 4),
-            size: units.gu(0.8),
-            targetSize: units.gu(2.2 + Math.random() * 1.0),
-            color: topClr,
-            alpha: 0.65,
-            decay: 1.6
-        });
-    }
-
-    while (particles.length > 20) {
-        particles.shift();
-    }
-}
-
-function spawnSegmentShatter(particles, units, outerRadius, innerRadius, ringY, angle, topClr, edgeClr) {
-    var midR = (outerRadius + innerRadius) / 2.0;
-    for (var s = 0; s < 6; s++) {
-        var shardAngle = angle + (Math.random() - 0.5) * 0.45;
-        var radialSpeed = units.gu(8) + Math.random() * units.gu(11);
-        var sw = units.gu(1.5 + Math.random() * 0.8);
-        var sh = units.gu(1.2 + Math.random() * 0.7);
-        particles.push({
-            kind: "shard",
-            x: Math.cos(shardAngle) * midR,
-            y: ringY,
-            z: Math.sin(shardAngle) * midR,
-            vx: Math.cos(shardAngle) * radialSpeed,
-            vy: -units.gu(4 + Math.random() * 6),
-            vz: Math.sin(shardAngle) * radialSpeed,
             rotX: Math.random() * Math.PI * 2.0,
             rotY: Math.random() * Math.PI * 2.0,
             rotZ: Math.random() * Math.PI * 2.0,
             vrotX: (Math.random() - 0.5) * 12.0,
             vrotY: (Math.random() - 0.5) * 14.0,
             vrotZ: (Math.random() - 0.5) * 12.0,
-            width: sw,
-            height: sh,
-            depth: units.gu(0.6),
+            width: units.gu(1.3 + Math.random() * 0.7),
+            height: units.gu(1.0 + Math.random() * 0.5),
+            depth: units.gu(0.5),
+            topColor: isGoal ? (isGrand ? "#FFD700" : "#E8C872") : theme.topSafe,
+            edgeColor: isGoal ? (isGrand ? "#B8860B" : "#B09242") : theme.sideSafe,
+            specular: isGoal,
+            alpha: 1.0,
+            decay: 1.2
+        });
+    }
+
+    var sparkCount = isGrand ? 10 : 6;
+    for (var sp = 0; sp < sparkCount; sp++) {
+        var spAngle = Math.random() * Math.PI * 2.0;
+        var spSpeed = units.gu(12) + Math.random() * units.gu(16);
+        particles.push({
+            kind: "spark",
+            x: Math.cos(spAngle) * midR,
+            y: ringY,
+            z: Math.sin(spAngle) * midR,
+            vx: Math.cos(spAngle) * spSpeed,
+            vy: -units.gu(6 + Math.random() * 10),
+            vz: Math.sin(spAngle) * spSpeed,
+            size: units.gu(0.3 + Math.random() * 0.25),
+            color: isGoal ? "#FFFFFF" : (isSuper ? "#FFEAA7" : theme.topSafe),
+            alpha: 1.0,
+            decay: 2.2
+        });
+    }
+
+    for (var d = 0; d < 4; d++) {
+        var dustAngle = Math.random() * Math.PI * 2.0;
+        var dustR = midR + (Math.random() - 0.5) * units.gu(2.0);
+        particles.push({
+            kind: "dust",
+            x: Math.cos(dustAngle) * dustR,
+            y: ringY,
+            z: Math.sin(dustAngle) * dustR,
+            vx: Math.cos(dustAngle) * units.gu(3 + Math.random() * 3),
+            vy: -units.gu(1.5 + Math.random() * 2.5),
+            vz: Math.sin(dustAngle) * units.gu(3 + Math.random() * 3),
+            size: units.gu(0.7),
+            targetSize: units.gu(1.8 + Math.random() * 0.8),
+            color: isGoal ? "#FFF275" : theme.topSafe,
+            alpha: 0.60,
+            decay: 1.6
+        });
+    }
+
+    while (particles.length > 70) {
+        particles.shift();
+    }
+}
+
+function spawnSegmentShatter(particles, units, outerRadius, innerRadius, ringY, angle, topClr, edgeClr, segIndex, towerAngle, ring, ringHeight) {
+    var midR = (outerRadius + innerRadius) / 2.0;
+    var rH = ringHeight || units.gu(2.8);
+    var ringAngle = (towerAngle || 0.0) + (ring && ring.angleOffset ? ring.angleOffset : 0.0);
+    var segStart = (segIndex !== undefined) ? (ringAngle + segIndex * (Math.PI / 4.0)) : (angle - Math.PI / 8.0);
+    var segMid = segStart + (Math.PI / 8.0);
+
+    var radX = Math.cos(segMid);
+    var radZ = Math.sin(segMid);
+    var tanX = -Math.sin(segMid);
+    var tanZ = Math.cos(segMid);
+
+    var blastSpeed = units.gu(7.5 + Math.random() * 4.5);
+    var tanSpeed = (Math.random() - 0.5) * units.gu(3.0);
+    var downSpeed = units.gu(3.5 + Math.random() * 4.5);
+
+    particles.push({
+        kind: "block",
+        x: radX * midR,
+        y: ringY + rH * 0.5,
+        z: radZ * midR,
+        vx: radX * blastSpeed + tanX * tanSpeed,
+        vy: downSpeed,
+        vz: radZ * blastSpeed + tanZ * tanSpeed,
+        rotX: (Math.random() - 0.5) * 0.25,
+        rotY: (Math.random() - 0.5) * 0.25,
+        rotZ: (Math.random() - 0.5) * 0.25,
+        vrotX: (Math.random() - 0.5) * 6.0 + 2.0,
+        vrotY: (Math.random() - 0.5) * 4.5,
+        vrotZ: (Math.random() - 0.5) * 5.5,
+        startAngle: segStart,
+        midAngle: segMid,
+        segArc: Math.PI / 4.0,
+        outerRadius: outerRadius,
+        innerRadius: innerRadius,
+        height: rH,
+        topColor: topClr,
+        sideColor: edgeClr,
+        bottomColor: "rgba(25, 25, 30, 0.85)",
+        cutColor: edgeClr,
+        isHazard: false,
+        isGoal: false,
+        isGrand: false,
+        alpha: 1.0,
+        decay: 0.70
+    });
+
+    for (var s = 0; s < 3; s++) {
+        var shardAngle = segMid + (Math.random() - 0.5) * 0.45;
+        var shardSpeed = units.gu(8) + Math.random() * units.gu(9);
+        particles.push({
+            kind: "shard",
+            x: Math.cos(shardAngle) * midR,
+            y: ringY,
+            z: Math.sin(shardAngle) * midR,
+            vx: Math.cos(shardAngle) * shardSpeed,
+            vy: -units.gu(3 + Math.random() * 5),
+            vz: Math.sin(shardAngle) * shardSpeed,
+            rotX: Math.random() * Math.PI * 2.0,
+            rotY: Math.random() * Math.PI * 2.0,
+            rotZ: Math.random() * Math.PI * 2.0,
+            vrotX: (Math.random() - 0.5) * 12.0,
+            vrotY: (Math.random() - 0.5) * 14.0,
+            vrotZ: (Math.random() - 0.5) * 12.0,
+            width: units.gu(1.3 + Math.random() * 0.6),
+            height: units.gu(1.0 + Math.random() * 0.5),
+            depth: units.gu(0.5),
             topColor: topClr,
             edgeColor: edgeClr,
             specular: false,
@@ -203,7 +265,8 @@ function spawnSegmentShatter(particles, units, outerRadius, innerRadius, ringY, 
             decay: 1.4
         });
     }
-    while (particles.length > 20) {
+
+    while (particles.length > 70) {
         particles.shift();
     }
 }
@@ -221,6 +284,33 @@ function updateParticles(particles, dt, gravity, poleRadius, units) {
             if (pt.size < pt.targetSize) {
                 pt.size = Math.min(pt.targetSize, pt.size + dt * units.gu(4.0));
             }
+        } else if (pt.kind === "block") {
+            pt.vy += gravity * 0.85 * dt;
+            pt.vx *= Math.pow(0.92, dt);
+            pt.vz *= Math.pow(0.92, dt);
+
+            var distFromPole = Math.sqrt(pt.x * pt.x + pt.z * pt.z);
+            var blockWidth = (pt.outerRadius - pt.innerRadius) * 0.5;
+            var minDistance = poleRadius + blockWidth * 0.55;
+
+            if (distFromPole < minDistance) {
+                var nx = distFromPole > 0.0001 ? (pt.x / distFromPole) : 1.0;
+                var nz = distFromPole > 0.0001 ? (pt.z / distFromPole) : 0.0;
+                pt.x = nx * minDistance;
+                pt.z = nz * minDistance;
+
+                var vRad = (pt.vx || 0) * nx + (pt.vz || 0) * nz;
+                if (vRad < 0) {
+                    var bounceSpeed = -vRad * 0.35;
+                    pt.vx = (pt.vx - nx * vRad) * 0.90 + nx * bounceSpeed;
+                    pt.vz = (pt.vz - nz * vRad) * 0.90 + nz * bounceSpeed;
+                    pt.vy *= 0.92;
+                }
+            }
+
+            if (pt.vrotX) pt.rotX = (pt.rotX || 0) + pt.vrotX * dt;
+            if (pt.vrotY) pt.rotY = (pt.rotY || 0) + pt.vrotY * dt;
+            if (pt.vrotZ) pt.rotZ = (pt.rotZ || 0) + pt.vrotZ * dt;
         } else {
             pt.vy += gravity * 0.7 * dt;
             pt.vx *= Math.pow(0.86, dt);
@@ -272,7 +362,7 @@ function updateParticles(particles, dt, gravity, poleRadius, units) {
         }
     }
 
-    while (particles.length > 20) {
+    while (particles.length > 70) {
         particles.shift();
     }
 }

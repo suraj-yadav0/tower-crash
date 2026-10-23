@@ -408,12 +408,12 @@ MainView {
                 Particles.spawnBounceDust(particles, units, outerRadius, innerRadius, y, color1, color2);
             }
 
-            function spawnShatterDebris(ringY, isGoal, isGrand, theme, isSuper) {
-                Particles.spawnShatterDebris(particles, units, outerRadius, innerRadius, ringY, isGoal, isGrand, theme, isSuper);
+            function spawnShatterDebris(ringY, isGoal, isGrand, theme, isSuper, ring, towerAngle) {
+                Particles.spawnShatterDebris(particles, units, outerRadius, innerRadius, ringY, isGoal, isGrand, theme, isSuper, ring, towerAngle, ringHeight);
             }
 
-            function spawnSegmentShatter(ringY, angle, topClr, edgeClr) {
-                Particles.spawnSegmentShatter(particles, units, outerRadius, innerRadius, ringY, angle, topClr, edgeClr);
+            function spawnSegmentShatter(ringY, angle, topClr, edgeClr, segIndex, towerAngle, ring) {
+                Particles.spawnSegmentShatter(particles, units, outerRadius, innerRadius, ringY, angle, topClr, edgeClr, segIndex, towerAngle, ring, ringHeight);
             }
 
             function generateRing() {
