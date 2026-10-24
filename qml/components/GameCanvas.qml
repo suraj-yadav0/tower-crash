@@ -1138,6 +1138,83 @@ Canvas {
             ctx.strokeStyle = "rgba(255, 255, 255, 0.15)";
             ctx.lineWidth = units.gu(0.06);
             ctx.stroke();
+        } else if (bStyle === 2) {
+            var beachColors = ["#E74C3C", "#F8F9FA", "#2980B9", "#F1C40F", "#E67E22", "#1ABC9C"];
+            var numWedges = beachColors.length;
+            var latSteps = 10;
+
+            for (var w = 0; w < numWedges; w++) {
+                var lonA = w * (Math.PI * 2.0 / numWedges);
+                var lonB = (w + 1) * (Math.PI * 2.0 / numWedges);
+
+                for (var lat = 0; lat < latSteps; lat++) {
+                    var phi1 = -Math.PI * 0.5 + lat * (Math.PI / latSteps);
+                    var phi2 = -Math.PI * 0.5 + (lat + 1) * (Math.PI / latSteps);
+
+                    var pA1 = { x: Math.cos(phi1) * Math.sin(lonA), y: Math.sin(phi1), z: Math.cos(phi1) * Math.cos(lonA) };
+                    var pA2 = { x: Math.cos(phi2) * Math.sin(lonA), y: Math.sin(phi2), z: Math.cos(phi2) * Math.cos(lonA) };
+                    var pB2 = { x: Math.cos(phi2) * Math.sin(lonB), y: Math.sin(phi2), z: Math.cos(phi2) * Math.cos(lonB) };
+                    var pB1 = { x: Math.cos(phi1) * Math.sin(lonB), y: Math.sin(phi1), z: Math.cos(phi1) * Math.cos(lonB) };
+
+                    var sA1 = GamePhysics.projectSpherePoint(pA1, rotX, rotY, bRadius);
+                    var sA2 = GamePhysics.projectSpherePoint(pA2, rotX, rotY, bRadius);
+                    var sB2 = GamePhysics.projectSpherePoint(pB2, rotX, rotY, bRadius);
+                    var sB1 = GamePhysics.projectSpherePoint(pB1, rotX, rotY, bRadius);
+
+                    if (sA1.z > -0.1 || sA2.z > -0.1 || sB2.z > -0.1 || sB1.z > -0.1) {
+                        ctx.beginPath();
+                        ctx.moveTo(sA1.x, sA1.y);
+                        ctx.lineTo(sA2.x, sA2.y);
+                        ctx.lineTo(sB2.x, sB2.y);
+                        ctx.lineTo(sB1.x, sB1.y);
+                        ctx.closePath();
+                        ctx.fillStyle = beachColors[w];
+                        ctx.fill();
+                    }
+                }
+            }
+
+            for (var mIdx = 0; mIdx < numWedges; mIdx++) {
+                var mAngle = mIdx * (Math.PI * 2.0 / numWedges);
+                var mCoords = [];
+                for (var st = 0; st < 24; st++) {
+                    var tA = (st / 24.0) * Math.PI * 2.0;
+                    mCoords.push({
+                        x: Math.sin(tA) * Math.sin(mAngle),
+                        y: Math.cos(tA),
+                        z: Math.sin(tA) * Math.cos(mAngle)
+                    });
+                }
+                ctx.beginPath();
+                drawSphereLoop(mCoords);
+                ctx.strokeStyle = "rgba(0, 0, 0, 0.30)";
+                ctx.lineWidth = units.gu(0.08);
+                ctx.stroke();
+            }
+
+            var poleN = GamePhysics.projectSpherePoint({ x: 0, y: -1, z: 0 }, rotX, rotY, bRadius);
+            if (poleN.z > 0.04) {
+                var capRN = bRadius * 0.28 * Math.sqrt(poleN.z);
+                ctx.beginPath();
+                ctx.arc(poleN.x, poleN.y, capRN, 0, Math.PI * 2.0);
+                ctx.fillStyle = "#FFFFFF";
+                ctx.fill();
+                ctx.strokeStyle = "rgba(0, 0, 0, 0.35)";
+                ctx.lineWidth = units.gu(0.08);
+                ctx.stroke();
+            }
+
+            var poleS = GamePhysics.projectSpherePoint({ x: 0, y: 1, z: 0 }, rotX, rotY, bRadius);
+            if (poleS.z > 0.04) {
+                var capRS = bRadius * 0.28 * Math.sqrt(poleS.z);
+                ctx.beginPath();
+                ctx.arc(poleS.x, poleS.y, capRS, 0, Math.PI * 2.0);
+                ctx.fillStyle = "#FFFFFF";
+                ctx.fill();
+                ctx.strokeStyle = "rgba(0, 0, 0, 0.35)";
+                ctx.lineWidth = units.gu(0.08);
+                ctx.stroke();
+            }
         } else {
             ctx.fillStyle = theme.ballMid;
             ctx.fill();
