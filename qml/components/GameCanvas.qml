@@ -18,6 +18,7 @@ Canvas {
         target: game
         function onCurrentThemeChanged() { root.requestPaint(); }
         function onThemeTransitionProgressChanged() { root.requestPaint(); }
+        function onBallStyleChanged() { root.requestPaint(); }
     }
 
     onPaint: {
@@ -1097,81 +1098,90 @@ Canvas {
         ctx.arc(0, 0, bRadius, 0, Math.PI * 2.0);
         ctx.clip();
 
-        ctx.fillStyle = theme.ballMid;
-        ctx.fill();
-
+        var bStyle = (game && game.ballStyle !== undefined) ? game.ballStyle : 0;
         var rotX = game.ballRotationX || 0.0;
         var rotY = game.ballRotationY || 0.0;
 
-        ctx.beginPath();
-        for (var eq = 0; eq < GamePhysics.EQUATOR_COORDS.length; eq++) {
-            var eq1 = GamePhysics.projectSpherePoint(GamePhysics.EQUATOR_COORDS[eq], rotX, rotY, bRadius);
-            var eq2 = GamePhysics.projectSpherePoint(GamePhysics.EQUATOR_COORDS[(eq + 1) % GamePhysics.EQUATOR_COORDS.length], rotX, rotY, bRadius);
-            if (eq1.z > 0 && eq2.z > 0) {
-                ctx.moveTo(eq1.x, eq1.y);
-                ctx.lineTo(eq2.x, eq2.y);
-            } else if (eq1.z > 0 && eq2.z <= 0) {
-                var fracE = eq1.z / (eq1.z - eq2.z);
-                ctx.moveTo(eq1.x, eq1.y);
-                ctx.lineTo(eq1.x + (eq2.x - eq1.x) * fracE, eq1.y + (eq2.y - eq1.y) * fracE);
-            } else if (eq1.z <= 0 && eq2.z > 0) {
-                var fracE2 = -eq1.z / (eq2.z - eq1.z);
-                ctx.moveTo(eq1.x + (eq2.x - eq1.x) * fracE2, eq1.y + (eq2.y - eq1.y) * fracE2);
-                ctx.lineTo(eq2.x, eq2.y);
+        function drawSphereLoop(coords) {
+            var len = coords.length;
+            for (var i = 0; i < len; i++) {
+                var p1 = GamePhysics.projectSpherePoint(coords[i], rotX, rotY, bRadius);
+                var p2 = GamePhysics.projectSpherePoint(coords[(i + 1) % len], rotX, rotY, bRadius);
+                if (p1.z > 0 && p2.z > 0) {
+                    ctx.moveTo(p1.x, p1.y);
+                    ctx.lineTo(p2.x, p2.y);
+                } else if (p1.z > 0 && p2.z <= 0) {
+                    var f1 = p1.z / (p1.z - p2.z);
+                    ctx.moveTo(p1.x, p1.y);
+                    ctx.lineTo(p1.x + (p2.x - p1.x) * f1, p1.y + (p2.y - p1.y) * f1);
+                } else if (p1.z <= 0 && p2.z > 0) {
+                    var f2 = -p1.z / (p2.z - p1.z);
+                    ctx.moveTo(p1.x + (p2.x - p1.x) * f2, p1.y + (p2.y - p1.y) * f2);
+                    ctx.lineTo(p2.x, p2.y);
+                }
             }
         }
-        ctx.strokeStyle = "rgba(255, 255, 255, 0.16)";
-        ctx.lineWidth = units.gu(0.12);
-        ctx.stroke();
 
-        ctx.beginPath();
-        for (var sm = 0; sm < GamePhysics.SEAM_COORDS.length; sm++) {
-            var sm1 = GamePhysics.projectSpherePoint(GamePhysics.SEAM_COORDS[sm], rotX, rotY, bRadius);
-            var sm2 = GamePhysics.projectSpherePoint(GamePhysics.SEAM_COORDS[(sm + 1) % GamePhysics.SEAM_COORDS.length], rotX, rotY, bRadius);
-            if (sm1.z > 0 && sm2.z > 0) {
-                ctx.moveTo(sm1.x, sm1.y);
-                ctx.lineTo(sm2.x, sm2.y);
-            } else if (sm1.z > 0 && sm2.z <= 0) {
-                var fracS = sm1.z / (sm1.z - sm2.z);
-                ctx.moveTo(sm1.x, sm1.y);
-                ctx.lineTo(sm1.x + (sm2.x - sm1.x) * fracS, sm1.y + (sm2.y - sm1.y) * fracS);
-            } else if (sm1.z <= 0 && sm2.z > 0) {
-                var fracS2 = -sm1.z / (sm2.z - sm1.z);
-                ctx.moveTo(sm1.x + (sm2.x - sm1.x) * fracS2, sm1.y + (sm2.y - sm1.y) * fracS2);
-                ctx.lineTo(sm2.x, sm2.y);
+        if (bStyle === 1) {
+            ctx.fillStyle = "#D85604";
+            ctx.fill();
+
+            ctx.beginPath();
+            drawSphereLoop(GamePhysics.EQUATOR_COORDS);
+            drawSphereLoop(GamePhysics.MERIDIAN_COORDS);
+            drawSphereLoop(GamePhysics.BASKETBALL_RIB1_COORDS);
+            drawSphereLoop(GamePhysics.BASKETBALL_RIB2_COORDS);
+            ctx.strokeStyle = "rgba(18, 18, 20, 0.90)";
+            ctx.lineWidth = units.gu(0.22);
+            ctx.stroke();
+
+            ctx.strokeStyle = "rgba(255, 255, 255, 0.15)";
+            ctx.lineWidth = units.gu(0.06);
+            ctx.stroke();
+        } else {
+            ctx.fillStyle = theme.ballMid;
+            ctx.fill();
+
+            ctx.beginPath();
+            drawSphereLoop(GamePhysics.EQUATOR_COORDS);
+            ctx.strokeStyle = "rgba(255, 255, 255, 0.16)";
+            ctx.lineWidth = units.gu(0.12);
+            ctx.stroke();
+
+            ctx.beginPath();
+            drawSphereLoop(GamePhysics.SEAM_COORDS);
+            ctx.strokeStyle = "rgba(0, 0, 0, 0.32)";
+            ctx.lineWidth = units.gu(0.20);
+            ctx.stroke();
+
+            ctx.strokeStyle = "rgba(255, 255, 255, 0.30)";
+            ctx.lineWidth = units.gu(0.08);
+            ctx.stroke();
+
+            var pips = [
+                { x: 0, y: 1, z: 0 },
+                { x: 0, y: -1, z: 0 },
+                { x: 1, y: 0, z: 0 },
+                { x: -1, y: 0, z: 0 }
+            ];
+            for (var pi = 0; pi < pips.length; pi++) {
+                var pProj = GamePhysics.projectSpherePoint(pips[pi], rotX, rotY, bRadius);
+                if (pProj.z > 0.08) {
+                    var pipR = bRadius * 0.16 * Math.sqrt(pProj.z);
+                    ctx.beginPath();
+                    ctx.arc(pProj.x, pProj.y, pipR, 0, Math.PI * 2.0);
+                    ctx.fillStyle = theme.ballLight;
+                    ctx.globalAlpha = Math.min(1.0, pProj.z * 1.3) * 0.70;
+                    ctx.fill();
+
+                    ctx.beginPath();
+                    ctx.arc(pProj.x, pProj.y, pipR * 0.45, 0, Math.PI * 2.0);
+                    ctx.fillStyle = theme.ballDark;
+                    ctx.fill();
+                }
             }
+            ctx.globalAlpha = 1.0;
         }
-        ctx.strokeStyle = "rgba(0, 0, 0, 0.32)";
-        ctx.lineWidth = units.gu(0.20);
-        ctx.stroke();
-
-        ctx.strokeStyle = "rgba(255, 255, 255, 0.30)";
-        ctx.lineWidth = units.gu(0.08);
-        ctx.stroke();
-
-        var pips = [
-            { x: 0, y: 1, z: 0 },
-            { x: 0, y: -1, z: 0 },
-            { x: 1, y: 0, z: 0 },
-            { x: -1, y: 0, z: 0 }
-        ];
-        for (var pi = 0; pi < pips.length; pi++) {
-            var pProj = GamePhysics.projectSpherePoint(pips[pi], rotX, rotY, bRadius);
-            if (pProj.z > 0.08) {
-                var pipR = bRadius * 0.16 * Math.sqrt(pProj.z);
-                ctx.beginPath();
-                ctx.arc(pProj.x, pProj.y, pipR, 0, Math.PI * 2.0);
-                ctx.fillStyle = theme.ballLight;
-                ctx.globalAlpha = Math.min(1.0, pProj.z * 1.3) * 0.70;
-                ctx.fill();
-
-                ctx.beginPath();
-                ctx.arc(pProj.x, pProj.y, pipR * 0.45, 0, Math.PI * 2.0);
-                ctx.fillStyle = theme.ballDark;
-                ctx.fill();
-            }
-        }
-        ctx.globalAlpha = 1.0;
 
         var lightingGrad = ctx.createRadialGradient(
             -bRadius * 0.35,

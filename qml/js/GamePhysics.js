@@ -24,6 +24,40 @@ var EQUATOR_COORDS = (function() {
     return coords;
 })();
 
+var MERIDIAN_COORDS = (function() {
+    var coords = [];
+    var count = 24;
+    for (var i = 0; i < count; i++) {
+        var t = (i / count) * Math.PI * 2.0;
+        coords.push({ x: 0.0, y: Math.sin(t), z: Math.cos(t) });
+    }
+    return coords;
+})();
+
+var BASKETBALL_RIB1_COORDS = (function() {
+    var coords = [];
+    var count = 24;
+    var xOffset = 0.52;
+    var r = Math.sqrt(1.0 - xOffset * xOffset);
+    for (var i = 0; i < count; i++) {
+        var t = (i / count) * Math.PI * 2.0;
+        coords.push({ x: xOffset, y: Math.sin(t) * r, z: Math.cos(t) * r });
+    }
+    return coords;
+})();
+
+var BASKETBALL_RIB2_COORDS = (function() {
+    var coords = [];
+    var count = 24;
+    var xOffset = -0.52;
+    var r = Math.sqrt(1.0 - xOffset * xOffset);
+    for (var i = 0; i < count; i++) {
+        var t = (i / count) * Math.PI * 2.0;
+        coords.push({ x: xOffset, y: Math.sin(t) * r, z: Math.cos(t) * r });
+    }
+    return coords;
+})();
+
 var HAZARD_SPIKE_LAYOUT = [
     { u: 0.35, v: 0.30 },
     { u: 0.35, v: 0.70 },

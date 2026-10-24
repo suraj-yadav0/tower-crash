@@ -271,6 +271,9 @@ test('GamePhysics - projectSpherePoint transforms coordinates within sphere radi
 
     assert.ok(GamePhysics.SEAM_COORDS.length > 0, 'Seam coords should be precalculated');
     assert.ok(GamePhysics.EQUATOR_COORDS.length > 0, 'Equator coords should be precalculated');
+    assert.ok(GamePhysics.MERIDIAN_COORDS.length > 0, 'Meridian coords should be precalculated');
+    assert.ok(GamePhysics.BASKETBALL_RIB1_COORDS.length > 0, 'Basketball rib1 coords should be precalculated');
+    assert.ok(GamePhysics.BASKETBALL_RIB2_COORDS.length > 0, 'Basketball rib2 coords should be precalculated');
 
     const radius = 25;
     for (const pt of GamePhysics.SEAM_COORDS) {
@@ -278,6 +281,13 @@ test('GamePhysics - projectSpherePoint transforms coordinates within sphere radi
         assert.ok(!isNaN(proj.x) && !isNaN(proj.y) && !isNaN(proj.z));
         const dist2d = Math.sqrt(proj.x * proj.x + proj.y * proj.y);
         assert.ok(dist2d <= radius + 0.001, `Projected point must lie within sphere radius: ${dist2d}`);
+    }
+
+    for (const pt of GamePhysics.BASKETBALL_RIB1_COORDS) {
+        const proj = GamePhysics.projectSpherePoint(pt, 0.4, 0.8, radius);
+        assert.ok(!isNaN(proj.x) && !isNaN(proj.y) && !isNaN(proj.z));
+        const dist2d = Math.sqrt(proj.x * proj.x + proj.y * proj.y);
+        assert.ok(dist2d <= radius + 0.001, `Projected rib point must lie within sphere radius: ${dist2d}`);
     }
 });
 
