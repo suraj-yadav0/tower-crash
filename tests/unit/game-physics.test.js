@@ -274,6 +274,8 @@ test('GamePhysics - projectSpherePoint transforms coordinates within sphere radi
     assert.ok(GamePhysics.MERIDIAN_COORDS.length > 0, 'Meridian coords should be precalculated');
     assert.ok(GamePhysics.BASKETBALL_RIB1_COORDS.length > 0, 'Basketball rib1 coords should be precalculated');
     assert.ok(GamePhysics.BASKETBALL_RIB2_COORDS.length > 0, 'Basketball rib2 coords should be precalculated');
+    assert.ok(GamePhysics.TROPIC_NORTH_COORDS.length > 0, 'Tropic north coords should be precalculated');
+    assert.ok(GamePhysics.TROPIC_SOUTH_COORDS.length > 0, 'Tropic south coords should be precalculated');
 
     const radius = 25;
     for (const pt of GamePhysics.SEAM_COORDS) {

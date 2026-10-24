@@ -1263,6 +1263,31 @@ Canvas {
                     ctx.fill();
                 }
             }
+        } else if (bStyle === 4) {
+            ctx.fillStyle = "#090D14";
+            ctx.fill();
+
+            var neonCore = ctx.createRadialGradient(0, 0, 0, 0, 0, bRadius * 0.85);
+            neonCore.addColorStop(0.0, "rgba(0, 245, 255, 0.45)");
+            neonCore.addColorStop(0.5, "rgba(0, 245, 255, 0.15)");
+            neonCore.addColorStop(1.0, "rgba(0, 245, 255, 0.0)");
+            ctx.beginPath();
+            ctx.arc(0, 0, bRadius, 0, Math.PI * 2.0);
+            ctx.fillStyle = neonCore;
+            ctx.fill();
+
+            ctx.beginPath();
+            drawSphereLoop(GamePhysics.EQUATOR_COORDS);
+            drawSphereLoop(GamePhysics.TROPIC_NORTH_COORDS);
+            drawSphereLoop(GamePhysics.TROPIC_SOUTH_COORDS);
+            drawSphereLoop(GamePhysics.MERIDIAN_COORDS);
+            ctx.strokeStyle = "#00F5FF";
+            ctx.lineWidth = units.gu(0.14);
+            ctx.stroke();
+
+            ctx.strokeStyle = "rgba(0, 245, 255, 0.40)";
+            ctx.lineWidth = units.gu(0.28);
+            ctx.stroke();
         } else {
             ctx.fillStyle = theme.ballMid;
             ctx.fill();

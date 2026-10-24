@@ -58,6 +58,30 @@ var BASKETBALL_RIB2_COORDS = (function() {
     return coords;
 })();
 
+var TROPIC_NORTH_COORDS = (function() {
+    var coords = [];
+    var count = 24;
+    var yOffset = -0.52;
+    var r = Math.sqrt(1.0 - yOffset * yOffset);
+    for (var i = 0; i < count; i++) {
+        var t = (i / count) * Math.PI * 2.0;
+        coords.push({ x: Math.cos(t) * r, y: yOffset, z: Math.sin(t) * r });
+    }
+    return coords;
+})();
+
+var TROPIC_SOUTH_COORDS = (function() {
+    var coords = [];
+    var count = 24;
+    var yOffset = 0.52;
+    var r = Math.sqrt(1.0 - yOffset * yOffset);
+    for (var i = 0; i < count; i++) {
+        var t = (i / count) * Math.PI * 2.0;
+        coords.push({ x: Math.cos(t) * r, y: yOffset, z: Math.sin(t) * r });
+    }
+    return coords;
+})();
+
 var HAZARD_SPIKE_LAYOUT = [
     { u: 0.35, v: 0.30 },
     { u: 0.35, v: 0.70 },
