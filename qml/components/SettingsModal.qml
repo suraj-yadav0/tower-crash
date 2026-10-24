@@ -11,6 +11,7 @@ Rectangle {
     property int speedMode: 1
     property int difficultyMode: 1
     property int themeMode: 0
+    property int ballStyle: 0
     property real touchSensitivityMultiplier: 1.0
     property int bestScore: 0
     property int totalRings: 0
@@ -28,6 +29,7 @@ Rectangle {
     signal difficultyModeSelected(int newMode)
     signal touchSensitivitySelected(real newSensitivity)
     signal themeModeSelected(int newMode)
+    signal ballStyleSelected(int newStyle)
 
     anchors.fill: parent
     color: "#E608090A"
@@ -209,6 +211,135 @@ Rectangle {
                         id: themeCardMouse
                         anchors.fill: parent
                         onClicked: root.showingThemePicker = true
+                    }
+                }
+
+                // Ball Style Card
+                Rectangle {
+                    id: ballStyleCard
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    width: parent.width
+                    height: ballStyleCol.height + units.gu(2.0)
+                    radius: units.gu(1.6)
+                    color: root.theme ? root.theme.cardOuter : "#141517"
+                    border.color: root.theme ? root.theme.cardBorder : "#2A2C30"
+                    border.width: units.gu(0.1)
+
+                    Column {
+                        id: ballStyleCol
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        anchors.verticalCenter: parent.verticalCenter
+                        width: parent.width - units.gu(2.0)
+                        spacing: units.gu(0.8)
+
+                        Label {
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            text: i18n.tr("BALL STYLE")
+                            font.pixelSize: units.gu(1.05)
+                            font.weight: Font.Bold
+                            color: "#848890"
+                        }
+
+                        Row {
+                            id: ballStyleRow1
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            width: parent.width
+                            spacing: units.gu(0.6)
+
+                            Repeater {
+                                model: [
+                                    { id: 0, name: i18n.tr("Classic"), color: root.theme ? root.theme.ballMid : "#D99B26", ring: "#FFFFFF" },
+                                    { id: 1, name: i18n.tr("Basketball"), color: "#E65C00", ring: "#111111" },
+                                    { id: 2, name: i18n.tr("Beach"), color: "#3498DB", ring: "#E74C3C" }
+                                ]
+                                delegate: Rectangle {
+                                    width: (ballStyleRow1.width - units.gu(1.2)) / 3.0
+                                    height: units.gu(3.6)
+                                    radius: units.gu(1.8)
+                                    color: (root.ballStyle === modelData.id) ? (root.theme ? root.theme.accentBg : "#261E10") : (root.theme ? root.theme.cardInner : "#0D0E0F")
+                                    border.color: (root.ballStyle === modelData.id) ? (root.theme ? root.theme.accent : "#D99B26") : (root.theme ? root.theme.cardBorder : "#2A2C30")
+                                    border.width: (root.ballStyle === modelData.id) ? units.gu(0.12) : units.gu(0.08)
+
+                                    Row {
+                                        anchors.centerIn: parent
+                                        spacing: units.gu(0.5)
+
+                                        Rectangle {
+                                            width: units.gu(1.3)
+                                            height: units.gu(1.3)
+                                            radius: width / 2
+                                            color: modelData.color
+                                            border.color: modelData.ring
+                                            border.width: units.gu(0.1)
+                                            anchors.verticalCenter: parent.verticalCenter
+                                        }
+
+                                        Label {
+                                            text: modelData.name
+                                            font.pixelSize: units.gu(1.0)
+                                            font.weight: Font.Bold
+                                            color: (root.ballStyle === modelData.id) ? (root.theme ? root.theme.accent : "#D99B26") : "#9AA0A6"
+                                            anchors.verticalCenter: parent.verticalCenter
+                                        }
+                                    }
+
+                                    MouseArea {
+                                        anchors.fill: parent
+                                        onClicked: root.ballStyleSelected(modelData.id)
+                                    }
+                                }
+                            }
+                        }
+
+                        Row {
+                            id: ballStyleRow2
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            width: parent.width
+                            spacing: units.gu(0.6)
+
+                            Repeater {
+                                model: [
+                                    { id: 3, name: i18n.tr("8-Ball"), color: "#18191B", ring: "#FFFFFF" },
+                                    { id: 4, name: i18n.tr("Cyber Neon"), color: "#00E5FF", ring: "#00E5FF" }
+                                ]
+                                delegate: Rectangle {
+                                    width: (ballStyleRow2.width - units.gu(0.6)) / 2.0
+                                    height: units.gu(3.6)
+                                    radius: units.gu(1.8)
+                                    color: (root.ballStyle === modelData.id) ? (root.theme ? root.theme.accentBg : "#261E10") : (root.theme ? root.theme.cardInner : "#0D0E0F")
+                                    border.color: (root.ballStyle === modelData.id) ? (root.theme ? root.theme.accent : "#D99B26") : (root.theme ? root.theme.cardBorder : "#2A2C30")
+                                    border.width: (root.ballStyle === modelData.id) ? units.gu(0.12) : units.gu(0.08)
+
+                                    Row {
+                                        anchors.centerIn: parent
+                                        spacing: units.gu(0.5)
+
+                                        Rectangle {
+                                            width: units.gu(1.3)
+                                            height: units.gu(1.3)
+                                            radius: width / 2
+                                            color: modelData.color
+                                            border.color: modelData.ring
+                                            border.width: units.gu(0.1)
+                                            anchors.verticalCenter: parent.verticalCenter
+                                        }
+
+                                        Label {
+                                            text: modelData.name
+                                            font.pixelSize: units.gu(1.0)
+                                            font.weight: Font.Bold
+                                            color: (root.ballStyle === modelData.id) ? (root.theme ? root.theme.accent : "#D99B26") : "#9AA0A6"
+                                            anchors.verticalCenter: parent.verticalCenter
+                                        }
+                                    }
+
+                                    MouseArea {
+                                        anchors.fill: parent
+                                        onClicked: root.ballStyleSelected(modelData.id)
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
 

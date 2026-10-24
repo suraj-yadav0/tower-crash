@@ -53,6 +53,7 @@ function loadStats(forceReload) {
         speedMode: 1,
         themeMode: 0,
         touchSensitivityMultiplier: 1.0,
+        ballStyle: 0,
         highestLevelReached: 1,
         unlockedCheckpoints: [1],
         selectedCheckpoint: 1
@@ -103,6 +104,12 @@ function loadStats(forceReload) {
                 }
                 else if (k === "themeMode") stats.themeMode = !isNaN(parseInt(v)) ? parseInt(v) : 0;
                 else if (k === "touchSensitivityMultiplier") stats.touchSensitivityMultiplier = parseFloat(v) || 1.0;
+                else if (k === "ballStyle") {
+                    var parsedStyle = parseInt(v);
+                    if (!isNaN(parsedStyle) && parsedStyle >= 0 && parsedStyle <= 4) {
+                        stats.ballStyle = parsedStyle;
+                    }
+                }
                 else if (k === "highestLevelReached") stats.highestLevelReached = Math.max(1, parseInt(v) || 1);
                 else if (k === "selectedCheckpoint") stats.selectedCheckpoint = Math.max(1, parseInt(v) || 1);
                 else if (k === "unlockedCheckpoints") {
@@ -358,4 +365,10 @@ function saveSoundVolume(volume) {
 function saveTouchSensitivity(multiplier) {
     var mult = Math.max(0.4, Math.min(2.5, parseFloat(multiplier) || 1.0));
     saveStat("touchSensitivityMultiplier", mult.toFixed(2));
+}
+
+function saveBallStyle(style) {
+    var val = (!isNaN(parseInt(style)) && style >= 0 && style <= 4) ? parseInt(style) : 0;
+    saveStat("ballStyle", val.toString());
+    if (_cache) _cache.ballStyle = val;
 }

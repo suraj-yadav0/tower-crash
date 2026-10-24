@@ -20,6 +20,7 @@ Item {
     property int totalRings: 0
     property int speedMode: 1
     property int themeMode: 0
+    property int ballStyle: 0
     property int difficultyMode: 1
     property int currentLevel: 1
     property int selectedCheckpoint: 1
@@ -57,6 +58,7 @@ Item {
     signal volumeChanged(real volume)
     signal touchSensitivitySelected(real sensitivity)
     signal themeModeSelected(int mode)
+    signal ballStyleSelected(int style)
     signal settingsClosed()
     signal continueRequested()
 
@@ -142,6 +144,7 @@ Item {
                 hapticsEnabled: root.hapticsEnabled
                 speedMode: root.speedMode
                 themeMode: root.themeMode
+                ballStyle: root.ballStyle
                 difficultyMode: root.difficultyMode
                 touchSensitivityMultiplier: root.touchSensitivityMultiplier
                 bestScore: root.bestScore
@@ -157,6 +160,7 @@ Item {
                 onDifficultyModeSelected: root.difficultyModeSelected(newMode)
                 onTouchSensitivitySelected: root.touchSensitivitySelected(newSensitivity)
                 onThemeModeSelected: root.themeModeSelected(newMode)
+                onBallStyleSelected: root.ballStyleSelected(newStyle)
             }
         }
     }

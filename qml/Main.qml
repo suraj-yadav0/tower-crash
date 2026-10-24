@@ -241,6 +241,7 @@ MainView {
             property bool hapticsEnabled: true
             property real touchSensitivityMultiplier: 1.0
             property int themeMode: 0
+            property int ballStyle: 0
             property var previousTheme: null
             property real themeTransitionProgress: 1.0
             property var currentTheme: Themes.getTheme(themeMode, currentLevel)
@@ -555,6 +556,7 @@ MainView {
                 touchSensitivityMultiplier = (stats.touchSensitivityMultiplier !== undefined) ? stats.touchSensitivityMultiplier : 1.0;
                 speedMode = stats.speedMode;
                 themeMode = (stats.themeMode !== undefined) ? stats.themeMode : 0;
+                ballStyle = (stats.ballStyle !== undefined) ? stats.ballStyle : 0;
                 previousTheme = currentTheme;
                 highestLevelReached = stats.highestLevelReached;
                 unlockedCheckpoints = (difficultyMode === 3) ? [1] : stats.unlockedCheckpoints;
@@ -867,6 +869,7 @@ MainView {
                 totalRings: gameContainer.totalRings
                 speedMode: gameContainer.speedMode
                 themeMode: gameContainer.themeMode
+                ballStyle: gameContainer.ballStyle
                 difficultyMode: gameContainer.difficultyMode
                 currentLevel: gameContainer.currentLevel
                 selectedCheckpoint: gameContainer.selectedCheckpoint
@@ -971,6 +974,12 @@ MainView {
                     soundManager.buttonHaptic();
                     gameContainer.themeMode = mode;
                     Storage.saveStat("themeMode", mode.toString());
+                    gameCanvas.requestPaint();
+                }
+                onBallStyleSelected: {
+                    soundManager.buttonHaptic();
+                    gameContainer.ballStyle = style;
+                    Storage.saveBallStyle(style);
                     gameCanvas.requestPaint();
                 }
                 onTouchSensitivitySelected: {

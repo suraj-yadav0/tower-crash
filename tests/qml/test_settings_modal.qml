@@ -48,6 +48,11 @@ Item {
                 settingsModal.volumeChanged(0.65);
                 if (volReceived !== 0.65) throw new Error("volumeChanged failed");
 
+                var ballReceived = -1;
+                settingsModal.ballStyleSelected.connect(function(b) { ballReceived = b; });
+                settingsModal.ballStyleSelected(2);
+                if (ballReceived !== 2) throw new Error("ballStyleSelected failed");
+
                 var closed = false;
                 settingsModal.closeRequested.connect(function() { closed = true; });
                 settingsModal.closeRequested();
