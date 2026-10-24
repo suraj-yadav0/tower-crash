@@ -1215,6 +1215,54 @@ Canvas {
                 ctx.lineWidth = units.gu(0.08);
                 ctx.stroke();
             }
+        } else if (bStyle === 3) {
+            ctx.fillStyle = "#111215";
+            ctx.fill();
+
+            var badges = [
+                { x: 0, y: 0, z: 1.0 },
+                { x: 0, y: 0, z: -1.0 }
+            ];
+            for (var bi = 0; bi < badges.length; bi++) {
+                var pBadge = GamePhysics.projectSpherePoint(badges[bi], rotX, rotY, bRadius);
+                if (pBadge.z > 0.04) {
+                    var bScale = Math.sqrt(pBadge.z);
+                    var bRad = bRadius * 0.44 * bScale;
+
+                    ctx.beginPath();
+                    ctx.arc(pBadge.x, pBadge.y, bRad, 0, Math.PI * 2.0);
+                    ctx.fillStyle = "#FFFFFF";
+                    ctx.fill();
+                    ctx.strokeStyle = "rgba(0, 0, 0, 0.20)";
+                    ctx.lineWidth = units.gu(0.06);
+                    ctx.stroke();
+
+                    var rTop = bRad * 0.28;
+                    var rBot = bRad * 0.34;
+                    var yTop = pBadge.y - bRad * 0.24;
+                    var yBot = pBadge.y + bRad * 0.26;
+
+                    ctx.beginPath();
+                    ctx.arc(pBadge.x, yTop, rTop, 0, Math.PI * 2.0);
+                    ctx.fillStyle = "#111215";
+                    ctx.fill();
+
+                    ctx.beginPath();
+                    ctx.arc(pBadge.x, yBot, rBot, 0, Math.PI * 2.0);
+                    ctx.fillStyle = "#111215";
+                    ctx.fill();
+
+                    ctx.beginPath();
+                    ctx.arc(pBadge.x, yTop, rTop * 0.44, 0, Math.PI * 2.0);
+                    ctx.fillStyle = "#FFFFFF";
+                    ctx.fill();
+
+                    ctx.beginPath();
+                    ctx.arc(pBadge.x, yBot, rBot * 0.44, 0, Math.PI * 2.0);
+                    ctx.fillStyle = "#FFFFFF";
+                    ctx.fill();
+                }
+            }
         } else {
             ctx.fillStyle = theme.ballMid;
             ctx.fill();
