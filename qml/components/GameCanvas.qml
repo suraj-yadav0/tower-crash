@@ -1,6 +1,7 @@
 import QtQuick 2.9
 import Lomiri.Components 1.3
 import "../js/Themes.js" as Themes
+import "../js/Progression.js" as Progression
 import "../js/GamePhysics.js" as GamePhysics
 
 Canvas {
