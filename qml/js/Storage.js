@@ -106,7 +106,7 @@ function loadStats(forceReload) {
                 else if (k === "touchSensitivityMultiplier") stats.touchSensitivityMultiplier = parseFloat(v) || 1.0;
                 else if (k === "ballStyle") {
                     var parsedStyle = parseInt(v);
-                    if (!isNaN(parsedStyle) && parsedStyle >= 0 && parsedStyle <= 4) {
+                    if (!isNaN(parsedStyle) && parsedStyle >= 0 && parsedStyle <= 5) {
                         stats.ballStyle = parsedStyle;
                     }
                 }
@@ -368,7 +368,7 @@ function saveTouchSensitivity(multiplier) {
 }
 
 function saveBallStyle(style) {
-    var val = (!isNaN(parseInt(style)) && style >= 0 && style <= 4) ? parseInt(style) : 0;
+    var val = (!isNaN(parseInt(style)) && style >= 0 && style <= 5) ? parseInt(style) : 0;
     saveStat("ballStyle", val.toString());
     if (_cache) _cache.ballStyle = val;
 }

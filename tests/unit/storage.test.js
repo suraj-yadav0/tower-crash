@@ -146,6 +146,9 @@ test('Storage - saveBallStyle persistence and validation', () => {
     Storage.saveBallStyle(3);
     assert.strictEqual(_store.get('ballStyle'), '3');
 
+    Storage.saveBallStyle(5);
+    assert.strictEqual(_store.get('ballStyle'), '5');
+
     // Out-of-range should clamp/fallback to 0
     Storage.saveBallStyle(99);
     assert.strictEqual(_store.get('ballStyle'), '0');
