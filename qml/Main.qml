@@ -392,6 +392,10 @@ MainView {
                 var diffStats = Storage.getDifficultyStats ? Storage.getDifficultyStats(m) : { bestScore: 0, highestLevelReached: 1, unlockedCheckpoints: [1], selectedCheckpoint: 1 };
                 bestScore = diffStats.bestScore || 0;
                 highestLevelReached = diffStats.highestLevelReached || 1;
+                if (ballStyle !== 0 && !Progression.isBallUnlocked(ballStyle, highestLevelReached)) {
+                    ballStyle = 0;
+                    Storage.saveBallStyle(0);
+                }
                 unlockedCheckpoints = (m === 3) ? [1] : (diffStats.unlockedCheckpoints || [1]);
                 selectedCheckpoint = (m === 3) ? 1 : (diffStats.selectedCheckpoint || 1);
                 var keepSettings = isSettingsOpen;
@@ -556,9 +560,10 @@ MainView {
                 touchSensitivityMultiplier = (stats.touchSensitivityMultiplier !== undefined) ? stats.touchSensitivityMultiplier : 1.0;
                 speedMode = stats.speedMode;
                 themeMode = (stats.themeMode !== undefined) ? stats.themeMode : 0;
-                ballStyle = (stats.ballStyle !== undefined) ? stats.ballStyle : 0;
-                previousTheme = currentTheme;
                 highestLevelReached = stats.highestLevelReached;
+                previousTheme = currentTheme;
+                var loadedStyle = (stats.ballStyle !== undefined) ? stats.ballStyle : 0;
+                ballStyle = Progression.isBallUnlocked(loadedStyle, highestLevelReached) ? loadedStyle : 0;
                 unlockedCheckpoints = (difficultyMode === 3) ? [1] : stats.unlockedCheckpoints;
                 selectedCheckpoint = (difficultyMode === 3) ? 1 : stats.selectedCheckpoint;
                 isWelcomeOpen = true;
@@ -870,6 +875,7 @@ MainView {
                 speedMode: gameContainer.speedMode
                 themeMode: gameContainer.themeMode
                 ballStyle: gameContainer.ballStyle
+                highestLevelReached: gameContainer.highestLevelReached
                 difficultyMode: gameContainer.difficultyMode
                 currentLevel: gameContainer.currentLevel
                 selectedCheckpoint: gameContainer.selectedCheckpoint

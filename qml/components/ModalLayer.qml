@@ -21,6 +21,7 @@ Item {
     property int speedMode: 1
     property int themeMode: 0
     property int ballStyle: 0
+    property int highestLevelReached: 1
     property int difficultyMode: 1
     property int currentLevel: 1
     property int selectedCheckpoint: 1
@@ -145,6 +146,7 @@ Item {
                 speedMode: root.speedMode
                 themeMode: root.themeMode
                 ballStyle: root.ballStyle
+                highestLevelReached: root.highestLevelReached
                 difficultyMode: root.difficultyMode
                 touchSensitivityMultiplier: root.touchSensitivityMultiplier
                 bestScore: root.bestScore

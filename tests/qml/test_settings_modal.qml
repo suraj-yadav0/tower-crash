@@ -16,6 +16,8 @@ Item {
         speedMode: 1
         difficultyMode: 1
         themeMode: 0
+        ballStyle: 0
+        highestLevelReached: 25
         isWelcomeOpen: false
     }
 
@@ -27,6 +29,7 @@ Item {
             try {
                 if (settingsModal.difficultyMode !== 1) throw new Error("difficultyMode mismatch");
                 if (settingsModal.speedMode !== 1) throw new Error("speedMode mismatch");
+                if (settingsModal.highestLevelReached !== 25) throw new Error("highestLevelReached mismatch");
 
                 var diffReceived = -1;
                 settingsModal.difficultyModeSelected.connect(function(m) { diffReceived = m; });
