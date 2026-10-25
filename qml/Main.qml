@@ -319,6 +319,7 @@ MainView {
             property int currentLevel: Progression.calculateLevel(ballY, ringSpacing, levelRings, units.gu(2))
             property real levelProgress: Progression.calculateLevelProgress(ballY, currentLevel, ringSpacing, levelRings)
             property string bannerText: ""
+            property string bannerSubText: ""
             property bool bannerIsCheckpoint: false
             property bool bannerIsZone: false
             property real bannerOpacity: 0.0
@@ -442,6 +443,7 @@ MainView {
                 squashVelocity = 0.0;
                 isSuperFall = false;
                 bannerText = "";
+                bannerSubText = "";
                 bannerIsCheckpoint = false;
                 bannerIsZone = false;
                 bannerOpacity = 0.0;
@@ -851,6 +853,7 @@ MainView {
             MilestoneBanner {
                 z: 20
                 text: gameContainer.bannerText
+                subText: gameContainer.bannerSubText
                 isCheckpoint: gameContainer.bannerIsCheckpoint
                 isZoneTransition: gameContainer.bannerIsZone
                 bannerOpacity: gameContainer.bannerOpacity

@@ -6,6 +6,7 @@ Item {
     z: 20
 
     property string text: ""
+    property string subText: ""
     property bool isCheckpoint: false
     property bool isZoneTransition: false
     property real bannerOpacity: 0.0
@@ -64,6 +65,17 @@ Item {
                 color: "#F5F3EF"
                 horizontalAlignment: Text.AlignHCenter
                 wrapMode: Text.Wrap
+            }
+
+            Label {
+                id: bannerSubLabel
+                anchors.horizontalCenter: parent.horizontalCenter
+                text: root.subText
+                font.pixelSize: units.gu(1.1)
+                font.weight: Font.Bold
+                color: "#FFD700"
+                horizontalAlignment: Text.AlignHCenter
+                visible: root.subText.length > 0
             }
         }
     }

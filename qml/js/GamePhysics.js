@@ -316,6 +316,13 @@ function checkBallCollision(game, prevY, nextY, speedScale, soundManager, stageC
                 var baseEarned = isGrand ? 1000 : (isZone ? 250 : (isCp ? 150 : 100));
                 var earned = Math.round(baseEarned * diffMult);
 
+                var unlockedBall = (Progression.getUnlockedBallForLevel) ? Progression.getUnlockedBallForLevel(goalLevel) : null;
+                if (unlockedBall) {
+                    game.bannerSubText = i18n.tr("%1 UNLOCKED!").arg(unlockedBall.name.toUpperCase());
+                } else {
+                    game.bannerSubText = "";
+                }
+
                 if (isGrand) {
                     game.spawnShatterDebris(ring.y, true, true, game.currentTheme, false, ring, game.towerAngle);
                     game.score += earned;

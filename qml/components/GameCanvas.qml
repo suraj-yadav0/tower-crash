@@ -19,6 +19,7 @@ Canvas {
         function onCurrentThemeChanged() { root.requestPaint(); }
         function onThemeTransitionProgressChanged() { root.requestPaint(); }
         function onBallStyleChanged() { root.requestPaint(); }
+        function onCurrentLevelChanged() { root.requestPaint(); }
     }
 
     onPaint: {
@@ -1034,6 +1035,9 @@ Canvas {
         ctx.clip();
 
         var bStyle = (game && game.ballStyle !== undefined) ? game.ballStyle : 0;
+        if (bStyle === 0) {
+            bStyle = Progression.getLevelBallStyle(game ? game.currentLevel : 1);
+        }
         var rotX = game.ballRotationX || 0.0;
         var rotY = game.ballRotationY || 0.0;
 
@@ -1105,7 +1109,7 @@ Canvas {
             }
         }
 
-        if (bStyle === 1) {
+        if (bStyle === 2) {
             ctx.fillStyle = "#D85604";
             ctx.fill();
 
@@ -1121,7 +1125,7 @@ Canvas {
             ctx.strokeStyle = "rgba(255, 255, 255, 0.15)";
             ctx.lineWidth = units.gu(0.06);
             ctx.stroke();
-        } else if (bStyle === 2) {
+        } else if (bStyle === 3) {
             var beachColors = ["#E74C3C", "#F8F9FA", "#2980B9", "#F1C40F", "#E67E22", "#1ABC9C"];
             var gores = GamePhysics.BEACHBALL_GORES;
 
@@ -1174,7 +1178,7 @@ Canvas {
                 ctx.lineWidth = units.gu(0.08);
                 ctx.stroke();
             }
-        } else if (bStyle === 3) {
+        } else if (bStyle === 4) {
             ctx.fillStyle = "#111215";
             ctx.fill();
 
@@ -1213,7 +1217,7 @@ Canvas {
                     ctx.fill();
                 }
             }
-        } else if (bStyle === 4) {
+        } else if (bStyle === 5) {
             ctx.fillStyle = "#090D14";
             ctx.fill();
 
