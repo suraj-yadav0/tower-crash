@@ -11,6 +11,7 @@ Canvas {
     renderStrategy: Canvas.Threaded
 
     property var game: null
+    property var rimColorCache: ({})
 
     onWidthChanged: requestPaint()
     onHeightChanged: requestPaint()
@@ -71,10 +72,6 @@ Canvas {
         sharedTopGrad.addColorStop(0.0, "rgba(255, 255, 255, 0.18)");
         sharedTopGrad.addColorStop(0.55, "rgba(255, 255, 255, 0.02)");
         sharedTopGrad.addColorStop(1.0, "rgba(0, 0, 0, 0.18)");
-
-        var sharedInnerAo = ctx.createRadialGradient(0, 0, inR, 0, 0, inR + units.gu(0.8));
-        sharedInnerAo.addColorStop(0.0, "rgba(0, 0, 0, 0.10)");
-        sharedInnerAo.addColorStop(1.0, "rgba(0, 0, 0, 0.0)");
 
         var botAoH = units.gu(0.9);
         var sharedBotAoGrad = ctx.createLinearGradient(0, 0, 0, botAoH);
@@ -339,9 +336,6 @@ Canvas {
             ctx.fillStyle = sharedTopGrad;
             ctx.fill();
 
-            ctx.fillStyle = sharedInnerAo;
-            ctx.fill();
-
             ctx.beginPath();
             ctx.arc(0, 0, outR, startAngle, endAngle, false);
             ctx.arc(0, 0, inR, endAngle, startAngle, true);
@@ -414,6 +408,11 @@ Canvas {
             var spikeHeight = units.gu(0.72);
             var baseRadius = units.gu(0.38);
             var baseRy = baseRadius * tilt;
+            var k = 0.55228475;
+            var rx = baseRadius * 1.15;
+            var ry = baseRy * 1.15;
+            var ox = rx * k;
+            var oy = ry * k;
 
             for (var vs = 0; vs < visibleSpikes.length; vs++) {
                 var cur = visibleSpikes[vs];
@@ -429,30 +428,15 @@ Canvas {
                 var frontX = bx;
                 var frontY = by + baseRy;
 
-                ctx.save();
-                ctx.translate(bx, by);
-                ctx.scale(1.0, tilt);
-                var aoGrad = ctx.createRadialGradient(0, 0, baseRadius * 0.25, 0, 0, baseRadius * 1.3);
-                aoGrad.addColorStop(0.0, "rgba(0, 0, 0, 0.30)");
-                aoGrad.addColorStop(0.65, "rgba(0, 0, 0, 0.10)");
-                aoGrad.addColorStop(1.0, "rgba(0, 0, 0, 0.0)");
-                ctx.fillStyle = aoGrad;
                 ctx.beginPath();
-                ctx.arc(0, 0, baseRadius * 1.3, 0, Math.PI * 2.0);
+                ctx.moveTo(bx - rx, by);
+                ctx.bezierCurveTo(bx - rx, by - oy, bx - ox, by - ry, bx, by - ry);
+                ctx.bezierCurveTo(bx + ox, by - ry, bx + rx, by - oy, bx + rx, by);
+                ctx.bezierCurveTo(bx + rx, by + oy, bx + ox, by + ry, bx, by + ry);
+                ctx.bezierCurveTo(bx - ox, by + ry, bx - rx, by + oy, bx - rx, by);
+                ctx.closePath();
+                ctx.fillStyle = "rgba(0, 0, 0, 0.28)";
                 ctx.fill();
-                ctx.restore();
-
-                ctx.save();
-                ctx.translate(bx, by);
-                ctx.scale(1.0, tilt);
-                ctx.beginPath();
-                ctx.arc(0, 0, baseRadius, 0, Math.PI * 2.0);
-                ctx.fillStyle = "rgba(0, 0, 0, 0.20)";
-                ctx.fill();
-                ctx.strokeStyle = "rgba(0, 0, 0, 0.35)";
-                ctx.lineWidth = units.gu(0.04) / tilt;
-                ctx.stroke();
-                ctx.restore();
 
                 ctx.beginPath();
                 ctx.moveTo(tipX, tipY);
@@ -460,12 +444,7 @@ Canvas {
                 ctx.quadraticCurveTo(leftX, frontY, frontX, frontY);
                 ctx.lineTo(tipX, tipY);
                 ctx.closePath();
-
-                var leftGrad = ctx.createLinearGradient(leftX, tipY, frontX, frontY);
-                leftGrad.addColorStop(0.0, "rgba(255, 255, 255, 0.88)");
-                leftGrad.addColorStop(0.32, topColor);
-                leftGrad.addColorStop(1.0, sideColor);
-                ctx.fillStyle = leftGrad;
+                ctx.fillStyle = topColor;
                 ctx.fill();
 
                 ctx.beginPath();
@@ -474,18 +453,16 @@ Canvas {
                 ctx.quadraticCurveTo(rightX, frontY, rightX, rightY);
                 ctx.lineTo(tipX, tipY);
                 ctx.closePath();
+                ctx.fillStyle = sideColor;
+                ctx.fill();
 
-                var rightGrad = ctx.createLinearGradient(frontX, tipY, rightX, rightY);
-                rightGrad.addColorStop(0.0, topColor);
-                rightGrad.addColorStop(0.40, sideColor);
-                rightGrad.addColorStop(1.0, "rgba(20, 10, 10, 0.70)");
-                ctx.fillStyle = rightGrad;
+                ctx.fillStyle = "rgba(0, 0, 0, 0.22)";
                 ctx.fill();
 
                 ctx.beginPath();
                 ctx.moveTo(tipX, tipY);
                 ctx.lineTo(frontX, frontY);
-                ctx.strokeStyle = "rgba(255, 255, 255, 0.38)";
+                ctx.strokeStyle = "rgba(255, 255, 255, 0.45)";
                 ctx.lineWidth = units.gu(0.04);
                 ctx.stroke();
 
@@ -493,13 +470,13 @@ Canvas {
                 ctx.moveTo(leftX, leftY);
                 ctx.lineTo(tipX, tipY);
                 ctx.lineTo(rightX, rightY);
-                ctx.strokeStyle = "rgba(10, 15, 20, 0.28)";
+                ctx.strokeStyle = "rgba(10, 15, 20, 0.30)";
                 ctx.lineWidth = units.gu(0.035);
                 ctx.stroke();
 
                 ctx.beginPath();
                 ctx.arc(tipX, tipY + units.gu(0.03), units.gu(0.06), 0, Math.PI * 2.0);
-                ctx.fillStyle = "rgba(255, 255, 255, 0.88)";
+                ctx.fillStyle = "rgba(255, 255, 255, 0.90)";
                 ctx.fill();
             }
         }
@@ -535,10 +512,12 @@ Canvas {
             }
             ctx.closePath();
 
-            ctx.fillStyle = sideColor;
-            ctx.fill();
-
-            ctx.fillStyle = "rgba(0, 0, 0, 0.28)";
+            var rimClr = root.rimColorCache[sideColor];
+            if (!rimClr) {
+                rimClr = Themes.lerpColor(sideColor, "#000000", 0.28);
+                root.rimColorCache[sideColor] = rimClr;
+            }
+            ctx.fillStyle = rimClr;
             ctx.fill();
 
             ctx.beginPath();
@@ -650,17 +629,17 @@ Canvas {
         ctx.fillRect(pLeft, 0, pWidth, h);
 
         // Subtle, smooth ambient shadow directly under each platform
+        ctx.fillStyle = sharedBotAoGrad;
         for (var aoR = 0; aoR < game.rings.length; aoR++) {
             var aoRing = game.rings[aoR];
             if (aoRing.broken) continue;
             var aoRingScreenY = bScreenY + (aoRing.y - camY) + (aoRing.recoil || 0);
             if (aoRingScreenY < -rSpacing || aoRingScreenY > h + rSpacing) continue;
 
-            ctx.save();
-            ctx.translate(pLeft, aoRingScreenY + rHeight);
-            ctx.fillStyle = sharedBotAoGrad;
+            var aoY = aoRingScreenY + rHeight;
+            ctx.translate(pLeft, aoY);
             ctx.fillRect(0, 0, pWidth, botAoH);
-            ctx.restore();
+            ctx.translate(-pLeft, -aoY);
         }
 
         for (var r2 = 0; r2 < game.rings.length; r2++) {
