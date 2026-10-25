@@ -204,18 +204,22 @@ test('Progression - unlocked ball milestone on level goal completion', () => {
     const b10 = Progression.getUnlockedBallForLevel(10);
     assert.strictEqual(b10.id, 2);
     assert.strictEqual(b10.name, 'Basketball');
+    assert.strictEqual(b10.color, '#E65C00');
 
     const b20 = Progression.getUnlockedBallForLevel(20);
     assert.strictEqual(b20.id, 3);
     assert.strictEqual(b20.name, 'Beach Ball');
+    assert.strictEqual(b20.color, '#3498DB');
 
     const b30 = Progression.getUnlockedBallForLevel(30);
     assert.strictEqual(b30.id, 4);
     assert.strictEqual(b30.name, '8-Ball');
+    assert.strictEqual(b30.color, '#18191B');
 
     const b40 = Progression.getUnlockedBallForLevel(40);
     assert.strictEqual(b40.id, 5);
     assert.strictEqual(b40.name, 'Cyber Neon');
+    assert.strictEqual(b40.color, '#00E5FF');
 
     assert.strictEqual(Progression.getUnlockedBallForLevel(50), null);
 });

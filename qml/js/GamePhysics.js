@@ -392,7 +392,7 @@ function checkBallCollision(game, prevY, nextY, speedScale, soundManager, stageC
                 }
                 Storage.flushPendingWrites();
 
-                if (isCp || isGrand) {
+                if (isCp || isGrand || unlockedBall) {
                     game.stageClearStage = goalLevel;
                     game.stageClearBonus = earned;
                     game.stageClearStreak = currentStreak;

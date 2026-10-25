@@ -14,6 +14,7 @@ Rectangle {
     property int checkpointLevel: 1
     property bool isGrandVictory: false
     property var theme: null
+    readonly property var unlockedBall: Progression.getUnlockedBallForLevel ? Progression.getUnlockedBallForLevel(root.stageNumber) : null
 
     signal continueRequested()
     signal restartRequested()
@@ -209,6 +210,55 @@ Rectangle {
                                 font.pixelSize: units.gu(1.8)
                                 font.weight: Font.Bold
                                 color: root.theme ? root.theme.accent : "#D99B26"
+                            }
+                        }
+                    }
+                }
+
+                // Unlocked Ball Skin Card
+                Rectangle {
+                    id: unlockedBallCard
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    width: parent.width
+                    height: units.gu(5.6)
+                    radius: units.gu(1.6)
+                    visible: root.unlockedBall !== null
+                    color: root.theme ? root.theme.accentBg : "#261E10"
+                    border.color: root.theme ? root.theme.accent : "#D99B26"
+                    border.width: units.gu(0.12)
+
+                    Row {
+                        anchors.fill: parent
+                        anchors.leftMargin: units.gu(1.4)
+                        anchors.rightMargin: units.gu(1.4)
+                        spacing: units.gu(1.2)
+
+                        Rectangle {
+                            anchors.verticalCenter: parent.verticalCenter
+                            width: units.gu(3.2)
+                            height: units.gu(3.2)
+                            radius: width / 2
+                            color: root.unlockedBall ? (root.unlockedBall.color || "#D99B26") : "#D99B26"
+                            border.color: root.unlockedBall ? (root.unlockedBall.ring || "#FFFFFF") : "#FFFFFF"
+                            border.width: units.gu(0.12)
+                        }
+
+                        Column {
+                            anchors.verticalCenter: parent.verticalCenter
+                            spacing: units.gu(0.2)
+
+                            Label {
+                                text: i18n.tr("NEW BALL UNLOCKED!")
+                                font.pixelSize: units.gu(1.1)
+                                font.weight: Font.Bold
+                                color: root.theme ? root.theme.accent : "#D99B26"
+                            }
+
+                            Label {
+                                text: root.unlockedBall ? root.unlockedBall.name : ""
+                                font.pixelSize: units.gu(1.4)
+                                font.weight: Font.Black
+                                color: "#F5F3EF"
                             }
                         }
                     }

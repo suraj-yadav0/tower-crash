@@ -165,9 +165,9 @@ function getLevelBallStyle(lvl) {
 }
 
 function getUnlockedBallForLevel(goalLevel) {
-    if (goalLevel === 10) return { id: 2, name: "Basketball" };
-    if (goalLevel === 20) return { id: 3, name: "Beach Ball" };
-    if (goalLevel === 30) return { id: 4, name: "8-Ball" };
-    if (goalLevel === 40) return { id: 5, name: "Cyber Neon" };
+    if (goalLevel === 10) return { id: 2, name: "Basketball", color: "#E65C00", ring: "#111111" };
+    if (goalLevel === 20) return { id: 3, name: "Beach Ball", color: "#3498DB", ring: "#E74C3C" };
+    if (goalLevel === 30) return { id: 4, name: "8-Ball", color: "#18191B", ring: "#FFFFFF" };
+    if (goalLevel === 40) return { id: 5, name: "Cyber Neon", color: "#00E5FF", ring: "#00E5FF" };
     return null;
 }
