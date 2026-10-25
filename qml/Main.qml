@@ -55,37 +55,28 @@ MainView {
             subtitle: {
                 if (gameContainer.isWelcomeOpen) return i18n.tr("Arcade Edition");
                 var diffName = Progression.getDifficultyName(gameContainer.difficultyMode);
+                var zoneIdx = Progression.getZoneIndex(gameContainer.currentLevel);
                 var zoneName = Progression.getZoneName(gameContainer.currentLevel);
                 if (gameContainer.difficultyMode === 3) {
-                    if (gameContainer.bestScore > 0) {
-                        return i18n.tr("Level %1 • %2 • %3 (Permadeath) • Best: %4")
-                            .arg(gameContainer.currentLevel)
-                            .arg(zoneName)
-                            .arg(diffName)
-                            .arg(gameContainer.bestScore);
-                    }
-                    return i18n.tr("Level %1 • %2 • %3 (Permadeath)")
-                        .arg(gameContainer.currentLevel)
+                    return i18n.tr("Zone %1: %2 • %3 (Permadeath)")
+                        .arg(zoneIdx)
                         .arg(zoneName)
                         .arg(diffName);
                 }
-                var stage = ((gameContainer.currentLevel - 1) % 5) + 1;
-                if (gameContainer.bestScore > 0) {
-                    return i18n.tr("Level %1 • %2 • %3 (%4/5) • Best: %5")
-                        .arg(gameContainer.currentLevel)
-                        .arg(zoneName)
-                        .arg(diffName)
-                        .arg(stage)
-                        .arg(gameContainer.bestScore);
-                }
-                return i18n.tr("Level %1 • %2 • %3 (%4/5)")
-                    .arg(gameContainer.currentLevel)
+                return i18n.tr("Zone %1: %2 • %3")
+                    .arg(zoneIdx)
                     .arg(zoneName)
-                    .arg(diffName)
-                    .arg(stage);
+                    .arg(diffName);
             }
             z: 100
             visible: true
+
+            StyleHints {
+                foregroundColor: "#F5F3EF"
+                subtitleColor: (gameContainer && gameContainer.currentTheme) ? gameContainer.currentTheme.accent : "#D99B26"
+                backgroundColor: (gameContainer && gameContainer.currentTheme) ? gameContainer.currentTheme.cardOuter : "#101216"
+                dividerColor: (gameContainer && gameContainer.currentTheme) ? gameContainer.currentTheme.cardBorder : "#252830"
+            }
 
             trailingActionBar.numberOfSlots: 5
             trailingActionBar.delegate: Component {
@@ -93,40 +84,54 @@ MainView {
                     id: actionButton
                     action: modelData
                     objectName: (action && action.objectName) ? (action.objectName + "_button") : "action_button"
-                    width: units.gu(5)
+                    width: units.gu(4.8)
                     height: parent ? parent.height : units.gu(5)
                     activeFocusOnTab: true
 
                     readonly property bool isSelected: Boolean(action && action.selected)
 
                     Rectangle {
-                        id: background
-                        anchors.fill: parent
-                        color: actionButton.pressed ?
-                                   theme.palette.highlighted.background :
-                                   (actionButton.isSelected ? theme.palette.selected.background : "transparent")
-                    }
-
-                    Icon {
-                        id: icon
+                        id: buttonPill
                         anchors.centerIn: parent
-                        width: units.gu(2.5)
-                        height: units.gu(2.5)
-                        name: action ? (action.iconName || "") : ""
-                        source: action ? (action.iconSource || "") : ""
-                        color: actionButton.enabled ? theme.palette.normal.backgroundText : theme.palette.disabled.backgroundText
-                    }
+                        width: units.gu(4.0)
+                        height: units.gu(4.0)
+                        radius: units.gu(1.3)
+                        color: actionButton.pressed ?
+                                   ((gameContainer && gameContainer.currentTheme) ? gameContainer.currentTheme.accentBg : "rgba(255, 255, 255, 0.15)") :
+                                   (actionButton.isSelected ?
+                                       ((gameContainer && gameContainer.currentTheme) ? gameContainer.currentTheme.accentBg : "#261E10") :
+                                       "transparent")
+                        border.color: actionButton.isSelected ?
+                                          ((gameContainer && gameContainer.currentTheme) ? gameContainer.currentTheme.accent : "#D99B26") :
+                                          (actionButton.pressed ? "rgba(255, 255, 255, 0.18)" : "transparent")
+                        border.width: actionButton.isSelected ? units.gu(0.12) : units.gu(0.08)
 
-                    Rectangle {
-                        id: activeIndicator
-                        anchors {
-                            bottom: parent.bottom
-                            horizontalCenter: parent.horizontalCenter
+                        Icon {
+                            id: icon
+                            anchors.centerIn: parent
+                            width: units.gu(2.3)
+                            height: units.gu(2.3)
+                            name: action ? (action.iconName || "") : ""
+                            source: action ? (action.iconSource || "") : ""
+                            color: !actionButton.enabled ? "#555A64" :
+                                   (actionButton.isSelected ?
+                                       ((gameContainer && gameContainer.currentTheme) ? gameContainer.currentTheme.accent : "#D99B26") :
+                                       "#F5F3EF")
                         }
-                        width: units.gu(3)
-                        height: units.dp(3)
-                        color: theme.palette.selected.focus
-                        visible: actionButton.isSelected
+
+                        Rectangle {
+                            id: activeIndicator
+                            anchors {
+                                bottom: parent.bottom
+                                bottomMargin: units.dp(2)
+                                horizontalCenter: parent.horizontalCenter
+                            }
+                            width: units.gu(1.8)
+                            height: units.dp(2)
+                            radius: units.dp(1)
+                            color: (gameContainer && gameContainer.currentTheme) ? gameContainer.currentTheme.accent : "#D99B26"
+                            visible: actionButton.isSelected
+                        }
                     }
                 }
             }

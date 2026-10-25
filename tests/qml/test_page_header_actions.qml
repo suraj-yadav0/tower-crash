@@ -25,7 +25,14 @@ Item {
         id: pageHeader
         width: parent.width
         title: "Tower Crash"
-        subtitle: root.isWelcomeOpen ? "Arcade Edition" : "Level 1 • Tower Dawn • Normal (1/5)"
+        subtitle: root.isWelcomeOpen ? "Arcade Edition" : "Zone 1: Outer Terrace • Normal"
+
+        StyleHints {
+            foregroundColor: "#F5F3EF"
+            subtitleColor: root.currentTheme ? root.currentTheme.accent : "#D99B26"
+            backgroundColor: "#101216"
+            dividerColor: "#252830"
+        }
 
         trailingActionBar.numberOfSlots: 5
         trailingActionBar.delegate: Component {
@@ -33,40 +40,54 @@ Item {
                 id: actionButton
                 action: modelData
                 objectName: (action && action.objectName) ? (action.objectName + "_button") : "action_button"
-                width: units.gu(5)
+                width: units.gu(4.8)
                 height: parent ? parent.height : units.gu(5)
                 activeFocusOnTab: true
 
                 readonly property bool isSelected: Boolean(action && action.selected)
 
                 Rectangle {
-                    id: background
-                    anchors.fill: parent
-                    color: actionButton.pressed ?
-                               theme.palette.highlighted.background :
-                               (actionButton.isSelected ? theme.palette.selected.background : "transparent")
-                }
-
-                Icon {
-                    id: icon
+                    id: buttonPill
                     anchors.centerIn: parent
-                    width: units.gu(2.5)
-                    height: units.gu(2.5)
-                    name: action ? (action.iconName || "") : ""
-                    source: action ? (action.iconSource || "") : ""
-                    color: actionButton.enabled ? theme.palette.normal.backgroundText : theme.palette.disabled.backgroundText
-                }
+                    width: units.gu(4.0)
+                    height: units.gu(4.0)
+                    radius: units.gu(1.3)
+                    color: actionButton.pressed ?
+                               (root.currentTheme ? root.currentTheme.accentBg : "rgba(255, 255, 255, 0.15)") :
+                               (actionButton.isSelected ?
+                                   (root.currentTheme ? root.currentTheme.accentBg : "#261E10") :
+                                   "transparent")
+                    border.color: actionButton.isSelected ?
+                                      (root.currentTheme ? root.currentTheme.accent : "#D99B26") :
+                                      (actionButton.pressed ? "rgba(255, 255, 255, 0.18)" : "transparent")
+                    border.width: actionButton.isSelected ? units.gu(0.12) : units.gu(0.08)
 
-                Rectangle {
-                    id: activeIndicator
-                    anchors {
-                        bottom: parent.bottom
-                        horizontalCenter: parent.horizontalCenter
+                    Icon {
+                        id: icon
+                        anchors.centerIn: parent
+                        width: units.gu(2.3)
+                        height: units.gu(2.3)
+                        name: action ? (action.iconName || "") : ""
+                        source: action ? (action.iconSource || "") : ""
+                        color: !actionButton.enabled ? "#555A64" :
+                               (actionButton.isSelected ?
+                                   (root.currentTheme ? root.currentTheme.accent : "#D99B26") :
+                                   "#F5F3EF")
                     }
-                    width: units.gu(3)
-                    height: units.dp(3)
-                    color: theme.palette.selected.focus
-                    visible: actionButton.isSelected
+
+                    Rectangle {
+                        id: activeIndicator
+                        anchors {
+                            bottom: parent.bottom
+                            bottomMargin: units.dp(2)
+                            horizontalCenter: parent.horizontalCenter
+                        }
+                        width: units.gu(1.8)
+                        height: units.dp(2)
+                        radius: units.dp(1)
+                        color: root.currentTheme ? root.currentTheme.accent : "#D99B26"
+                        visible: actionButton.isSelected
+                    }
                 }
             }
         }
