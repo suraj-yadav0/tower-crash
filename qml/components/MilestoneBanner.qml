@@ -38,8 +38,8 @@ Item {
             Rectangle {
                 anchors.horizontalCenter: parent.horizontalCenter
                 width: stageTag.width + units.gu(1.6)
-                height: units.gu(1.8)
-                radius: units.gu(0.9)
+                height: units.gu(2.2)
+                radius: units.gu(1.1)
                 color: root.isZoneTransition ? "#1A2633" : (root.isCheckpoint ? "#332608" : (root.theme ? root.theme.accentBg : "#261E10"))
                 border.color: root.isZoneTransition ? "#84B6D8" : (root.isCheckpoint ? "#FFD700" : (root.theme ? root.theme.accentBorder : "#544020"))
                 border.width: units.gu(0.08)
@@ -50,7 +50,7 @@ Item {
                     text: root.isZoneTransition
                           ? i18n.tr("NEW ZONE")
                           : (root.isCheckpoint ? i18n.tr("CHECKPOINT") : i18n.tr("STAGE CLEAR"))
-                    font.pixelSize: units.gu(1.0)
+                    font.pixelSize: units.gu(1.1)
                     font.weight: Font.Bold
                     color: root.isZoneTransition ? "#84B6D8" : (root.isCheckpoint ? "#FFD700" : (root.theme ? root.theme.accent : "#D99B26"))
                 }

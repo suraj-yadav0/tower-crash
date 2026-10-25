@@ -159,7 +159,7 @@ Column {
 
             Label {
                 text: i18n.tr("If you enjoy playing Tower Crash, consider giving it a star on GitHub. It helps other Ubuntu Touch users find the game and supports independent open-source development.")
-                font.pixelSize: units.gu(1.15)
+                font.pixelSize: units.gu(1.2)
                 color: "#D6D5D2"
                 wrapMode: Text.WordWrap
                 width: parent.width
@@ -193,7 +193,7 @@ Column {
 
                     Label {
                         text: "•  github.com/suraj-yadav0/tower-crash"
-                        font.pixelSize: units.gu(1.05)
+                        font.pixelSize: units.gu(1.15)
                         color: "#848890"
                         anchors.verticalCenter: parent.verticalCenter
                     }
