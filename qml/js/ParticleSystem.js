@@ -114,7 +114,7 @@ function spawnShatterDebris(particles, units, outerRadius, innerRadius, ringY, i
             isGoal: isGoal,
             isGrand: isGrand,
             alpha: 1.0,
-            decay: 0.70
+            decay: 1.25
         });
     }
 
@@ -186,7 +186,7 @@ function spawnShatterDebris(particles, units, outerRadius, innerRadius, ringY, i
         });
     }
 
-    while (particles.length > 70) {
+    while (particles.length > 32) {
         particles.shift();
     }
 }
@@ -235,7 +235,7 @@ function spawnSegmentShatter(particles, units, outerRadius, innerRadius, ringY, 
         isGoal: false,
         isGrand: false,
         alpha: 1.0,
-        decay: 0.70
+        decay: 1.25
     });
 
     for (var s = 0; s < 3; s++) {
@@ -266,7 +266,7 @@ function spawnSegmentShatter(particles, units, outerRadius, innerRadius, ringY, 
         });
     }
 
-    while (particles.length > 70) {
+    while (particles.length > 32) {
         particles.shift();
     }
 }
@@ -362,7 +362,7 @@ function updateParticles(particles, dt, gravity, poleRadius, units) {
         }
     }
 
-    while (particles.length > 70) {
+    while (particles.length > 32) {
         particles.shift();
     }
 }

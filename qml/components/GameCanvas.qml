@@ -79,19 +79,24 @@ Canvas {
         sharedBotAoGrad.addColorStop(0.0, "rgba(0, 0, 0, 0.14)");
         sharedBotAoGrad.addColorStop(1.0, "rgba(0, 0, 0, 0.0)");
 
-        function drawFallingBlock(pt) {
-            var bInR = pt.innerRadius || inR;
-            var bOutR = pt.outerRadius || outR;
-            var bH = pt.height || rHeight;
-            var arc = pt.segArc || (Math.PI / 4.0);
-            var hArc = arc * 0.5;
-            var midAngle = pt.midAngle;
-            var midR = (bInR + bOutR) * 0.5;
+        var blkX = [0, 0, 0, 0, 0, 0, 0, 0];
+        var blkY = [0, 0, 0, 0, 0, 0, 0, 0];
 
+        function drawFallingBlock(pt) {
             var screenCenterY = bScreenY + (pt.y - camY) + (pt.z || 0) * tilt;
-            if (screenCenterY < -bOutR * 2.0 || screenCenterY > h + bOutR * 2.0) {
+            var screenCenterX = centerX + pt.x;
+            var bOutR = pt.outerRadius || outR;
+
+            if (screenCenterY < -bOutR * 1.5 || screenCenterY > h + bOutR * 1.5 ||
+                screenCenterX < -bOutR * 1.5 || screenCenterX > w + bOutR * 1.5) {
                 return;
             }
+
+            var bInR = pt.innerRadius || inR;
+            var bH = pt.height || rHeight;
+            var hArc = (pt.segArc || (Math.PI / 4.0)) * 0.5;
+            var midAngle = pt.midAngle;
+            var midR = (bInR + bOutR) * 0.5;
 
             var cosX = Math.cos(pt.rotX || 0);
             var sinX = Math.sin(pt.rotX || 0);
@@ -100,148 +105,78 @@ Canvas {
             var cosZ = Math.cos(pt.rotZ || 0);
             var sinZ = Math.sin(pt.rotZ || 0);
 
+            var cosStart = Math.cos(midAngle - hArc);
+            var sinStart = Math.sin(midAngle - hArc);
+            var cosEnd = Math.cos(midAngle + hArc);
+            var sinEnd = Math.sin(midAngle + hArc);
+
             var origCenterX = Math.cos(midAngle) * midR;
             var origCenterZ = Math.sin(midAngle) * midR;
 
-            function getScreenVertex(r, da, yLocal) {
-                var lx = r * Math.cos(midAngle + da) - origCenterX;
+            for (var vi = 0; vi < 8; vi++) {
+                var isOut = (vi === 1 || vi === 2 || vi === 5 || vi === 6);
+                var isEnd = (vi === 2 || vi === 3 || vi === 6 || vi === 7);
+                var isBot = (vi >= 4);
+
+                var r = isOut ? bOutR : bInR;
+                var cosA = isEnd ? cosEnd : cosStart;
+                var sinA = isEnd ? sinEnd : sinStart;
+                var yLocal = isBot ? bH : 0.0;
+
+                var lx = r * cosA - origCenterX;
                 var ly = yLocal - bH * 0.5;
-                var lz = r * Math.sin(midAngle + da) - origCenterZ;
+                var lz = r * sinA - origCenterZ;
 
                 var x1 = lx * cosY + lz * sinY;
-                var y1 = ly;
                 var z1 = -lx * sinY + lz * cosY;
 
-                var x2 = x1;
-                var y2 = y1 * cosX - z1 * sinX;
-                var z2 = y1 * sinX + z1 * cosX;
+                var y2 = ly * cosX - z1 * sinX;
+                var z2 = ly * sinX + z1 * cosX;
 
-                var rx = x2 * cosZ - y2 * sinZ;
-                var ry = x2 * sinZ + y2 * cosZ;
+                var rx = x1 * cosZ - y2 * sinZ;
+                var ry = x1 * sinZ + y2 * cosZ;
                 var rz = z2;
 
-                var wx = pt.x + rx;
-                var wy = pt.y + ry;
-                var wz = pt.z + rz;
-
-                return {
-                    x: centerX + wx,
-                    y: bScreenY + (wy - camY) + wz * tilt,
-                    z: wz
-                };
+                blkX[vi] = screenCenterX + rx;
+                blkY[vi] = bScreenY + (pt.y + ry - camY) + (pt.z + rz) * tilt;
             }
 
-            var daList = [-hArc, 0, hArc];
-            var tIn = [];
-            var tOut = [];
-            var bIn = [];
-            var bOut = [];
-
-            for (var i = 0; i < 3; i++) {
-                var da = daList[i];
-                tIn.push(getScreenVertex(bInR, da, 0));
-                tOut.push(getScreenVertex(bOutR, da, 0));
-                bIn.push(getScreenVertex(bInR, da, bH));
-                bOut.push(getScreenVertex(bOutR, da, bH));
-            }
+            ctx.save();
+            ctx.globalAlpha = Math.max(0, Math.min(1.0, pt.alpha));
 
             var topClr = pt.topColor || theme.topSafe;
             var sideClr = pt.sideColor || theme.sideSafe;
             var botClr = pt.bottomColor || "rgba(25, 25, 30, 0.85)";
             var cutClr = pt.cutColor || sideClr;
 
-            var faces = [
-                {
-                    pts: [tIn[0], tIn[1], tIn[2], tOut[2], tOut[1], tOut[0]],
-                    fill: topClr,
-                    isTop: true
-                },
-                {
-                    pts: [bOut[0], bOut[1], bOut[2], bIn[2], bIn[1], bIn[0]],
-                    fill: botClr,
-                    isTop: false
-                },
-                {
-                    pts: [tOut[0], tOut[1], bOut[1], bOut[0]],
-                    fill: sideClr,
-                    isTop: false
-                },
-                {
-                    pts: [tOut[1], tOut[2], bOut[2], bOut[1]],
-                    fill: sideClr,
-                    isTop: false
-                },
-                {
-                    pts: [tIn[1], tIn[0], bIn[0], bIn[1]],
-                    fill: sideClr,
-                    isTop: false
-                },
-                {
-                    pts: [tIn[2], tIn[1], bIn[1], bIn[2]],
-                    fill: sideClr,
-                    isTop: false
-                },
-                {
-                    pts: [tIn[0], tOut[0], bOut[0], bIn[0]],
-                    fill: cutClr,
-                    isTop: false
-                },
-                {
-                    pts: [tOut[2], tIn[2], bIn[2], bOut[2]],
-                    fill: cutClr,
-                    isTop: false
+            function drawFace(i0, i1, i2, i3, fillClr) {
+                var a = (blkX[i0] * blkY[i1] - blkX[i1] * blkY[i0])
+                      + (blkX[i1] * blkY[i2] - blkX[i2] * blkY[i1])
+                      + (blkX[i2] * blkY[i3] - blkX[i3] * blkY[i2])
+                      + (blkX[i3] * blkY[i0] - blkX[i0] * blkY[i3]);
+                if (a > 0.05) {
+                    ctx.beginPath();
+                    ctx.moveTo(blkX[i0], blkY[i0]);
+                    ctx.lineTo(blkX[i1], blkY[i1]);
+                    ctx.lineTo(blkX[i2], blkY[i2]);
+                    ctx.lineTo(blkX[i3], blkY[i3]);
+                    ctx.closePath();
+                    ctx.fillStyle = fillClr;
+                    ctx.fill();
+                    return true;
                 }
-            ];
-
-            var visibleFaces = [];
-            for (var f = 0; f < faces.length; f++) {
-                var face = faces[f];
-                var fPts = face.pts;
-                var area = 0;
-                var zSum = 0;
-                var n = fPts.length;
-                for (var p = 0; p < n; p++) {
-                    var nextP = (p + 1) % n;
-                    area += fPts[p].x * fPts[nextP].y - fPts[nextP].x * fPts[p].y;
-                    zSum += fPts[p].z;
-                }
-                if (area > 0.05) {
-                    face.avgZ = zSum / n;
-                    visibleFaces.push(face);
-                }
+                return false;
             }
 
-            visibleFaces.sort(function(a, b) {
-                return a.avgZ - b.avgZ;
-            });
-
-            ctx.save();
-            ctx.globalAlpha = Math.max(0, Math.min(1.0, pt.alpha));
-
-            for (var vf = 0; vf < visibleFaces.length; vf++) {
-                var vFace = visibleFaces[vf];
-                var pts = vFace.pts;
-
-                ctx.beginPath();
-                ctx.moveTo(pts[0].x, pts[0].y);
-                for (var k = 1; k < pts.length; k++) {
-                    ctx.lineTo(pts[k].x, pts[k].y);
-                }
-                ctx.closePath();
-                ctx.fillStyle = vFace.fill;
+            if (drawFace(0, 3, 2, 1, topClr) && pt.isGoal) {
+                ctx.fillStyle = "rgba(255, 255, 255, 0.28)";
                 ctx.fill();
-
-                if (vFace.isTop) {
-                    if (pt.isGoal) {
-                        ctx.fillStyle = "rgba(255, 255, 255, 0.28)";
-                        ctx.fill();
-                    }
-                }
-
-                ctx.strokeStyle = "rgba(10, 15, 20, 0.35)";
-                ctx.lineWidth = units.gu(0.06);
-                ctx.stroke();
             }
+            drawFace(5, 6, 7, 4, botClr);
+            drawFace(1, 2, 6, 5, sideClr);
+            drawFace(3, 0, 4, 7, botClr);
+            drawFace(0, 1, 5, 4, cutClr);
+            drawFace(2, 3, 7, 6, cutClr);
 
             ctx.restore();
         }
@@ -1102,23 +1037,71 @@ Canvas {
         var rotX = game.ballRotationX || 0.0;
         var rotY = game.ballRotationY || 0.0;
 
+        var ballCosY = Math.cos(rotY);
+        var ballSinY = Math.sin(rotY);
+        var ballCosX = Math.cos(rotX);
+        var ballSinX = Math.sin(rotX);
+        var ballCosTilt = 0.9759674;
+        var ballSinTilt = 0.2179831;
+
+        var pX = 0, pY = 0, pZ = 0;
+        function projectFast(x0, y0, z0) {
+            var x1 = x0 * ballCosY + z0 * ballSinY;
+            var z1 = -x0 * ballSinY + z0 * ballCosY;
+
+            var y2 = y0 * ballCosX - z1 * ballSinX;
+            var z2 = y0 * ballSinX + z1 * ballCosX;
+
+            var x3 = x1 * ballCosTilt - y2 * ballSinTilt;
+            var y3 = x1 * ballSinTilt + y2 * ballCosTilt;
+
+            pX = x3 * bRadius;
+            pY = y3 * bRadius;
+            pZ = z2;
+        }
+
         function drawSphereLoop(coords) {
             var len = coords.length;
-            for (var i = 0; i < len; i++) {
-                var p1 = GamePhysics.projectSpherePoint(coords[i], rotX, rotY, bRadius);
-                var p2 = GamePhysics.projectSpherePoint(coords[(i + 1) % len], rotX, rotY, bRadius);
-                if (p1.z > 0 && p2.z > 0) {
-                    ctx.moveTo(p1.x, p1.y);
-                    ctx.lineTo(p2.x, p2.y);
-                } else if (p1.z > 0 && p2.z <= 0) {
-                    var f1 = p1.z / (p1.z - p2.z);
-                    ctx.moveTo(p1.x, p1.y);
-                    ctx.lineTo(p1.x + (p2.x - p1.x) * f1, p1.y + (p2.y - p1.y) * f1);
-                } else if (p1.z <= 0 && p2.z > 0) {
-                    var f2 = -p1.z / (p2.z - p1.z);
-                    ctx.moveTo(p1.x + (p2.x - p1.x) * f2, p1.y + (p2.y - p1.y) * f2);
-                    ctx.lineTo(p2.x, p2.y);
+            if (len === 0) return;
+
+            projectFast(coords[0].x, coords[0].y, coords[0].z);
+            var prevX = pX;
+            var prevY = pY;
+            var prevZ = pZ;
+            var firstX = prevX;
+            var firstY = prevY;
+            var firstZ = prevZ;
+
+            for (var i = 1; i <= len; i++) {
+                var nextX, nextY, nextZ;
+                if (i < len) {
+                    var c = coords[i];
+                    projectFast(c.x, c.y, c.z);
+                    nextX = pX;
+                    nextY = pY;
+                    nextZ = pZ;
+                } else {
+                    nextX = firstX;
+                    nextY = firstY;
+                    nextZ = firstZ;
                 }
+
+                if (prevZ > 0 && nextZ > 0) {
+                    ctx.moveTo(prevX, prevY);
+                    ctx.lineTo(nextX, nextY);
+                } else if (prevZ > 0 && nextZ <= 0) {
+                    var f1 = prevZ / (prevZ - nextZ);
+                    ctx.moveTo(prevX, prevY);
+                    ctx.lineTo(prevX + (nextX - prevX) * f1, prevY + (nextY - prevY) * f1);
+                } else if (prevZ <= 0 && nextZ > 0) {
+                    var f2 = -prevZ / (nextZ - prevZ);
+                    ctx.moveTo(prevX + (nextX - prevX) * f2, prevY + (nextY - prevY) * f2);
+                    ctx.lineTo(nextX, nextY);
+                }
+
+                prevX = nextX;
+                prevY = nextY;
+                prevZ = nextZ;
             }
         }
 
@@ -1140,63 +1123,39 @@ Canvas {
             ctx.stroke();
         } else if (bStyle === 2) {
             var beachColors = ["#E74C3C", "#F8F9FA", "#2980B9", "#F1C40F", "#E67E22", "#1ABC9C"];
-            var numWedges = beachColors.length;
-            var latSteps = 10;
+            var gores = GamePhysics.BEACHBALL_GORES;
 
-            for (var w = 0; w < numWedges; w++) {
-                var lonA = w * (Math.PI * 2.0 / numWedges);
-                var lonB = (w + 1) * (Math.PI * 2.0 / numWedges);
+            for (var w = 0; w < 6; w++) {
+                var goreMid = GamePhysics.BEACHBALL_MIDPOINTS[w];
+                projectFast(goreMid.x, goreMid.y, goreMid.z);
+                if (pZ < -0.55) continue;
 
-                for (var lat = 0; lat < latSteps; lat++) {
-                    var phi1 = -Math.PI * 0.5 + lat * (Math.PI / latSteps);
-                    var phi2 = -Math.PI * 0.5 + (lat + 1) * (Math.PI / latSteps);
-
-                    var pA1 = { x: Math.cos(phi1) * Math.sin(lonA), y: Math.sin(phi1), z: Math.cos(phi1) * Math.cos(lonA) };
-                    var pA2 = { x: Math.cos(phi2) * Math.sin(lonA), y: Math.sin(phi2), z: Math.cos(phi2) * Math.cos(lonA) };
-                    var pB2 = { x: Math.cos(phi2) * Math.sin(lonB), y: Math.sin(phi2), z: Math.cos(phi2) * Math.cos(lonB) };
-                    var pB1 = { x: Math.cos(phi1) * Math.sin(lonB), y: Math.sin(phi1), z: Math.cos(phi1) * Math.cos(lonB) };
-
-                    var sA1 = GamePhysics.projectSpherePoint(pA1, rotX, rotY, bRadius);
-                    var sA2 = GamePhysics.projectSpherePoint(pA2, rotX, rotY, bRadius);
-                    var sB2 = GamePhysics.projectSpherePoint(pB2, rotX, rotY, bRadius);
-                    var sB1 = GamePhysics.projectSpherePoint(pB1, rotX, rotY, bRadius);
-
-                    if (sA1.z > -0.1 || sA2.z > -0.1 || sB2.z > -0.1 || sB1.z > -0.1) {
-                        ctx.beginPath();
-                        ctx.moveTo(sA1.x, sA1.y);
-                        ctx.lineTo(sA2.x, sA2.y);
-                        ctx.lineTo(sB2.x, sB2.y);
-                        ctx.lineTo(sB1.x, sB1.y);
-                        ctx.closePath();
-                        ctx.fillStyle = beachColors[w];
-                        ctx.fill();
-                    }
+                var pts = gores[w];
+                projectFast(pts[0].x, pts[0].y, pts[0].z);
+                ctx.beginPath();
+                ctx.moveTo(pX, pY);
+                for (var gi = 1; gi < pts.length; gi++) {
+                    projectFast(pts[gi].x, pts[gi].y, pts[gi].z);
+                    ctx.lineTo(pX, pY);
                 }
+                ctx.closePath();
+                ctx.fillStyle = beachColors[w];
+                ctx.fill();
             }
 
-            for (var mIdx = 0; mIdx < numWedges; mIdx++) {
-                var mAngle = mIdx * (Math.PI * 2.0 / numWedges);
-                var mCoords = [];
-                for (var st = 0; st < 24; st++) {
-                    var tA = (st / 24.0) * Math.PI * 2.0;
-                    mCoords.push({
-                        x: Math.sin(tA) * Math.sin(mAngle),
-                        y: Math.cos(tA),
-                        z: Math.sin(tA) * Math.cos(mAngle)
-                    });
-                }
-                ctx.beginPath();
-                drawSphereLoop(mCoords);
-                ctx.strokeStyle = "rgba(0, 0, 0, 0.30)";
-                ctx.lineWidth = units.gu(0.08);
-                ctx.stroke();
+            ctx.beginPath();
+            for (var mIdx = 0; mIdx < 6; mIdx++) {
+                drawSphereLoop(GamePhysics.BEACHBALL_MERIDIANS[mIdx]);
             }
+            ctx.strokeStyle = "rgba(0, 0, 0, 0.30)";
+            ctx.lineWidth = units.gu(0.08);
+            ctx.stroke();
 
-            var poleN = GamePhysics.projectSpherePoint({ x: 0, y: -1, z: 0 }, rotX, rotY, bRadius);
-            if (poleN.z > 0.04) {
-                var capRN = bRadius * 0.28 * Math.sqrt(poleN.z);
+            projectFast(0, -1, 0);
+            if (pZ > 0.04) {
+                var capRN = bRadius * 0.28 * Math.sqrt(pZ);
                 ctx.beginPath();
-                ctx.arc(poleN.x, poleN.y, capRN, 0, Math.PI * 2.0);
+                ctx.arc(pX, pY, capRN, 0, Math.PI * 2.0);
                 ctx.fillStyle = "#FFFFFF";
                 ctx.fill();
                 ctx.strokeStyle = "rgba(0, 0, 0, 0.35)";
@@ -1204,11 +1163,11 @@ Canvas {
                 ctx.stroke();
             }
 
-            var poleS = GamePhysics.projectSpherePoint({ x: 0, y: 1, z: 0 }, rotX, rotY, bRadius);
-            if (poleS.z > 0.04) {
-                var capRS = bRadius * 0.28 * Math.sqrt(poleS.z);
+            projectFast(0, 1, 0);
+            if (pZ > 0.04) {
+                var capRS = bRadius * 0.28 * Math.sqrt(pZ);
                 ctx.beginPath();
-                ctx.arc(poleS.x, poleS.y, capRS, 0, Math.PI * 2.0);
+                ctx.arc(pX, pY, capRS, 0, Math.PI * 2.0);
                 ctx.fillStyle = "#FFFFFF";
                 ctx.fill();
                 ctx.strokeStyle = "rgba(0, 0, 0, 0.35)";
@@ -1219,18 +1178,17 @@ Canvas {
             ctx.fillStyle = "#111215";
             ctx.fill();
 
-            var badges = [
-                { x: 0, y: 0, z: 1.0 },
-                { x: 0, y: 0, z: -1.0 }
-            ];
+            var badges = GamePhysics.EIGHT_BALL_BADGES;
             for (var bi = 0; bi < badges.length; bi++) {
-                var pBadge = GamePhysics.projectSpherePoint(badges[bi], rotX, rotY, bRadius);
-                if (pBadge.z > 0.04) {
-                    var bScale = Math.sqrt(pBadge.z);
+                projectFast(badges[bi].x, badges[bi].y, badges[bi].z);
+                if (pZ > 0.04) {
+                    var bScale = Math.sqrt(pZ);
                     var bRad = bRadius * 0.44 * bScale;
+                    var bX = pX;
+                    var bY = pY;
 
                     ctx.beginPath();
-                    ctx.arc(pBadge.x, pBadge.y, bRad, 0, Math.PI * 2.0);
+                    ctx.arc(bX, bY, bRad, 0, Math.PI * 2.0);
                     ctx.fillStyle = "#FFFFFF";
                     ctx.fill();
                     ctx.strokeStyle = "rgba(0, 0, 0, 0.20)";
@@ -1239,26 +1197,18 @@ Canvas {
 
                     var rTop = bRad * 0.28;
                     var rBot = bRad * 0.34;
-                    var yTop = pBadge.y - bRad * 0.24;
-                    var yBot = pBadge.y + bRad * 0.26;
+                    var yTop = bY - bRad * 0.24;
+                    var yBot = bY + bRad * 0.26;
 
                     ctx.beginPath();
-                    ctx.arc(pBadge.x, yTop, rTop, 0, Math.PI * 2.0);
+                    ctx.arc(bX, yTop, rTop, 0, Math.PI * 2.0);
+                    ctx.arc(bX, yBot, rBot, 0, Math.PI * 2.0);
                     ctx.fillStyle = "#111215";
                     ctx.fill();
 
                     ctx.beginPath();
-                    ctx.arc(pBadge.x, yBot, rBot, 0, Math.PI * 2.0);
-                    ctx.fillStyle = "#111215";
-                    ctx.fill();
-
-                    ctx.beginPath();
-                    ctx.arc(pBadge.x, yTop, rTop * 0.44, 0, Math.PI * 2.0);
-                    ctx.fillStyle = "#FFFFFF";
-                    ctx.fill();
-
-                    ctx.beginPath();
-                    ctx.arc(pBadge.x, yBot, rBot * 0.44, 0, Math.PI * 2.0);
+                    ctx.arc(bX, yTop, rTop * 0.44, 0, Math.PI * 2.0);
+                    ctx.arc(bX, yBot, rBot * 0.44, 0, Math.PI * 2.0);
                     ctx.fillStyle = "#FFFFFF";
                     ctx.fill();
                 }
@@ -1308,24 +1258,19 @@ Canvas {
             ctx.lineWidth = units.gu(0.08);
             ctx.stroke();
 
-            var pips = [
-                { x: 0, y: 1, z: 0 },
-                { x: 0, y: -1, z: 0 },
-                { x: 1, y: 0, z: 0 },
-                { x: -1, y: 0, z: 0 }
-            ];
+            var pips = GamePhysics.BALL_PIPS;
             for (var pi = 0; pi < pips.length; pi++) {
-                var pProj = GamePhysics.projectSpherePoint(pips[pi], rotX, rotY, bRadius);
-                if (pProj.z > 0.08) {
-                    var pipR = bRadius * 0.16 * Math.sqrt(pProj.z);
+                projectFast(pips[pi].x, pips[pi].y, pips[pi].z);
+                if (pZ > 0.08) {
+                    var pipR = bRadius * 0.16 * Math.sqrt(pZ);
                     ctx.beginPath();
-                    ctx.arc(pProj.x, pProj.y, pipR, 0, Math.PI * 2.0);
+                    ctx.arc(pX, pY, pipR, 0, Math.PI * 2.0);
                     ctx.fillStyle = theme.ballLight;
-                    ctx.globalAlpha = Math.min(1.0, pProj.z * 1.3) * 0.70;
+                    ctx.globalAlpha = Math.min(1.0, pZ * 1.3) * 0.70;
                     ctx.fill();
 
                     ctx.beginPath();
-                    ctx.arc(pProj.x, pProj.y, pipR * 0.45, 0, Math.PI * 2.0);
+                    ctx.arc(pX, pY, pipR * 0.45, 0, Math.PI * 2.0);
                     ctx.fillStyle = theme.ballDark;
                     ctx.fill();
                 }

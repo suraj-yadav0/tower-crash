@@ -82,6 +82,81 @@ var TROPIC_SOUTH_COORDS = (function() {
     return coords;
 })();
 
+var BALL_PIPS = [
+    { x: 0.0, y: 1.0, z: 0.0 },
+    { x: 0.0, y: -1.0, z: 0.0 },
+    { x: 1.0, y: 0.0, z: 0.0 },
+    { x: -1.0, y: 0.0, z: 0.0 }
+];
+
+var EIGHT_BALL_BADGES = [
+    { x: 0.0, y: 0.0, z: 1.0 },
+    { x: 0.0, y: 0.0, z: -1.0 }
+];
+
+var BEACHBALL_GORES = (function() {
+    var gores = [];
+    var numWedges = 6;
+    var steps = 8;
+    for (var w = 0; w < numWedges; w++) {
+        var lonA = w * (Math.PI * 2.0 / numWedges);
+        var lonB = (w + 1) * (Math.PI * 2.0 / numWedges);
+        var pts = [];
+        for (var s1 = 0; s1 <= steps; s1++) {
+            var phi1 = -Math.PI * 0.5 + (s1 / steps) * Math.PI;
+            pts.push({
+                x: Math.cos(phi1) * Math.sin(lonA),
+                y: Math.sin(phi1),
+                z: Math.cos(phi1) * Math.cos(lonA)
+            });
+        }
+        for (var s2 = steps; s2 >= 0; s2--) {
+            var phi2 = -Math.PI * 0.5 + (s2 / steps) * Math.PI;
+            pts.push({
+                x: Math.cos(phi2) * Math.sin(lonB),
+                y: Math.sin(phi2),
+                z: Math.cos(phi2) * Math.cos(lonB)
+            });
+        }
+        gores.push(pts);
+    }
+    return gores;
+})();
+
+var BEACHBALL_MIDPOINTS = (function() {
+    var mids = [];
+    var numWedges = 6;
+    for (var w = 0; w < numWedges; w++) {
+        var lonMid = (w + 0.5) * (Math.PI * 2.0 / numWedges);
+        mids.push({
+            x: Math.sin(lonMid),
+            y: 0.0,
+            z: Math.cos(lonMid)
+        });
+    }
+    return mids;
+})();
+
+var BEACHBALL_MERIDIANS = (function() {
+    var meridians = [];
+    var numWedges = 6;
+    var count = 20;
+    for (var w = 0; w < numWedges; w++) {
+        var mAngle = w * (Math.PI * 2.0 / numWedges);
+        var coords = [];
+        for (var st = 0; st < count; st++) {
+            var tA = (st / count) * Math.PI * 2.0;
+            coords.push({
+                x: Math.sin(tA) * Math.sin(mAngle),
+                y: Math.cos(tA),
+                z: Math.sin(tA) * Math.cos(mAngle)
+            });
+        }
+        meridians.push(coords);
+    }
+    return meridians;
+})();
+
 var HAZARD_SPIKE_LAYOUT = [
     { u: 0.35, v: 0.30 },
     { u: 0.35, v: 0.70 },
