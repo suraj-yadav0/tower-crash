@@ -41,6 +41,49 @@ function spawnBounceDust(particles, units, outerRadius, innerRadius, y, color1, 
     }
 }
 
+function addFallingBlock(particles, units, outerRadius, innerRadius, ringY, rH, midR, segStart, segMid, topClr, sideClr, isHazard, isGoal, isGrand, isSuper, rotSpeed) {
+    var radX = Math.cos(segMid);
+    var radZ = Math.sin(segMid);
+    var tanX = -Math.sin(segMid);
+    var tanZ = Math.cos(segMid);
+
+    var mult = isSuper ? 1.35 : 1.0;
+    var blastSpeed = units.gu(7.0 + Math.random() * 5.0) * mult;
+    var tanVelocity = (rotSpeed ? rotSpeed * midR * 0.6 : 0) + (Math.random() - 0.5) * units.gu(3.0);
+    var downSpeed = units.gu(3.0 + Math.random() * 5.0) * mult;
+
+    particles.push({
+        kind: "block",
+        x: radX * midR,
+        y: ringY + rH * 0.5,
+        z: radZ * midR,
+        vx: radX * blastSpeed + tanX * tanVelocity,
+        vy: downSpeed,
+        vz: radZ * blastSpeed + tanZ * tanVelocity,
+        rotX: (Math.random() - 0.5) * 0.25,
+        rotY: (Math.random() - 0.5) * 0.25,
+        rotZ: (Math.random() - 0.5) * 0.25,
+        vrotX: (Math.random() - 0.5) * 5.5 + (isSuper ? 2.5 : 1.5),
+        vrotY: (Math.random() - 0.5) * 4.5,
+        vrotZ: (Math.random() - 0.5) * 5.5,
+        startAngle: segStart,
+        midAngle: segMid,
+        segArc: Math.PI / 4.0,
+        outerRadius: outerRadius,
+        innerRadius: innerRadius,
+        height: rH,
+        topColor: topClr,
+        sideColor: sideClr,
+        bottomColor: "rgba(25, 25, 30, 0.85)",
+        cutColor: sideClr,
+        isHazard: Boolean(isHazard),
+        isGoal: Boolean(isGoal),
+        isGrand: Boolean(isGrand),
+        alpha: 1.0,
+        decay: 1.25
+    });
+}
+
 function spawnShatterDebris(particles, units, outerRadius, innerRadius, ringY, isGoal, isGrand, theme, isSuper, ring, towerAngle, ringHeight) {
     var midR = (outerRadius + innerRadius) / 2.0;
     var rH = ringHeight || units.gu(2.8);
@@ -69,53 +112,12 @@ function spawnShatterDebris(particles, units, outerRadius, innerRadius, ringY, i
         if (segType === 1) continue;
 
         var isHazard = (segType === 2 && !isGoal);
-        var isFragile = (segType === 3);
-
         var topClr = isGoal ? (isGrand ? "#FFF275" : (theme.goalTop || "#E8C872")) : (isHazard ? (theme.topHazard || "#BA3C3C") : (theme.topSafe || "#D99B26"));
         var sideClr = isGoal ? (isGrand ? "#D4AF37" : (theme.goalSide || "#B09242")) : (isHazard ? (theme.sideHazard || "#8E2A2A") : (theme.sideSafe || "#A06B15"));
 
         var segStart = ringAngle + s * (Math.PI / 4.0);
         var segMid = segStart + (Math.PI / 8.0);
-
-        var radX = Math.cos(segMid);
-        var radZ = Math.sin(segMid);
-        var tanX = -Math.sin(segMid);
-        var tanZ = Math.cos(segMid);
-
-        var blastSpeed = (units.gu(7.0 + Math.random() * 5.0)) * (isSuper ? 1.35 : 1.0);
-        var tanSpeed = (ring && ring.rotationSpeed ? ring.rotationSpeed * midR * 0.6 : 0) + (Math.random() - 0.5) * units.gu(3.0);
-        var downSpeed = units.gu(3.0 + Math.random() * 5.5) * (isSuper ? 1.3 : 1.0);
-
-        particles.push({
-            kind: "block",
-            x: radX * midR,
-            y: ringY + rH * 0.5,
-            z: radZ * midR,
-            vx: radX * blastSpeed + tanX * tanSpeed,
-            vy: downSpeed,
-            vz: radZ * blastSpeed + tanZ * tanSpeed,
-            rotX: (Math.random() - 0.5) * 0.25,
-            rotY: (Math.random() - 0.5) * 0.25,
-            rotZ: (Math.random() - 0.5) * 0.25,
-            vrotX: (Math.random() - 0.5) * 5.5 + (isSuper ? 2.5 : 1.5),
-            vrotY: (Math.random() - 0.5) * 4.5,
-            vrotZ: (Math.random() - 0.5) * 5.5,
-            startAngle: segStart,
-            midAngle: segMid,
-            segArc: Math.PI / 4.0,
-            outerRadius: outerRadius,
-            innerRadius: innerRadius,
-            height: rH,
-            topColor: topClr,
-            sideColor: sideClr,
-            bottomColor: "rgba(25, 25, 30, 0.85)",
-            cutColor: sideClr,
-            isHazard: isHazard,
-            isGoal: isGoal,
-            isGrand: isGrand,
-            alpha: 1.0,
-            decay: 1.25
-        });
+        addFallingBlock(particles, units, outerRadius, innerRadius, ringY, rH, midR, segStart, segMid, topClr, sideClr, isHazard, isGoal, isGrand, isSuper, ring ? ring.rotationSpeed : 0);
     }
 
     var shardCount = isGrand ? 6 : 4;
@@ -198,45 +200,7 @@ function spawnSegmentShatter(particles, units, outerRadius, innerRadius, ringY, 
     var segStart = (segIndex !== undefined) ? (ringAngle + segIndex * (Math.PI / 4.0)) : (angle - Math.PI / 8.0);
     var segMid = segStart + (Math.PI / 8.0);
 
-    var radX = Math.cos(segMid);
-    var radZ = Math.sin(segMid);
-    var tanX = -Math.sin(segMid);
-    var tanZ = Math.cos(segMid);
-
-    var blastSpeed = units.gu(7.5 + Math.random() * 4.5);
-    var tanSpeed = (Math.random() - 0.5) * units.gu(3.0);
-    var downSpeed = units.gu(3.5 + Math.random() * 4.5);
-
-    particles.push({
-        kind: "block",
-        x: radX * midR,
-        y: ringY + rH * 0.5,
-        z: radZ * midR,
-        vx: radX * blastSpeed + tanX * tanSpeed,
-        vy: downSpeed,
-        vz: radZ * blastSpeed + tanZ * tanSpeed,
-        rotX: (Math.random() - 0.5) * 0.25,
-        rotY: (Math.random() - 0.5) * 0.25,
-        rotZ: (Math.random() - 0.5) * 0.25,
-        vrotX: (Math.random() - 0.5) * 6.0 + 2.0,
-        vrotY: (Math.random() - 0.5) * 4.5,
-        vrotZ: (Math.random() - 0.5) * 5.5,
-        startAngle: segStart,
-        midAngle: segMid,
-        segArc: Math.PI / 4.0,
-        outerRadius: outerRadius,
-        innerRadius: innerRadius,
-        height: rH,
-        topColor: topClr,
-        sideColor: edgeClr,
-        bottomColor: "rgba(25, 25, 30, 0.85)",
-        cutColor: edgeClr,
-        isHazard: false,
-        isGoal: false,
-        isGrand: false,
-        alpha: 1.0,
-        decay: 1.25
-    });
+    addFallingBlock(particles, units, outerRadius, innerRadius, ringY, rH, midR, segStart, segMid, topClr, edgeClr, false, false, false, false, ring ? ring.rotationSpeed : 0);
 
     for (var s = 0; s < 3; s++) {
         var shardAngle = segMid + (Math.random() - 0.5) * 0.45;

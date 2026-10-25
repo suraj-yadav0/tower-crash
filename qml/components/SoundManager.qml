@@ -95,13 +95,6 @@ Item {
         } catch (e) {}
     }
 
-    // No-op compatibility methods
-    function playPass(streak) {}
-    function playGameOver() {}
-    function playWhoosh() {}
-    function stopWhoosh() {}
-    function playClick() {}
-
     function stopAll() {
         if (!multimediaLoader.item) return;
         try {

@@ -337,11 +337,7 @@ MainView {
             onCurrentLevelChanged: {
                 if (currentLevel > highestLevelReached) {
                     highestLevelReached = currentLevel;
-                    if (Storage.saveHighestLevelForMode) {
-                        Storage.saveHighestLevelForMode(highestLevelReached, difficultyMode);
-                    } else {
-                        Storage.saveHighestLevel(highestLevelReached);
-                    }
+                    Storage.saveHighestLevelForMode(highestLevelReached, difficultyMode);
                 }
                 if (Progression.isCheckpointLevel(currentLevel, difficultyMode)) {
                     unlockCheckpoint(currentLevel);
@@ -355,20 +351,11 @@ MainView {
                 if (isNew) {
                     unlockedCheckpoints = updated;
                     selectedCheckpoint = lvl;
-                    if (Storage.saveUnlockedCheckpointsForMode) {
-                        Storage.saveUnlockedCheckpointsForMode(unlockedCheckpoints, difficultyMode);
-                        Storage.saveSelectedCheckpointForMode(selectedCheckpoint, difficultyMode);
-                    } else {
-                        Storage.saveUnlockedCheckpoints(unlockedCheckpoints);
-                        Storage.saveSelectedCheckpoint(selectedCheckpoint);
-                    }
+                    Storage.saveUnlockedCheckpointsForMode(unlockedCheckpoints, difficultyMode);
+                    Storage.saveSelectedCheckpointForMode(selectedCheckpoint, difficultyMode);
                 } else if (lvl > selectedCheckpoint) {
                     selectedCheckpoint = lvl;
-                    if (Storage.saveSelectedCheckpointForMode) {
-                        Storage.saveSelectedCheckpointForMode(selectedCheckpoint, difficultyMode);
-                    } else {
-                        Storage.saveSelectedCheckpoint(selectedCheckpoint);
-                    }
+                    Storage.saveSelectedCheckpointForMode(selectedCheckpoint, difficultyMode);
                 }
             }
 
@@ -380,11 +367,7 @@ MainView {
                 }
                 var validCheckpoint = Math.max(1, checkpointLevel || selectedCheckpoint || 1);
                 selectedCheckpoint = validCheckpoint;
-                if (Storage.saveSelectedCheckpointForMode) {
-                    Storage.saveSelectedCheckpointForMode(selectedCheckpoint, difficultyMode);
-                } else {
-                    Storage.saveSelectedCheckpoint(selectedCheckpoint);
-                }
+                Storage.saveSelectedCheckpointForMode(selectedCheckpoint, difficultyMode);
                 initGame(validCheckpoint);
             }
 
@@ -392,10 +375,8 @@ MainView {
                 var m = Math.max(0, Math.min(3, parseInt(newMode) || 0));
                 if (m === difficultyMode) return;
                 difficultyMode = m;
-                if (Storage.saveDifficultyMode) {
-                    Storage.saveDifficultyMode(m);
-                }
-                var diffStats = Storage.getDifficultyStats ? Storage.getDifficultyStats(m) : { bestScore: 0, highestLevelReached: 1, unlockedCheckpoints: [1], selectedCheckpoint: 1 };
+                Storage.saveDifficultyMode(m);
+                var diffStats = Storage.getDifficultyStats(m);
                 bestScore = diffStats.bestScore || 0;
                 highestLevelReached = diffStats.highestLevelReached || 1;
                 if (ballStyle !== 0 && !Progression.isBallUnlocked(ballStyle, highestLevelReached)) {
@@ -513,11 +494,7 @@ MainView {
                     var nearest = Progression.getNearestCheckpoint(currentLevel, unlockedCheckpoints, difficultyMode);
                     if (nearest > selectedCheckpoint) {
                         selectedCheckpoint = nearest;
-                        if (Storage.saveSelectedCheckpointForMode) {
-                            Storage.saveSelectedCheckpointForMode(selectedCheckpoint, difficultyMode);
-                        } else {
-                            Storage.saveSelectedCheckpoint(selectedCheckpoint);
-                        }
+                        Storage.saveSelectedCheckpointForMode(selectedCheckpoint, difficultyMode);
                     }
                 } else {
                     selectedCheckpoint = 1;
@@ -915,11 +892,7 @@ MainView {
                         return;
                     }
                     gameContainer.selectedCheckpoint = checkpoint;
-                    if (Storage.saveSelectedCheckpointForMode) {
-                        Storage.saveSelectedCheckpointForMode(checkpoint, gameContainer.difficultyMode);
-                    } else {
-                        Storage.saveSelectedCheckpoint(checkpoint);
-                    }
+                    Storage.saveSelectedCheckpointForMode(checkpoint, gameContainer.difficultyMode);
                     gameCanvas.requestPaint();
                 }
                 onSettingsRequested: {

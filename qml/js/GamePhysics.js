@@ -368,11 +368,7 @@ function checkBallCollision(game, prevY, nextY, speedScale, soundManager, stageC
 
                 if (nextLvl > game.highestLevelReached) {
                     game.highestLevelReached = nextLvl;
-                    if (Storage.saveHighestLevelForMode) {
-                        Storage.saveHighestLevelForMode(nextLvl, game.difficultyMode);
-                    } else {
-                        Storage.saveHighestLevel(nextLvl);
-                    }
+                    Storage.saveHighestLevelForMode(nextLvl, game.difficultyMode);
                 }
                 if (isCp && (!Progression.hasCheckpoints || Progression.hasCheckpoints(game.difficultyMode))) {
                     game.unlockCheckpoint(nextLvl);
@@ -380,11 +376,7 @@ function checkBallCollision(game, prevY, nextY, speedScale, soundManager, stageC
 
                 if (game.score > game.bestScore) {
                     game.bestScore = game.score;
-                    if (Storage.saveBestScoreForMode) {
-                        Storage.saveBestScoreForMode(game.bestScore, game.difficultyMode);
-                    } else {
-                        Storage.queueStat("bestScore", game.bestScore);
-                    }
+                    Storage.saveBestScoreForMode(game.bestScore, game.difficultyMode);
                 }
                 if (game.activePlayTimeAccumulator > 0.0) {
                     Storage.recordPlayTime(game.activePlayTimeAccumulator);

@@ -97,13 +97,6 @@ Item {
         } catch (e) {}
     }
 
-    // Unused sound methods kept as clean no-ops for compatibility
-    function playPass(streak) {}
-    function playGameOver() {}
-    function playWhoosh() {}
-    function stopWhoosh() {}
-    function playClick() {}
-
     function stopAll() {
         try {
             sfxBounce.stop();

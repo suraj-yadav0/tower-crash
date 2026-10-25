@@ -209,17 +209,15 @@ function getStat(key, fallback) {
 }
 
 function saveHighestLevel(level) {
-    saveStat("highestLevelReached", Math.max(1, parseInt(level) || 1));
+    saveHighestLevelForMode(level, 1);
 }
 
 function saveUnlockedCheckpoints(checkpoints) {
-    if (Array.isArray(checkpoints)) {
-        saveStat("unlockedCheckpoints", JSON.stringify(checkpoints));
-    }
+    saveUnlockedCheckpointsForMode(checkpoints, 1);
 }
 
 function saveSelectedCheckpoint(level) {
-    saveStat("selectedCheckpoint", Math.max(1, parseInt(level) || 1));
+    saveSelectedCheckpointForMode(level, 1);
 }
 
 function getDifficultyStats(mode) {
