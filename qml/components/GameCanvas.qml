@@ -862,25 +862,35 @@ Canvas {
             var wakeH = actualBallScreenY - apexY;
             var kappa = 0.55228475;
 
-            // Capsule path: parallel vertical walls with rounded dome cap at top
+            // Capsule path with subtle inward convergence toward the top apex
             function drawCapsulePath(halfW, topY) {
                 var h = actualBallScreenY - topY;
                 if (h <= 0.0) return;
-                var domeR = Math.min(halfW, h * 0.4);
+                var topW = halfW * 0.68;
+                var domeR = Math.min(topW, h * 0.35);
+
                 ctx.beginPath();
                 ctx.moveTo(centerX - halfW, actualBallScreenY);
-                ctx.lineTo(centerX - halfW, topY + domeR);
                 ctx.bezierCurveTo(
-                    centerX - halfW, topY + domeR * (1.0 - kappa),
-                    centerX - halfW * kappa, topY,
+                    centerX - halfW, actualBallScreenY - h * 0.38,
+                    centerX - (halfW * 0.45 + topW * 0.55), topY + domeR + h * 0.22,
+                    centerX - topW, topY + domeR
+                );
+                ctx.bezierCurveTo(
+                    centerX - topW, topY + domeR * (1.0 - kappa),
+                    centerX - topW * kappa, topY,
                     centerX, topY
                 );
                 ctx.bezierCurveTo(
-                    centerX + halfW * kappa, topY,
-                    centerX + halfW, topY + domeR * (1.0 - kappa),
-                    centerX + halfW, topY + domeR
+                    centerX + topW * kappa, topY,
+                    centerX + topW, topY + domeR * (1.0 - kappa),
+                    centerX + topW, topY + domeR
                 );
-                ctx.lineTo(centerX + halfW, actualBallScreenY);
+                ctx.bezierCurveTo(
+                    centerX + (halfW * 0.45 + topW * 0.55), topY + domeR + h * 0.22,
+                    centerX + halfW, actualBallScreenY - h * 0.38,
+                    centerX + halfW, actualBallScreenY
+                );
                 ctx.closePath();
             }
 
@@ -896,10 +906,11 @@ Canvas {
                     var echoA = echo.alpha * (isSuper ? 0.26 : 0.16) * (1.0 - echoFrac * 0.5) * wakeStrength;
                     if (echoA < 0.008) continue;
 
+                    var echoScale = 1.0 - echoFrac * 0.28;
                     ctx.save();
                     ctx.globalAlpha = echoA;
                     ctx.translate(centerX, echoScreenY);
-                    ctx.scale(bRadiusX / bRadius, 1.0);
+                    ctx.scale((bRadiusX / bRadius) * echoScale, echoScale);
                     ctx.beginPath();
                     ctx.arc(0, 0, bRadius, 0, Math.PI * 2.0);
                     ctx.fillStyle = isSuper ? "rgba(255, 150, 80, 1.0)" : hexToRgba(theme.ballMid, 1.0);
