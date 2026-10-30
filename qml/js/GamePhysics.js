@@ -612,16 +612,16 @@ function updatePhysicsStep(game, dt, soundManager, stageClearTimer, units, Stora
             game.ballTrail.push({
                 y: game.ballY,
                 isSuper: game.isSuperFall,
-                alpha: 0.7
+                alpha: 0.85
             });
-            if (game.ballTrail.length > 8) {
+            if (game.ballTrail.length > 16) {
                 game.ballTrail.shift();
             }
         } else if (game.ballTrail.length > 0) {
             game.ballTrail.shift();
         }
         for (var t = 0; t < game.ballTrail.length; t++) {
-            game.ballTrail[t].alpha -= dt * 3.5;
+            game.ballTrail[t].alpha -= dt * 2.2;
         }
     }
 
