@@ -607,22 +607,8 @@ function updatePhysicsStep(game, dt, soundManager, stageClearTimer, units, Stora
         game.ballVy = 0.0;
     }
 
-    if (game.ballTrail) {
-        if (game.ballVy > 0) {
-            game.ballTrail.push({
-                y: game.ballY,
-                isSuper: game.isSuperFall,
-                alpha: 0.85
-            });
-            if (game.ballTrail.length > 16) {
-                game.ballTrail.shift();
-            }
-        } else if (game.ballTrail.length > 0) {
-            game.ballTrail.shift();
-        }
-        for (var t = 0; t < game.ballTrail.length; t++) {
-            game.ballTrail[t].alpha -= dt * 2.2;
-        }
+    if (game.ballTrail && game.ballTrail.length > 0) {
+        game.ballTrail.length = 0;
     }
 
     if (game.bannerOpacity > 0) {

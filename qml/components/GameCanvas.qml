@@ -46,6 +46,14 @@ Canvas {
 
         var theme = (game && game.currentTheme) ? game.currentTheme : Themes.getTheme(game ? game.currentLevel : 1);
 
+        var bMidRgbPrefix = "rgba(255, 255, 255, ";
+        if (theme && theme.ballMid && theme.ballMid.charAt(0) === "#" && theme.ballMid.length >= 7) {
+            var bmr = parseInt(theme.ballMid.slice(1, 3), 16) || 0;
+            var bmg = parseInt(theme.ballMid.slice(3, 5), 16) || 0;
+            var bmb = parseInt(theme.ballMid.slice(5, 7), 16) || 0;
+            bMidRgbPrefix = "rgba(" + bmr + ", " + bmg + ", " + bmb + ", ";
+        }
+
         var pole1Clr = theme.pole1;
         var pole2Clr = theme.pole2;
         var pole3Clr = theme.pole3;
@@ -894,32 +902,7 @@ Canvas {
                 ctx.closePath();
             }
 
-            // Ghost sphere echoes from trail history for shutter persistence
-            if (game.ballTrail && game.ballTrail.length > 0) {
-                for (var ei = 0; ei < game.ballTrail.length; ei++) {
-                    var echo = game.ballTrail[ei];
-                    if (!echo || echo.alpha <= 0.02) continue;
-                    var echoScreenY = bScreenY + (echo.y - camY) + midR * tilt - bRadius * renderSquash;
-                    var echoDist = actualBallScreenY - echoScreenY;
-                    if (echoDist < bRadius * 0.6 || echoScreenY < apexY - bRadius) continue;
-                    var echoFrac = Math.min(1.0, echoDist / wakeH);
-                    var echoA = echo.alpha * (isSuper ? 0.26 : 0.16) * (1.0 - echoFrac * 0.5) * wakeStrength;
-                    if (echoA < 0.008) continue;
-
-                    var echoScale = 1.0 - echoFrac * 0.28;
-                    ctx.save();
-                    ctx.globalAlpha = echoA;
-                    ctx.translate(centerX, echoScreenY);
-                    ctx.scale((bRadiusX / bRadius) * echoScale, echoScale);
-                    ctx.beginPath();
-                    ctx.arc(0, 0, bRadius, 0, Math.PI * 2.0);
-                    ctx.fillStyle = isSuper ? "rgba(255, 150, 80, 1.0)" : hexToRgba(theme.ballMid, 1.0);
-                    ctx.fill();
-                    ctx.restore();
-                }
-            }
-
-            // Single unified motion trail ribbon matching the ball diameter
+            // Single unified motion trail ribbon matching the ball diameter in one draw pass
             var trailW = bRadiusX * 0.98;
             ctx.save();
             drawCapsulePath(trailW, apexY);
@@ -933,11 +916,11 @@ Canvas {
                 trailGrad.addColorStop(1.00, "rgba(255, 225, 130, " + superAlpha.toFixed(3) + ")");
             } else {
                 var normAlpha = 0.58 * wakeStrength;
-                trailGrad.addColorStop(0.00, hexToRgba(theme.ballMid, 0.0));
-                trailGrad.addColorStop(0.30, hexToRgba(theme.ballMid, normAlpha * 0.15));
-                trailGrad.addColorStop(0.60, hexToRgba(theme.ballMid, normAlpha * 0.45));
-                trailGrad.addColorStop(0.85, hexToRgba(theme.ballMid, normAlpha * 0.80));
-                trailGrad.addColorStop(1.00, hexToRgba(theme.ballMid, normAlpha));
+                trailGrad.addColorStop(0.00, bMidRgbPrefix + "0.0)");
+                trailGrad.addColorStop(0.30, bMidRgbPrefix + (normAlpha * 0.15).toFixed(3) + ")");
+                trailGrad.addColorStop(0.60, bMidRgbPrefix + (normAlpha * 0.45).toFixed(3) + ")");
+                trailGrad.addColorStop(0.85, bMidRgbPrefix + (normAlpha * 0.80).toFixed(3) + ")");
+                trailGrad.addColorStop(1.00, bMidRgbPrefix + normAlpha.toFixed(3) + ")");
             }
             ctx.fillStyle = trailGrad;
             ctx.fill();
@@ -1252,8 +1235,8 @@ Canvas {
         if (wakeStrength > 0.004) {
             var dissolveAlpha = Math.min(0.45, wakeStrength * 0.32);
             var dissolveGrad = ctx.createLinearGradient(0, -bRadius, 0, bRadius * 0.15);
-            dissolveGrad.addColorStop(0.0, game.isSuperFall ? "rgba(255, 120, 60, " + dissolveAlpha.toFixed(3) + ")" : hexToRgba(theme.ballMid, dissolveAlpha));
-            dissolveGrad.addColorStop(0.6, game.isSuperFall ? "rgba(255, 160, 80, " + (dissolveAlpha * 0.35).toFixed(3) + ")" : hexToRgba(theme.ballMid, dissolveAlpha * 0.30));
+            dissolveGrad.addColorStop(0.0, game.isSuperFall ? "rgba(255, 120, 60, " + dissolveAlpha.toFixed(3) + ")" : bMidRgbPrefix + dissolveAlpha.toFixed(3) + ")");
+            dissolveGrad.addColorStop(0.6, game.isSuperFall ? "rgba(255, 160, 80, " + (dissolveAlpha * 0.35).toFixed(3) + ")" : bMidRgbPrefix + (dissolveAlpha * 0.30).toFixed(3) + ")");
             dissolveGrad.addColorStop(1.0, "rgba(0, 0, 0, 0.0)");
             ctx.beginPath();
             ctx.arc(0, 0, bRadius, 0, Math.PI * 2.0);
