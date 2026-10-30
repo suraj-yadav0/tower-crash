@@ -760,11 +760,13 @@ Canvas {
 
         var renderSquash = game.squash;
         var velStretch = 1.0;
+        var bounceRef = (game.bounceSpeed && game.bounceSpeed > 0) ? game.bounceSpeed : 1.0;
+        var fallRef = (game.maxFallSpeed && game.maxFallSpeed > 0) ? game.maxFallSpeed : 1.0;
         if (game.ballVy < 0) {
-            velStretch += 0.22 * Math.min(1.0, Math.abs(game.ballVy) / game.bounceSpeed);
+            velStretch += 0.22 * Math.min(1.0, Math.abs(game.ballVy) / bounceRef);
         } else {
-            var stretchFactor = game.isSuperFall ? 0.38 : 0.20;
-            velStretch += stretchFactor * Math.min(1.0, game.ballVy / game.maxFallSpeed);
+            var stretchFactor = game.isSuperFall ? 0.40 : 0.26;
+            velStretch += stretchFactor * Math.min(1.0, game.ballVy / fallRef);
         }
 
         if (game.squash < 1.0) {
@@ -846,150 +848,89 @@ Canvas {
         var actualBallScreenY = contactScreenY - bRadius * renderSquash;
         var bRadiusX = bRadius / Math.sqrt(Math.max(0.2, renderSquash));
 
-        var trailNodes = [];
-        if (game.ballTrail && game.ballTrail.length > 0) {
-            for (var tr = 0; tr < game.ballTrail.length; tr++) {
-                var trItem = game.ballTrail[tr];
-                if (!trItem || trItem.alpha <= 0.02) continue;
-                var trScreenY = bScreenY + (trItem.y - camY) + midR * tilt - bRadius * renderSquash;
-                if (trScreenY < actualBallScreenY - units.gu(0.25)) {
-                    trailNodes.push({
-                        y: trScreenY,
-                        alpha: Math.max(0.0, Math.min(1.0, trItem.alpha)),
-                        isSuper: trItem.isSuper
-                    });
-                }
+        var fallSpeed = Math.max(0.0, game.ballVy || 0.0);
+        var normFall = Math.min(1.0, fallSpeed / fallRef);
+
+        // Helix Jump / Stack Ball reference: 3-5x ball diameter normal, 5-7x superfall
+        var wakeStrength = normFall * normFall * (3.0 - 2.0 * normFall);
+        if (wakeStrength > 0.004) {
+            var isSuper = game.isSuperFall;
+            var normalLen = bRadius * (1.5 + 8.5 * normFall);
+            var superLen = bRadius * (2.0 + 12.0 * normFall);
+            var wakeLen = (isSuper ? superLen : normalLen) * wakeStrength;
+            var apexY = actualBallScreenY - wakeLen;
+            var wakeH = actualBallScreenY - apexY;
+            var kappa = 0.55228475;
+
+            // Capsule path: parallel vertical walls with rounded dome cap at top
+            function drawCapsulePath(halfW, topY) {
+                var h = actualBallScreenY - topY;
+                if (h <= 0.0) return;
+                var domeR = Math.min(halfW, h * 0.4);
+                ctx.beginPath();
+                ctx.moveTo(centerX - halfW, actualBallScreenY);
+                ctx.lineTo(centerX - halfW, topY + domeR);
+                ctx.bezierCurveTo(
+                    centerX - halfW, topY + domeR * (1.0 - kappa),
+                    centerX - halfW * kappa, topY,
+                    centerX, topY
+                );
+                ctx.bezierCurveTo(
+                    centerX + halfW * kappa, topY,
+                    centerX + halfW, topY + domeR * (1.0 - kappa),
+                    centerX + halfW, topY + domeR
+                );
+                ctx.lineTo(centerX + halfW, actualBallScreenY);
+                ctx.closePath();
             }
-        }
 
-        var normFall = (game.maxFallSpeed > 0) ? Math.min(1.0, Math.max(0.0, game.ballVy) / game.maxFallSpeed) : 0;
-        if (trailNodes.length === 0 && normFall > 0.10) {
-            var dynamicLength = bRadius * (1.4 + 2.6 * normFall);
-            trailNodes.push({
-                y: actualBallScreenY - dynamicLength,
-                alpha: 0.65 * normFall,
-                isSuper: game.isSuperFall
-            });
-        }
-
-        if (trailNodes.length > 0) {
-            trailNodes.sort(function(n1, n2) { return n1.y - n2.y; });
-            var apexY = trailNodes[0].y;
-            var trailHeight = actualBallScreenY - apexY;
-
-            if (trailHeight > units.gu(0.35)) {
-                var topW = bRadiusX * 0.12;
-                var botW = bRadiusX * 0.86;
-                var isSuper = game.isSuperFall;
-
-                ctx.save();
-                ctx.beginPath();
-                ctx.arc(centerX, apexY + topW, topW, Math.PI, 0, false);
-
-                var prevX = centerX + topW;
-                var prevY = apexY + topW;
-                for (var ri = 0; ri < trailNodes.length; ri++) {
-                    var fracR = Math.max(0.0, Math.min(1.0, (trailNodes[ri].y - apexY) / trailHeight));
-                    var wR = topW + (botW - topW) * Math.pow(fracR, 0.72);
-                    var currX = centerX + wR;
-                    var currY = trailNodes[ri].y;
-                    var midX = (prevX + currX) * 0.5;
-                    var midY = (prevY + currY) * 0.5;
-                    ctx.quadraticCurveTo(prevX, prevY, midX, midY);
-                    prevX = currX;
-                    prevY = currY;
-                }
-                ctx.quadraticCurveTo(prevX, prevY, centerX + botW, actualBallScreenY);
-                ctx.lineTo(centerX - botW, actualBallScreenY);
-
-                var prevLX = centerX - botW;
-                var prevLY = actualBallScreenY;
-                for (var li = trailNodes.length - 1; li >= 0; li--) {
-                    var fracL = Math.max(0.0, Math.min(1.0, (trailNodes[li].y - apexY) / trailHeight));
-                    var wL = topW + (botW - topW) * Math.pow(fracL, 0.72);
-                    var currLX = centerX - wL;
-                    var currLY = trailNodes[li].y;
-                    var midLX = (prevLX + currLX) * 0.5;
-                    var midLY = (prevLY + currLY) * 0.5;
-                    ctx.quadraticCurveTo(prevLX, prevLY, midLX, midLY);
-                    prevLX = currLX;
-                    prevLY = currLY;
-                }
-                ctx.quadraticCurveTo(prevLX, prevLY, centerX - topW, apexY + topW);
-                ctx.closePath();
-
-                var outerGrad = ctx.createLinearGradient(centerX, apexY, centerX, actualBallScreenY);
-                if (isSuper) {
-                    outerGrad.addColorStop(0.00, "rgba(255, 56, 56, 0.0)");
-                    outerGrad.addColorStop(0.35, "rgba(255, 80, 50, 0.35)");
-                    outerGrad.addColorStop(0.70, "rgba(255, 121, 63, 0.65)");
-                    outerGrad.addColorStop(1.00, "rgba(255, 218, 121, 0.92)");
-                } else {
-                    outerGrad.addColorStop(0.00, hexToRgba(theme.ballMid, 0.0));
-                    outerGrad.addColorStop(0.35, hexToRgba(theme.ballMid, 0.15));
-                    outerGrad.addColorStop(0.70, hexToRgba(theme.ballMid, 0.38));
-                    outerGrad.addColorStop(1.00, hexToRgba(theme.ballMid, 0.65));
-                }
-                ctx.fillStyle = outerGrad;
-                ctx.fill();
-                ctx.restore();
-
-                var coreApexY = apexY + trailHeight * 0.20;
-                var coreTopW = topW * 0.40;
-                var coreBotW = botW * 0.42;
-
-                ctx.save();
-                ctx.beginPath();
-                ctx.moveTo(centerX - coreTopW, coreApexY);
-                ctx.quadraticCurveTo(centerX, coreApexY - coreTopW * 0.8, centerX + coreTopW, coreApexY);
-                ctx.quadraticCurveTo(centerX + coreBotW * 0.70, (coreApexY + actualBallScreenY) * 0.5, centerX + coreBotW, actualBallScreenY);
-                ctx.lineTo(centerX - coreBotW, actualBallScreenY);
-                ctx.quadraticCurveTo(centerX - coreBotW * 0.70, (coreApexY + actualBallScreenY) * 0.5, centerX - coreTopW, coreApexY);
-                ctx.closePath();
-
-                var coreGrad = ctx.createLinearGradient(centerX, coreApexY, centerX, actualBallScreenY);
-                if (isSuper) {
-                    coreGrad.addColorStop(0.00, "rgba(255, 255, 255, 0.0)");
-                    coreGrad.addColorStop(0.45, "rgba(255, 240, 180, 0.45)");
-                    coreGrad.addColorStop(1.00, "rgba(255, 255, 255, 0.85)");
-                } else {
-                    coreGrad.addColorStop(0.00, "rgba(255, 255, 255, 0.0)");
-                    coreGrad.addColorStop(0.45, hexToRgba(theme.ballLight, 0.25));
-                    coreGrad.addColorStop(1.00, hexToRgba(theme.ballLight, 0.60));
-                }
-                ctx.fillStyle = coreGrad;
-                ctx.fill();
-                ctx.restore();
-
-                if (normFall > 0.32) {
-                    var wispAlpha = Math.min(0.38, (normFall - 0.32) * 0.55);
-                    var wispLen = Math.min(trailHeight * 0.70, bRadius * (1.2 + 2.0 * normFall));
-                    var wispTopY = actualBallScreenY - wispLen;
-                    var wispOffset = bRadiusX * 1.08;
+            // Ghost sphere echoes from trail history for shutter persistence
+            if (game.ballTrail && game.ballTrail.length > 0) {
+                for (var ei = 0; ei < game.ballTrail.length; ei++) {
+                    var echo = game.ballTrail[ei];
+                    if (!echo || echo.alpha <= 0.02) continue;
+                    var echoScreenY = bScreenY + (echo.y - camY) + midR * tilt - bRadius * renderSquash;
+                    var echoDist = actualBallScreenY - echoScreenY;
+                    if (echoDist < bRadius * 0.6 || echoScreenY < apexY - bRadius) continue;
+                    var echoFrac = Math.min(1.0, echoDist / wakeH);
+                    var echoA = echo.alpha * (isSuper ? 0.26 : 0.16) * (1.0 - echoFrac * 0.5) * wakeStrength;
+                    if (echoA < 0.008) continue;
 
                     ctx.save();
-                    ctx.lineWidth = units.gu(0.12);
-                    ctx.lineCap = "round";
-
-                    var wispGrad = ctx.createLinearGradient(0, wispTopY, 0, actualBallScreenY);
-                    wispGrad.addColorStop(0.0, "rgba(255, 255, 255, 0.0)");
-                    wispGrad.addColorStop(0.5, isSuper ? "rgba(255, 180, 100, " + (wispAlpha * 0.6).toFixed(2) + ")" : "rgba(255, 255, 255, " + (wispAlpha * 0.5).toFixed(2) + ")");
-                    wispGrad.addColorStop(1.0, isSuper ? "rgba(255, 230, 150, " + wispAlpha.toFixed(2) + ")" : "rgba(255, 255, 255, " + wispAlpha.toFixed(2) + ")");
-                    ctx.strokeStyle = wispGrad;
-
+                    ctx.globalAlpha = echoA;
+                    ctx.translate(centerX, echoScreenY);
+                    ctx.scale(bRadiusX / bRadius, 1.0);
                     ctx.beginPath();
-                    ctx.moveTo(centerX - wispOffset, wispTopY);
-                    ctx.lineTo(centerX - wispOffset, actualBallScreenY);
-                    ctx.stroke();
-
-                    ctx.beginPath();
-                    ctx.moveTo(centerX + wispOffset, wispTopY);
-                    ctx.lineTo(centerX + wispOffset, actualBallScreenY);
-                    ctx.stroke();
-
+                    ctx.arc(0, 0, bRadius, 0, Math.PI * 2.0);
+                    ctx.fillStyle = isSuper ? "rgba(255, 150, 80, 1.0)" : hexToRgba(theme.ballMid, 1.0);
+                    ctx.fill();
                     ctx.restore();
                 }
             }
+
+            // Single unified motion trail ribbon matching the ball diameter
+            var trailW = bRadiusX * 0.98;
+            ctx.save();
+            drawCapsulePath(trailW, apexY);
+            var trailGrad = ctx.createLinearGradient(centerX, apexY, centerX, actualBallScreenY);
+            if (isSuper) {
+                var superAlpha = 0.86 * wakeStrength;
+                trailGrad.addColorStop(0.00, "rgba(255, 60, 20, 0.0)");
+                trailGrad.addColorStop(0.30, "rgba(255, 90, 40, " + (superAlpha * 0.20).toFixed(3) + ")");
+                trailGrad.addColorStop(0.60, "rgba(255, 140, 60, " + (superAlpha * 0.50).toFixed(3) + ")");
+                trailGrad.addColorStop(0.85, "rgba(255, 190, 90, " + (superAlpha * 0.80).toFixed(3) + ")");
+                trailGrad.addColorStop(1.00, "rgba(255, 225, 130, " + superAlpha.toFixed(3) + ")");
+            } else {
+                var normAlpha = 0.58 * wakeStrength;
+                trailGrad.addColorStop(0.00, hexToRgba(theme.ballMid, 0.0));
+                trailGrad.addColorStop(0.30, hexToRgba(theme.ballMid, normAlpha * 0.15));
+                trailGrad.addColorStop(0.60, hexToRgba(theme.ballMid, normAlpha * 0.45));
+                trailGrad.addColorStop(0.85, hexToRgba(theme.ballMid, normAlpha * 0.80));
+                trailGrad.addColorStop(1.00, hexToRgba(theme.ballMid, normAlpha));
+            }
+            ctx.fillStyle = trailGrad;
+            ctx.fill();
+            ctx.restore();
         }
 
         if (game.isSuperFall) {
@@ -1296,10 +1237,30 @@ Canvas {
         ctx.fillStyle = fresnelGrad;
         ctx.fill();
 
+        // Trailing-edge dissolve: softly dissolves the upper hemisphere into the wake during freefall
+        if (wakeStrength > 0.004) {
+            var dissolveAlpha = Math.min(0.45, wakeStrength * 0.32);
+            var dissolveGrad = ctx.createLinearGradient(0, -bRadius, 0, bRadius * 0.15);
+            dissolveGrad.addColorStop(0.0, game.isSuperFall ? "rgba(255, 120, 60, " + dissolveAlpha.toFixed(3) + ")" : hexToRgba(theme.ballMid, dissolveAlpha));
+            dissolveGrad.addColorStop(0.6, game.isSuperFall ? "rgba(255, 160, 80, " + (dissolveAlpha * 0.35).toFixed(3) + ")" : hexToRgba(theme.ballMid, dissolveAlpha * 0.30));
+            dissolveGrad.addColorStop(1.0, "rgba(0, 0, 0, 0.0)");
+            ctx.beginPath();
+            ctx.arc(0, 0, bRadius, 0, Math.PI * 2.0);
+            ctx.fillStyle = dissolveGrad;
+            ctx.fill();
+        }
+
+        // Specular highlight: softens and smears vertically under high fall velocity
+        var smear = wakeStrength;
+        var specAlpha = Math.max(0.18, 0.92 * (1.0 - normFall * 0.65));
+        ctx.save();
+        ctx.translate(-bRadius * 0.35, -bRadius * 0.38);
+        ctx.scale(1.0 - 0.15 * smear, 1.0 + 0.75 * smear);
         ctx.beginPath();
-        ctx.arc(-bRadius * 0.35, -bRadius * 0.38, bRadius * 0.16, 0, Math.PI * 2.0);
-        ctx.fillStyle = "rgba(255, 255, 255, 0.92)";
+        ctx.arc(0, 0, bRadius * 0.16, 0, Math.PI * 2.0);
+        ctx.fillStyle = "rgba(255, 255, 255, " + specAlpha.toFixed(2) + ")";
         ctx.fill();
+        ctx.restore();
 
         ctx.restore();
 
