@@ -10,7 +10,7 @@
             "desktop":  "tower-crash.desktop"
         }
     },
-    "version": "1.0.0",
+    "version": "1.0.1",
     "maintainer": "Suraj Yadav <surajyadav200701@gmail.com>",
     "framework": "@CLICK_FRAMEWORK@"
 }

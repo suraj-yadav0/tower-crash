@@ -978,7 +978,7 @@ Rectangle {
                             }
 
                             Label {
-                                text: i18n.tr("v1.0.0 • Credits & Info")
+                                text: i18n.tr("v1.0.1 • Credits & Info")
                                 font.pixelSize: units.gu(1.1)
                                 color: "#848890"
                             }

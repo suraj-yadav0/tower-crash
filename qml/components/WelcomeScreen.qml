@@ -635,7 +635,7 @@ Rectangle {
                         }
 
                         Label {
-                            text: "•  v1.0.0"
+                            text: "•  v1.0.1"
                             font.pixelSize: units.gu(1.15)
                             color: root.theme ? root.theme.accent : "#D99B26"
                             font.weight: Font.Bold

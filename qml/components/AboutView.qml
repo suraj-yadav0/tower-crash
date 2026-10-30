@@ -57,7 +57,7 @@ Column {
                     width: parent.width / 2.0
                 }
                 Label {
-                    text: "1.0.0"
+                    text: "1.0.1"
                     font.pixelSize: units.gu(1.2)
                     font.weight: Font.Bold
                     color: "#F5F3EF"
