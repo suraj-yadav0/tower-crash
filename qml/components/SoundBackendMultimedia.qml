@@ -23,6 +23,22 @@ Item {
         volume: backend.masterVolume * 0.95
     }
 
+    SoundEffect {
+        id: sfxCrash
+        category: "music"
+        source: Qt.resolvedUrl("../../assets/sounds/crash.wav")
+        muted: !backend.soundEnabled || backend.masterVolume <= 0.001
+        volume: backend.masterVolume
+    }
+
+    SoundEffect {
+        id: sfxSuperfall
+        category: "music"
+        source: Qt.resolvedUrl("../../assets/sounds/superfall.wav")
+        muted: !backend.soundEnabled || backend.masterVolume <= 0.001
+        volume: backend.masterVolume * 0.95
+    }
+
     onSoundEnabledChanged: {
         if (!soundEnabled) {
             stopAll();
@@ -32,6 +48,8 @@ Item {
     onMasterVolumeChanged: {
         sfxBounce.volume = Math.max(0.0, Math.min(1.0, backend.masterVolume));
         sfxRoundCleared.volume = Math.max(0.0, Math.min(1.0, backend.masterVolume * 0.95));
+        sfxCrash.volume = Math.max(0.0, Math.min(1.0, backend.masterVolume));
+        sfxSuperfall.volume = Math.max(0.0, Math.min(1.0, backend.masterVolume * 0.95));
     }
 
     function playBounce(velocityNorm) {
@@ -59,18 +77,32 @@ Item {
         playRoundCleared();
     }
 
-    // Unused sound methods kept as clean no-ops for compatibility
-    function playPass(streak) {}
-    function playSmash(streak) {}
-    function playGameOver() {}
-    function playWhoosh() {}
-    function stopWhoosh() {}
-    function playClick() {}
+    function playCrash() {
+        if (!soundEnabled || backend.masterVolume <= 0.001) return;
+        try {
+            sfxCrash.volume = Math.max(0.0, Math.min(1.0, backend.masterVolume));
+            sfxCrash.play();
+        } catch (e) {}
+    }
+
+    function playSmash(streak) {
+        playCrash();
+    }
+
+    function playSuperfall() {
+        if (!soundEnabled || backend.masterVolume <= 0.001) return;
+        try {
+            sfxSuperfall.volume = Math.max(0.0, Math.min(1.0, backend.masterVolume * 0.95));
+            sfxSuperfall.play();
+        } catch (e) {}
+    }
 
     function stopAll() {
         try {
             sfxBounce.stop();
             sfxRoundCleared.stop();
+            sfxCrash.stop();
+            sfxSuperfall.stop();
         } catch (e) {}
     }
 }

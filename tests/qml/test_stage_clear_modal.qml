@@ -28,6 +28,11 @@ Item {
                 if (stageClearModal.stageNumber !== 5) throw new Error("stageNumber mismatch");
                 if (stageClearModal.isCheckpoint !== true) throw new Error("isCheckpoint mismatch");
                 if (stageClearModal.nextCheckpoint !== 6) throw new Error("nextCheckpoint mismatch");
+                if (stageClearModal.unlockedBall !== null) throw new Error("unlockedBall should be null for stage 5");
+
+                stageClearModal.stageNumber = 10;
+                if (!stageClearModal.unlockedBall) throw new Error("unlockedBall should not be null for stage 10");
+                if (stageClearModal.unlockedBall.name !== "Basketball") throw new Error("unlockedBall name should be Basketball");
 
                 var continueFired = false;
                 stageClearModal.continueRequested.connect(function() { continueFired = true; });

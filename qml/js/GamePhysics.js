@@ -1,5 +1,196 @@
 .pragma library
 
+var SEAM_COORDS = (function() {
+    var coords = [];
+    var count = 36;
+    for (var i = 0; i < count; i++) {
+        var t = (i / count) * Math.PI * 2.0;
+        var u = Math.cos(t) + 0.38 * Math.cos(3.0 * t);
+        var v = Math.sin(t) - 0.38 * Math.sin(3.0 * t);
+        var w = 0.82 * Math.sin(2.0 * t);
+        var invLen = 1.0 / Math.sqrt(u * u + v * v + w * w);
+        coords.push({ x: u * invLen, y: v * invLen, z: w * invLen });
+    }
+    return coords;
+})();
+
+var EQUATOR_COORDS = (function() {
+    var coords = [];
+    var count = 24;
+    for (var i = 0; i < count; i++) {
+        var t = (i / count) * Math.PI * 2.0;
+        coords.push({ x: Math.cos(t), y: 0.0, z: Math.sin(t) });
+    }
+    return coords;
+})();
+
+var MERIDIAN_COORDS = (function() {
+    var coords = [];
+    var count = 24;
+    for (var i = 0; i < count; i++) {
+        var t = (i / count) * Math.PI * 2.0;
+        coords.push({ x: 0.0, y: Math.sin(t), z: Math.cos(t) });
+    }
+    return coords;
+})();
+
+var BASKETBALL_RIB1_COORDS = (function() {
+    var coords = [];
+    var count = 24;
+    var xOffset = 0.52;
+    var r = Math.sqrt(1.0 - xOffset * xOffset);
+    for (var i = 0; i < count; i++) {
+        var t = (i / count) * Math.PI * 2.0;
+        coords.push({ x: xOffset, y: Math.sin(t) * r, z: Math.cos(t) * r });
+    }
+    return coords;
+})();
+
+var BASKETBALL_RIB2_COORDS = (function() {
+    var coords = [];
+    var count = 24;
+    var xOffset = -0.52;
+    var r = Math.sqrt(1.0 - xOffset * xOffset);
+    for (var i = 0; i < count; i++) {
+        var t = (i / count) * Math.PI * 2.0;
+        coords.push({ x: xOffset, y: Math.sin(t) * r, z: Math.cos(t) * r });
+    }
+    return coords;
+})();
+
+var TROPIC_NORTH_COORDS = (function() {
+    var coords = [];
+    var count = 24;
+    var yOffset = -0.52;
+    var r = Math.sqrt(1.0 - yOffset * yOffset);
+    for (var i = 0; i < count; i++) {
+        var t = (i / count) * Math.PI * 2.0;
+        coords.push({ x: Math.cos(t) * r, y: yOffset, z: Math.sin(t) * r });
+    }
+    return coords;
+})();
+
+var TROPIC_SOUTH_COORDS = (function() {
+    var coords = [];
+    var count = 24;
+    var yOffset = 0.52;
+    var r = Math.sqrt(1.0 - yOffset * yOffset);
+    for (var i = 0; i < count; i++) {
+        var t = (i / count) * Math.PI * 2.0;
+        coords.push({ x: Math.cos(t) * r, y: yOffset, z: Math.sin(t) * r });
+    }
+    return coords;
+})();
+
+var BALL_PIPS = [
+    { x: 0.0, y: 1.0, z: 0.0 },
+    { x: 0.0, y: -1.0, z: 0.0 },
+    { x: 1.0, y: 0.0, z: 0.0 },
+    { x: -1.0, y: 0.0, z: 0.0 }
+];
+
+var EIGHT_BALL_BADGES = [
+    { x: 0.0, y: 0.0, z: 1.0 },
+    { x: 0.0, y: 0.0, z: -1.0 }
+];
+
+var BEACHBALL_GORES = (function() {
+    var gores = [];
+    var numWedges = 6;
+    var steps = 8;
+    for (var w = 0; w < numWedges; w++) {
+        var lonA = w * (Math.PI * 2.0 / numWedges);
+        var lonB = (w + 1) * (Math.PI * 2.0 / numWedges);
+        var pts = [];
+        for (var s1 = 0; s1 <= steps; s1++) {
+            var phi1 = -Math.PI * 0.5 + (s1 / steps) * Math.PI;
+            pts.push({
+                x: Math.cos(phi1) * Math.sin(lonA),
+                y: Math.sin(phi1),
+                z: Math.cos(phi1) * Math.cos(lonA)
+            });
+        }
+        for (var s2 = steps; s2 >= 0; s2--) {
+            var phi2 = -Math.PI * 0.5 + (s2 / steps) * Math.PI;
+            pts.push({
+                x: Math.cos(phi2) * Math.sin(lonB),
+                y: Math.sin(phi2),
+                z: Math.cos(phi2) * Math.cos(lonB)
+            });
+        }
+        gores.push(pts);
+    }
+    return gores;
+})();
+
+var BEACHBALL_MIDPOINTS = (function() {
+    var mids = [];
+    var numWedges = 6;
+    for (var w = 0; w < numWedges; w++) {
+        var lonMid = (w + 0.5) * (Math.PI * 2.0 / numWedges);
+        mids.push({
+            x: Math.sin(lonMid),
+            y: 0.0,
+            z: Math.cos(lonMid)
+        });
+    }
+    return mids;
+})();
+
+var BEACHBALL_MERIDIANS = (function() {
+    var meridians = [];
+    var numWedges = 6;
+    var count = 20;
+    for (var w = 0; w < numWedges; w++) {
+        var mAngle = w * (Math.PI * 2.0 / numWedges);
+        var coords = [];
+        for (var st = 0; st < count; st++) {
+            var tA = (st / count) * Math.PI * 2.0;
+            coords.push({
+                x: Math.sin(tA) * Math.sin(mAngle),
+                y: Math.cos(tA),
+                z: Math.sin(tA) * Math.cos(mAngle)
+            });
+        }
+        meridians.push(coords);
+    }
+    return meridians;
+})();
+
+var HAZARD_SPIKE_LAYOUT = [
+    { u: 0.35, v: 0.30 },
+    { u: 0.35, v: 0.70 },
+    { u: 0.65, v: 0.18 },
+    { u: 0.65, v: 0.50 },
+    { u: 0.65, v: 0.82 }
+];
+
+function projectSpherePoint(p, rotX, rotY, bRadius) {
+    var cosY = Math.cos(rotY);
+    var sinY = Math.sin(rotY);
+    var x1 = p.x * cosY + p.z * sinY;
+    var y1 = p.y;
+    var z1 = -p.x * sinY + p.z * cosY;
+
+    var cosX = Math.cos(rotX);
+    var sinX = Math.sin(rotX);
+    var x2 = x1;
+    var y2 = y1 * cosX - z1 * sinX;
+    var z2 = y1 * sinX + z1 * cosX;
+
+    var tiltAngle = 0.22;
+    var cosZ = Math.cos(tiltAngle);
+    var sinZ = Math.sin(tiltAngle);
+    var x3 = x2 * cosZ - y2 * sinZ;
+    var y3 = x2 * sinZ + y2 * cosZ;
+
+    return {
+        x: x3 * bRadius,
+        y: y3 * bRadius,
+        z: z2
+    };
+}
+
 function getSegmentIndex(towerAngle, ringOffset) {
     var effectiveAngle = towerAngle + (ringOffset || 0.0);
     var fullCircle = 2.0 * Math.PI;
@@ -34,8 +225,8 @@ function updateCamera(cameraY, ballY, activePlatformY, isSuperFall, dt, maxLag) 
 }
 
 function updateSquash(squash, squashVelocity, dt) {
-    var springK = 360.0;
-    var damping = 22.0;
+    var springK = 380.0;
+    var damping = 15.0;
     var force = -springK * (squash - 1.0) - damping * squashVelocity;
     var nextVel = squashVelocity + force * dt;
     var nextSquash = squash + nextVel * dt;
@@ -125,26 +316,33 @@ function checkBallCollision(game, prevY, nextY, speedScale, soundManager, stageC
                 var baseEarned = isGrand ? 1000 : (isZone ? 250 : (isCp ? 150 : 100));
                 var earned = Math.round(baseEarned * diffMult);
 
+                var unlockedBall = (Progression.getUnlockedBallForLevel) ? Progression.getUnlockedBallForLevel(goalLevel) : null;
+                if (unlockedBall) {
+                    game.bannerSubText = i18n.tr("%1 UNLOCKED!").arg(unlockedBall.name.toUpperCase());
+                } else {
+                    game.bannerSubText = "";
+                }
+
                 if (isGrand) {
-                    game.spawnShatterDebris(ring.y, true, true, game.currentTheme, false);
+                    game.spawnShatterDebris(ring.y, true, true, game.currentTheme, false, ring, game.towerAngle);
                     game.score += earned;
                     game.bannerText = i18n.tr("TOWER CONQUERED! 100 LEVELS COMPLETE!");
                     Storage.saveStat("gameCleared", "1");
                     soundManager.milestoneHaptic();
                 } else if (isZone) {
-                    game.spawnShatterDebris(ring.y, true, false, game.currentTheme, false);
+                    game.spawnShatterDebris(ring.y, true, false, game.currentTheme, false, ring, game.towerAngle);
                     game.score += earned;
                     var zoneIdx = Progression.getZoneIndex(nextLvl);
                     var zoneName = Progression.getZoneName(nextLvl);
                     game.bannerText = i18n.tr("ZONE %1: %2").arg(zoneIdx).arg(zoneName.toUpperCase());
                     soundManager.milestoneHaptic();
                 } else if (isCp) {
-                    game.spawnShatterDebris(ring.y, true, false, game.currentTheme, false);
+                    game.spawnShatterDebris(ring.y, true, false, game.currentTheme, false, ring, game.towerAngle);
                     game.score += earned;
                     game.bannerText = i18n.tr("CHECKPOINT STAGE %1!").arg(nextLvl);
                     soundManager.milestoneHaptic();
                 } else {
-                    game.spawnShatterDebris(ring.y, true, false, game.currentTheme, false);
+                    game.spawnShatterDebris(ring.y, true, false, game.currentTheme, false, ring, game.towerAngle);
                     game.score += earned;
                     game.bannerText = i18n.tr("LEVEL %1 COMPLETE!").arg(goalLevel);
                     soundManager.haptic(true);
@@ -164,17 +362,13 @@ function checkBallCollision(game, prevY, nextY, speedScale, soundManager, stageC
                 game.ballVy = -game.bounceSpeed * speedScale * 0.95;
                 game.cameraY = ring.y;
                 game.activePlatformY = ring.y;
-                game.squash = 0.45;
-                game.squashVelocity = (1.0 - game.squash) * 40.0;
+                game.squash = 0.38;
+                game.squashVelocity = (1.0 - game.squash) * 26.0;
                 nextY = ring.y;
 
                 if (nextLvl > game.highestLevelReached) {
                     game.highestLevelReached = nextLvl;
-                    if (Storage.saveHighestLevelForMode) {
-                        Storage.saveHighestLevelForMode(nextLvl, game.difficultyMode);
-                    } else {
-                        Storage.saveHighestLevel(nextLvl);
-                    }
+                    Storage.saveHighestLevelForMode(nextLvl, game.difficultyMode);
                 }
                 if (isCp && (!Progression.hasCheckpoints || Progression.hasCheckpoints(game.difficultyMode))) {
                     game.unlockCheckpoint(nextLvl);
@@ -182,11 +376,7 @@ function checkBallCollision(game, prevY, nextY, speedScale, soundManager, stageC
 
                 if (game.score > game.bestScore) {
                     game.bestScore = game.score;
-                    if (Storage.saveBestScoreForMode) {
-                        Storage.saveBestScoreForMode(game.bestScore, game.difficultyMode);
-                    } else {
-                        Storage.queueStat("bestScore", game.bestScore);
-                    }
+                    Storage.saveBestScoreForMode(game.bestScore, game.difficultyMode);
                 }
                 if (game.activePlayTimeAccumulator > 0.0) {
                     Storage.recordPlayTime(game.activePlayTimeAccumulator);
@@ -194,7 +384,7 @@ function checkBallCollision(game, prevY, nextY, speedScale, soundManager, stageC
                 }
                 Storage.flushPendingWrites();
 
-                if (isCp || isGrand) {
+                if (isCp || isGrand || unlockedBall) {
                     game.stageClearStage = goalLevel;
                     game.stageClearBonus = earned;
                     game.stageClearStreak = currentStreak;
@@ -213,8 +403,14 @@ function checkBallCollision(game, prevY, nextY, speedScale, soundManager, stageC
 
             if (game.isSuperFall && segType !== 1) {
                 ring.broken = true;
-                game.spawnShatterDebris(ring.y, false, false, game.currentTheme, true);
-                soundManager.playBounce(1.0);
+                game.spawnShatterDebris(ring.y, false, false, game.currentTheme, true, ring, game.towerAngle);
+                if (soundManager.playCrash) {
+                    soundManager.playCrash();
+                } else if (soundManager.playSmash) {
+                    soundManager.playSmash();
+                } else {
+                    soundManager.playBounce(1.0);
+                }
                 soundManager.haptic(true);
 
                 var tier = Progression.getLevelTier ? Progression.getLevelTier(game.currentLevel) : 1;
@@ -229,8 +425,8 @@ function checkBallCollision(game, prevY, nextY, speedScale, soundManager, stageC
                 game.ballY = ring.y;
                 game.ballVy = -game.bounceSpeed * speedScale;
                 game.activePlatformY = ring.y;
-                game.squash = 0.48;
-                game.squashVelocity = (1.0 - game.squash) * 38.0;
+                game.squash = 0.36;
+                game.squashVelocity = (1.0 - game.squash) * 28.0;
                 nextY = ring.y;
 
                 if (game.score > game.bestScore) {
@@ -252,13 +448,18 @@ function checkBallCollision(game, prevY, nextY, speedScale, soundManager, stageC
                 game.activePlatformY = ring.y;
                 game.streak = 0;
                 game.isSuperFall = false;
-                game.squash = 0.54;
-                game.squashVelocity = (1.0 - game.squash) * 36.0;
+                game.squash = Math.max(0.38, 0.60 - normSpeed * 0.22);
+                game.squashVelocity = (1.0 - game.squash) * 24.0;
                 nextY = ring.y;
 
                 if (segType === 3) {
                     ring.segments[segmentIdx] = 1;
-                    game.spawnSegmentShatter(ring.y, relAngle, game.currentTheme.topSafe, game.currentTheme.sideSafe);
+                    game.spawnSegmentShatter(ring.y, relAngle, game.currentTheme.topSafe, game.currentTheme.sideSafe, segmentIdx, game.towerAngle, ring);
+                    if (soundManager.playCrash) {
+                        soundManager.playCrash();
+                    } else if (soundManager.playSmash) {
+                        soundManager.playSmash();
+                    }
                 }
                 soundManager.playBounce(normSpeed);
                 soundManager.haptic(false);
@@ -339,6 +540,9 @@ function checkBallCollision(game, prevY, nextY, speedScale, soundManager, stageC
 
                     if (game.streak >= 3) {
                         soundManager.haptic(true);
+                        if (game.streak === 3 && soundManager.playSuperfall) {
+                            soundManager.playSuperfall();
+                        }
                         if (game.ballVy > game.gravity * 0.35) {
                             game.isSuperFall = true;
                         }
@@ -372,7 +576,12 @@ function updatePhysicsStep(game, dt, soundManager, stageClearTimer, units, Stora
     }
 
     if (!game.isDragging && Math.abs(game.angularVelocity) > 0.0001) {
-        game.towerAngle += game.angularVelocity;
+        var dAngle = game.angularVelocity;
+        game.towerAngle += dAngle;
+        var rOuter = game.outerRadius || (units ? units.gu(20) : 160);
+        var rBall = game.ballRadius || (units ? units.gu(2.4) : 19.2);
+        var rollRatio = (rOuter / rBall) * 0.65;
+        game.ballRotationY = ((game.ballRotationY || 0.0) - dAngle * rollRatio) % (Math.PI * 2.0);
         game.angularVelocity *= Math.pow(0.04, dt);
     }
     if (game.towerAngle > Math.PI * 2.0) {
@@ -398,20 +607,8 @@ function updatePhysicsStep(game, dt, soundManager, stageClearTimer, units, Stora
         game.ballVy = 0.0;
     }
 
-    if (game.ballVy > 0) {
-        game.ballTrail.push({
-            y: game.ballY,
-            isSuper: game.isSuperFall,
-            alpha: 0.7
-        });
-        if (game.ballTrail.length > 5) {
-            game.ballTrail.shift();
-        }
-    } else if (game.ballTrail.length > 0) {
-        game.ballTrail.shift();
-    }
-    for (var t = 0; t < game.ballTrail.length; t++) {
-        game.ballTrail[t].alpha -= dt * 3.5;
+    if (game.ballTrail && game.ballTrail.length > 0) {
+        game.ballTrail.length = 0;
     }
 
     if (game.bannerOpacity > 0) {
@@ -427,6 +624,15 @@ function updatePhysicsStep(game, dt, soundManager, stageClearTimer, units, Stora
     }
 
     game.ballY = nextY;
+    var dy = nextY - prevY;
+    var bRadius = game.ballRadius || (units ? units.gu(2.4) : 19.2);
+    if (game.ballVy > 0) {
+        var rollDelta = (dy / bRadius) * 0.90;
+        game.ballRotationX = ((game.ballRotationX || 0.0) + rollDelta) % (Math.PI * 2.0);
+    } else {
+        var idleRoll = 2.4 * dt;
+        game.ballRotationX = ((game.ballRotationX || 0.0) + idleRoll) % (Math.PI * 2.0);
+    }
     game.cameraY = updateCamera(
         game.cameraY,
         game.ballY,
@@ -440,18 +646,24 @@ function updatePhysicsStep(game, dt, soundManager, stageClearTimer, units, Stora
     game.squash = sq.squash;
     game.squashVelocity = sq.velocity;
 
-    updateRings(game.rings, dt);
-    Particles.updateParticles(game.particles, dt, game.gravity, game.poleRadius, units);
-
-    var lastRing = game.rings[game.rings.length - 1];
-    while (lastRing && lastRing.y < game.cameraY + game.ringSpacing * 8) {
-        game.generateRing();
-        lastRing = game.rings[game.rings.length - 1];
+    if (game.rings) {
+        updateRings(game.rings, dt);
+    }
+    if (game.particles && Particles && Particles.updateParticles) {
+        Particles.updateParticles(game.particles, dt, game.gravity, game.poleRadius, units);
     }
 
-    while (game.rings.length > 0 &&
-           game.rings[0].y < game.cameraY - game.ringSpacing * 3) {
-        game.rings.shift();
+    if (game.rings) {
+        var lastRing = game.rings[game.rings.length - 1];
+        while (lastRing && lastRing.y < game.cameraY + game.ringSpacing * 8) {
+            game.generateRing();
+            lastRing = game.rings[game.rings.length - 1];
+        }
+
+        while (game.rings.length > 0 &&
+               game.rings[0].y < game.cameraY - game.ringSpacing * 3) {
+            game.rings.shift();
+        }
     }
 
     return true;

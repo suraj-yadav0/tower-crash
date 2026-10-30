@@ -10,6 +10,7 @@ Item {
     MilestoneBanner {
         id: banner
         text: "ZONE 2: CLOCKWORK SHAFT"
+        subText: "BASKETBALL UNLOCKED!"
         isZoneTransition: true
         isCheckpoint: false
         bannerOpacity: 1.0
@@ -22,6 +23,7 @@ Item {
         onTriggered: {
             try {
                 if (banner.text !== "ZONE 2: CLOCKWORK SHAFT") throw new Error("text mismatch");
+                if (banner.subText !== "BASKETBALL UNLOCKED!") throw new Error("subText mismatch");
                 if (banner.isZoneTransition !== true) throw new Error("isZoneTransition mismatch");
                 if (banner.visible !== true) throw new Error("visible mismatch when opacity is 1.0");
 

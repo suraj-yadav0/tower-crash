@@ -1,6 +1,7 @@
 import QtQuick 2.9
 import Lomiri.Components 1.3
 import "../js/Themes.js" as Themes
+import "../js/Progression.js" as Progression
 
 Rectangle {
     id: root
@@ -11,6 +12,8 @@ Rectangle {
     property int speedMode: 1
     property int difficultyMode: 1
     property int themeMode: 0
+    property int ballStyle: 0
+    property int highestLevelReached: 1
     property real touchSensitivityMultiplier: 1.0
     property int bestScore: 0
     property int totalRings: 0
@@ -28,6 +31,7 @@ Rectangle {
     signal difficultyModeSelected(int newMode)
     signal touchSensitivitySelected(real newSensitivity)
     signal themeModeSelected(int newMode)
+    signal ballStyleSelected(int newStyle)
 
     anchors.fill: parent
     color: "#E608090A"
@@ -170,7 +174,7 @@ Rectangle {
 
                             Label {
                                 text: i18n.tr("MATERIAL PALETTE")
-                                font.pixelSize: units.gu(0.85)
+                                font.pixelSize: units.gu(1.1)
                                 font.weight: Font.Bold
                                 color: "#848890"
                             }
@@ -198,7 +202,7 @@ Rectangle {
                                 id: changeLabel
                                 anchors.centerIn: parent
                                 text: i18n.tr("Change")
-                                font.pixelSize: units.gu(0.95)
+                                font.pixelSize: units.gu(1.1)
                                 font.weight: Font.Bold
                                 color: root.theme ? root.theme.accent : "#D99B26"
                             }
@@ -209,6 +213,148 @@ Rectangle {
                         id: themeCardMouse
                         anchors.fill: parent
                         onClicked: root.showingThemePicker = true
+                    }
+                }
+
+                // Ball Style Card
+                Rectangle {
+                    id: ballStyleCard
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    width: parent.width
+                    height: ballStyleCol.height + units.gu(2.0)
+                    radius: units.gu(1.6)
+                    color: root.theme ? root.theme.cardOuter : "#141517"
+                    border.color: root.theme ? root.theme.cardBorder : "#2A2C30"
+                    border.width: units.gu(0.1)
+
+                    Column {
+                        id: ballStyleCol
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        anchors.verticalCenter: parent.verticalCenter
+                        width: parent.width - units.gu(2.0)
+                        spacing: units.gu(0.8)
+
+                        Label {
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            text: i18n.tr("BALL STYLE")
+                            font.pixelSize: units.gu(1.1)
+                            font.weight: Font.Bold
+                            color: "#848890"
+                        }
+
+                        Row {
+                            id: ballStyleRow1
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            width: parent.width
+                            spacing: units.gu(0.6)
+
+                            Repeater {
+                                model: [
+                                    { id: 0, name: i18n.tr("Auto"), unlockLevel: 1, color: root.theme ? root.theme.accent : "#D99B26", ring: "#FFFFFF" },
+                                    { id: 1, name: i18n.tr("Classic"), unlockLevel: 1, color: root.theme ? root.theme.ballMid : "#D99B26", ring: "#FFFFFF" },
+                                    { id: 2, name: i18n.tr("Basketball"), unlockLevel: 10, color: "#E65C00", ring: "#111111" }
+                                ]
+                                delegate: Rectangle {
+                                    property bool isLocked: !Progression.isBallUnlocked(modelData.id, root.highestLevelReached)
+                                    width: (ballStyleRow1.width - units.gu(1.2)) / 3.0
+                                    height: units.gu(3.8)
+                                    radius: units.gu(1.9)
+                                    color: (root.ballStyle === modelData.id) ? (root.theme ? root.theme.accentBg : "#261E10") : (root.theme ? root.theme.cardInner : "#0D0E0F")
+                                    border.color: (root.ballStyle === modelData.id) ? (root.theme ? root.theme.accent : "#D99B26") : (root.theme ? root.theme.cardBorder : "#2A2C30")
+                                    border.width: (root.ballStyle === modelData.id) ? units.gu(0.12) : units.gu(0.08)
+                                    opacity: isLocked ? 0.40 : 1.0
+
+                                    Row {
+                                        anchors.centerIn: parent
+                                        spacing: units.gu(0.4)
+
+                                        Rectangle {
+                                            width: units.gu(1.2)
+                                            height: units.gu(1.2)
+                                            radius: width / 2
+                                            color: modelData.color
+                                            border.color: modelData.ring
+                                            border.width: units.gu(0.1)
+                                            anchors.verticalCenter: parent.verticalCenter
+                                        }
+
+                                        Label {
+                                            text: isLocked ? ("Lvl " + modelData.unlockLevel) : modelData.name
+                                            font.pixelSize: isLocked ? units.gu(1.0) : units.gu(1.05)
+                                            font.weight: Font.Bold
+                                            color: isLocked ? "#757B84" : ((root.ballStyle === modelData.id) ? (root.theme ? root.theme.accent : "#D99B26") : "#9AA0A6")
+                                            anchors.verticalCenter: parent.verticalCenter
+                                        }
+                                    }
+
+                                    MouseArea {
+                                        anchors.fill: parent
+                                        onClicked: {
+                                            if (!isLocked) {
+                                                root.ballStyleSelected(modelData.id);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        Row {
+                            id: ballStyleRow2
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            width: parent.width
+                            spacing: units.gu(0.6)
+
+                            Repeater {
+                                model: [
+                                    { id: 3, name: i18n.tr("Beach"), unlockLevel: 20, color: "#3498DB", ring: "#E74C3C" },
+                                    { id: 4, name: i18n.tr("8-Ball"), unlockLevel: 30, color: "#18191B", ring: "#FFFFFF" },
+                                    { id: 5, name: i18n.tr("Cyber Neon"), unlockLevel: 40, color: "#00E5FF", ring: "#00E5FF" }
+                                ]
+                                delegate: Rectangle {
+                                    property bool isLocked: !Progression.isBallUnlocked(modelData.id, root.highestLevelReached)
+                                    width: (ballStyleRow2.width - units.gu(1.2)) / 3.0
+                                    height: units.gu(3.8)
+                                    radius: units.gu(1.9)
+                                    color: (root.ballStyle === modelData.id) ? (root.theme ? root.theme.accentBg : "#261E10") : (root.theme ? root.theme.cardInner : "#0D0E0F")
+                                    border.color: (root.ballStyle === modelData.id) ? (root.theme ? root.theme.accent : "#D99B26") : (root.theme ? root.theme.cardBorder : "#2A2C30")
+                                    border.width: (root.ballStyle === modelData.id) ? units.gu(0.12) : units.gu(0.08)
+                                    opacity: isLocked ? 0.40 : 1.0
+
+                                    Row {
+                                        anchors.centerIn: parent
+                                        spacing: units.gu(0.4)
+
+                                        Rectangle {
+                                            width: units.gu(1.2)
+                                            height: units.gu(1.2)
+                                            radius: width / 2
+                                            color: modelData.color
+                                            border.color: modelData.ring
+                                            border.width: units.gu(0.1)
+                                            anchors.verticalCenter: parent.verticalCenter
+                                        }
+
+                                        Label {
+                                            text: isLocked ? ("Lvl " + modelData.unlockLevel) : modelData.name
+                                            font.pixelSize: isLocked ? units.gu(1.0) : units.gu(1.05)
+                                            font.weight: Font.Bold
+                                            color: isLocked ? "#757B84" : ((root.ballStyle === modelData.id) ? (root.theme ? root.theme.accent : "#D99B26") : "#9AA0A6")
+                                            anchors.verticalCenter: parent.verticalCenter
+                                        }
+                                    }
+
+                                    MouseArea {
+                                        anchors.fill: parent
+                                        onClicked: {
+                                            if (!isLocked) {
+                                                root.ballStyleSelected(modelData.id);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
 
@@ -233,7 +379,7 @@ Rectangle {
                         Label {
                             anchors.horizontalCenter: parent.horizontalCenter
                             text: i18n.tr("FALL SPEED")
-                            font.pixelSize: units.gu(0.95)
+                            font.pixelSize: units.gu(1.1)
                             font.weight: Font.Bold
                             color: "#848890"
                         }
@@ -364,7 +510,7 @@ Rectangle {
                         Label {
                             anchors.horizontalCenter: parent.horizontalCenter
                             text: root.isWelcomeOpen ? i18n.tr("DIFFICULTY MODE") : i18n.tr("DIFFICULTY MODE (Locked in Run)")
-                            font.pixelSize: units.gu(0.95)
+                            font.pixelSize: units.gu(1.1)
                             font.weight: Font.Bold
                             color: "#848890"
                         }
@@ -402,7 +548,7 @@ Rectangle {
                                     Label {
                                         anchors.centerIn: parent
                                         text: modelData.label
-                                        font.pixelSize: units.gu(1.1)
+                                        font.pixelSize: units.gu(1.15)
                                         font.weight: Font.Bold
                                         color: root.difficultyMode === modelData.mode
                                                ? "#0B0C0D"
@@ -442,7 +588,7 @@ Rectangle {
                         Label {
                             anchors.horizontalCenter: parent.horizontalCenter
                             text: i18n.tr("TOUCH SENSITIVITY")
-                            font.pixelSize: units.gu(0.95)
+                            font.pixelSize: units.gu(1.1)
                             font.weight: Font.Bold
                             color: "#848890"
                         }
@@ -675,7 +821,7 @@ Rectangle {
                                 anchors.left: parent.left
                                 anchors.verticalCenter: parent.verticalCenter
                                 text: i18n.tr("SOUND VOLUME")
-                                font.pixelSize: units.gu(0.95)
+                                font.pixelSize: units.gu(1.1)
                                 font.weight: Font.Bold
                                 color: "#848890"
                             }
@@ -684,7 +830,7 @@ Rectangle {
                                 anchors.right: parent.right
                                 anchors.verticalCenter: parent.verticalCenter
                                 text: Math.round(root.soundVolume * 100) + "%"
-                                font.pixelSize: units.gu(0.95)
+                                font.pixelSize: units.gu(1.1)
                                 font.weight: Font.Bold
                                 color: root.soundEnabled ? (root.theme ? root.theme.accent : "#D99B26") : "#555A64"
                             }
@@ -727,7 +873,7 @@ Rectangle {
                     id: statsCard
                     anchors.horizontalCenter: parent.horizontalCenter
                     width: parent.width
-                    height: units.gu(4.8)
+                    height: units.gu(5.2)
                     radius: units.gu(1.6)
                     color: root.theme ? root.theme.cardOuter : "#141517"
                     border.color: root.theme ? root.theme.cardBorder : "#2A2C30"
@@ -747,7 +893,7 @@ Rectangle {
                                 Label {
                                     anchors.horizontalCenter: parent.horizontalCenter
                                     text: i18n.tr("BEST RECORD")
-                                    font.pixelSize: units.gu(0.85)
+                                    font.pixelSize: units.gu(1.1)
                                     font.weight: Font.Bold
                                     color: "#848890"
                                 }
@@ -780,7 +926,7 @@ Rectangle {
                                 Label {
                                     anchors.horizontalCenter: parent.horizontalCenter
                                     text: i18n.tr("TOTAL SMASHED")
-                                    font.pixelSize: units.gu(0.85)
+                                    font.pixelSize: units.gu(1.1)
                                     font.weight: Font.Bold
                                     color: "#848890"
                                 }
@@ -802,7 +948,7 @@ Rectangle {
                     id: aboutSummaryCard
                     anchors.horizontalCenter: parent.horizontalCenter
                     width: parent.width
-                    height: units.gu(5.0)
+                    height: units.gu(5.2)
                     radius: units.gu(1.6)
                     color: aboutCardMouse.pressed ? "#1E2024" : (root.theme ? root.theme.cardOuter : "#141517")
                     border.color: aboutCardMouse.pressed
@@ -832,8 +978,8 @@ Rectangle {
                             }
 
                             Label {
-                                text: i18n.tr("v1.0.0 • Credits & Info")
-                                font.pixelSize: units.gu(0.95)
+                                text: i18n.tr("v1.0.1 • Credits & Info")
+                                font.pixelSize: units.gu(1.1)
                                 color: "#848890"
                             }
                         }

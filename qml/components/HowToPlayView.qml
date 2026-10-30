@@ -114,7 +114,7 @@ Column {
                 }
 
                 Label {
-                    text: i18n.tr("Avoid landing on red hazard segments.")
+                    text: i18n.tr("Avoid landing on spiked hazard segments.")
                     font.pixelSize: units.gu(1.25)
                     color: root.theme ? root.theme.topHazard : "#BA3C3C"
                     wrapMode: Text.WordWrap

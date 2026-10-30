@@ -17,6 +17,7 @@ test('Storage - default values on empty database', () => {
     assert.strictEqual(stats.bestScore, 0);
     assert.strictEqual(stats.highestLevelReached, 1);
     assert.strictEqual(stats.speedMode, 1);
+    assert.strictEqual(stats.ballStyle, 0);
     assert.deepStrictEqual([...stats.unlockedCheckpoints], [1]);
     assert.strictEqual(stats.selectedCheckpoint, 1);
 });
@@ -133,5 +134,23 @@ test('Storage - saveSoundVolume clamping and persistence', () => {
 
     Storage.saveSoundVolume(-0.5);
     assert.strictEqual(_store.get('soundVolume'), '0.00');
+});
+
+test('Storage - saveBallStyle persistence and validation', () => {
+    const { Storage, _store } = setupStorage();
+    Storage.loadStats(true);
+
+    Storage.saveBallStyle(1);
+    assert.strictEqual(_store.get('ballStyle'), '1');
+
+    Storage.saveBallStyle(3);
+    assert.strictEqual(_store.get('ballStyle'), '3');
+
+    Storage.saveBallStyle(5);
+    assert.strictEqual(_store.get('ballStyle'), '5');
+
+    // Out-of-range should clamp/fallback to 0
+    Storage.saveBallStyle(99);
+    assert.strictEqual(_store.get('ballStyle'), '0');
 });
 

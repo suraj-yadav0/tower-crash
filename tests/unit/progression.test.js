@@ -139,3 +139,87 @@ test('Progression - level progress percentage clamping', () => {
     assert.strictEqual(Progression.calculateLevelProgress(-100, 1, ringSpacing, ringsPerLevel), 0.0);
     assert.strictEqual(Progression.calculateLevelProgress(50 * ringSpacing, 1, ringSpacing, ringsPerLevel), 1.0);
 });
+
+test('Progression - ball unlock levels and status', () => {
+    assert.strictEqual(Progression.getBallUnlockLevel(0), 1);
+    assert.strictEqual(Progression.getBallUnlockLevel(1), 1);
+    assert.strictEqual(Progression.getBallUnlockLevel(2), 10);
+    assert.strictEqual(Progression.getBallUnlockLevel(3), 20);
+    assert.strictEqual(Progression.getBallUnlockLevel(4), 30);
+    assert.strictEqual(Progression.getBallUnlockLevel(5), 40);
+
+    // Level 1: Auto and Classic are unlocked, custom styles locked
+    assert.strictEqual(Progression.isBallUnlocked(0, 1), true);
+    assert.strictEqual(Progression.isBallUnlocked(1, 1), true);
+    assert.strictEqual(Progression.isBallUnlocked(2, 1), false);
+    assert.strictEqual(Progression.isBallUnlocked(3, 1), false);
+    assert.strictEqual(Progression.isBallUnlocked(4, 1), false);
+    assert.strictEqual(Progression.isBallUnlocked(5, 1), false);
+
+    // Level 10: Basketball unlocks
+    assert.strictEqual(Progression.isBallUnlocked(2, 10), true);
+    assert.strictEqual(Progression.isBallUnlocked(3, 10), false);
+
+    // Level 25: Basketball and Beach unlocked
+    assert.strictEqual(Progression.isBallUnlocked(2, 25), true);
+    assert.strictEqual(Progression.isBallUnlocked(3, 25), true);
+    assert.strictEqual(Progression.isBallUnlocked(4, 25), false);
+
+    // Level 40: All styles unlocked
+    assert.strictEqual(Progression.isBallUnlocked(4, 40), true);
+    assert.strictEqual(Progression.isBallUnlocked(5, 40), true);
+});
+
+test('Progression - dynamic level ball style rotation every 10 levels', () => {
+    // Levels 1-10 -> Style 1 (Classic)
+    assert.strictEqual(Progression.getLevelBallStyle(1), 1);
+    assert.strictEqual(Progression.getLevelBallStyle(5), 1);
+    assert.strictEqual(Progression.getLevelBallStyle(10), 1);
+
+    // Levels 11-20 -> Style 2 (Basketball)
+    assert.strictEqual(Progression.getLevelBallStyle(11), 2);
+    assert.strictEqual(Progression.getLevelBallStyle(20), 2);
+
+    // Levels 21-30 -> Style 3 (Beach Ball)
+    assert.strictEqual(Progression.getLevelBallStyle(21), 3);
+    assert.strictEqual(Progression.getLevelBallStyle(30), 3);
+
+    // Levels 31-40 -> Style 4 (8-Ball)
+    assert.strictEqual(Progression.getLevelBallStyle(31), 4);
+    assert.strictEqual(Progression.getLevelBallStyle(40), 4);
+
+    // Levels 41-50 -> Style 5 (Cyber Neon)
+    assert.strictEqual(Progression.getLevelBallStyle(41), 5);
+    assert.strictEqual(Progression.getLevelBallStyle(50), 5);
+
+    // Levels 51-60 -> Cycles back to Style 1 (Classic)
+    assert.strictEqual(Progression.getLevelBallStyle(51), 1);
+    assert.strictEqual(Progression.getLevelBallStyle(60), 1);
+    assert.strictEqual(Progression.getLevelBallStyle(61), 2);
+});
+
+test('Progression - unlocked ball milestone on level goal completion', () => {
+    assert.strictEqual(Progression.getUnlockedBallForLevel(5), null);
+
+    const b10 = Progression.getUnlockedBallForLevel(10);
+    assert.strictEqual(b10.id, 2);
+    assert.strictEqual(b10.name, 'Basketball');
+    assert.strictEqual(b10.color, '#E65C00');
+
+    const b20 = Progression.getUnlockedBallForLevel(20);
+    assert.strictEqual(b20.id, 3);
+    assert.strictEqual(b20.name, 'Beach Ball');
+    assert.strictEqual(b20.color, '#3498DB');
+
+    const b30 = Progression.getUnlockedBallForLevel(30);
+    assert.strictEqual(b30.id, 4);
+    assert.strictEqual(b30.name, '8-Ball');
+    assert.strictEqual(b30.color, '#18191B');
+
+    const b40 = Progression.getUnlockedBallForLevel(40);
+    assert.strictEqual(b40.id, 5);
+    assert.strictEqual(b40.name, 'Cyber Neon');
+    assert.strictEqual(b40.color, '#00E5FF');
+
+    assert.strictEqual(Progression.getUnlockedBallForLevel(50), null);
+});

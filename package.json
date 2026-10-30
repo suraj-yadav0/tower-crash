@@ -1,6 +1,6 @@
 {
   "name": "tower-crash",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Tower Crash 3D Helix Action Game for Ubuntu Touch / Lomiri",
   "main": "qml/Main.qml",
   "scripts": {

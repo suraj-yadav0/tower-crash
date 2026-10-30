@@ -129,3 +129,45 @@ function getCheckpointBaseScore(startLevel, mode) {
     }
     return total;
 }
+
+function getBallUnlockLevel(styleId) {
+    switch (styleId) {
+        case 2: return 10;
+        case 3: return 20;
+        case 4: return 30;
+        case 5: return 40;
+        case 0:
+        case 1:
+        default: return 1;
+    }
+}
+
+function isBallUnlocked(styleId, highestLevelReached) {
+    return (highestLevelReached || 1) >= getBallUnlockLevel(styleId);
+}
+
+function getBallStyleName(styleId) {
+    switch (styleId) {
+        case 0: return "Auto";
+        case 1: return "Classic";
+        case 2: return "Basketball";
+        case 3: return "Beach";
+        case 4: return "8-Ball";
+        case 5: return "Cyber Neon";
+        default: return "Classic";
+    }
+}
+
+function getLevelBallStyle(lvl) {
+    var l = (lvl !== undefined && lvl > 0) ? lvl : 1;
+    var tier = Math.floor((l - 1) / 10);
+    return 1 + (tier % 5);
+}
+
+function getUnlockedBallForLevel(goalLevel) {
+    if (goalLevel === 10) return { id: 2, name: "Basketball", color: "#E65C00", ring: "#111111" };
+    if (goalLevel === 20) return { id: 3, name: "Beach Ball", color: "#3498DB", ring: "#E74C3C" };
+    if (goalLevel === 30) return { id: 4, name: "8-Ball", color: "#18191B", ring: "#FFFFFF" };
+    if (goalLevel === 40) return { id: 5, name: "Cyber Neon", color: "#00E5FF", ring: "#00E5FF" };
+    return null;
+}

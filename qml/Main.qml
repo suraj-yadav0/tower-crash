@@ -55,37 +55,28 @@ MainView {
             subtitle: {
                 if (gameContainer.isWelcomeOpen) return i18n.tr("Arcade Edition");
                 var diffName = Progression.getDifficultyName(gameContainer.difficultyMode);
+                var zoneIdx = Progression.getZoneIndex(gameContainer.currentLevel);
                 var zoneName = Progression.getZoneName(gameContainer.currentLevel);
                 if (gameContainer.difficultyMode === 3) {
-                    if (gameContainer.bestScore > 0) {
-                        return i18n.tr("Level %1 • %2 • %3 (Permadeath) • Best: %4")
-                            .arg(gameContainer.currentLevel)
-                            .arg(zoneName)
-                            .arg(diffName)
-                            .arg(gameContainer.bestScore);
-                    }
-                    return i18n.tr("Level %1 • %2 • %3 (Permadeath)")
-                        .arg(gameContainer.currentLevel)
+                    return i18n.tr("Zone %1: %2 • %3 (Permadeath)")
+                        .arg(zoneIdx)
                         .arg(zoneName)
                         .arg(diffName);
                 }
-                var stage = ((gameContainer.currentLevel - 1) % 5) + 1;
-                if (gameContainer.bestScore > 0) {
-                    return i18n.tr("Level %1 • %2 • %3 (%4/5) • Best: %5")
-                        .arg(gameContainer.currentLevel)
-                        .arg(zoneName)
-                        .arg(diffName)
-                        .arg(stage)
-                        .arg(gameContainer.bestScore);
-                }
-                return i18n.tr("Level %1 • %2 • %3 (%4/5)")
-                    .arg(gameContainer.currentLevel)
+                return i18n.tr("Zone %1: %2 • %3")
+                    .arg(zoneIdx)
                     .arg(zoneName)
-                    .arg(diffName)
-                    .arg(stage);
+                    .arg(diffName);
             }
             z: 100
             visible: true
+
+            StyleHints {
+                foregroundColor: "#F5F3EF"
+                subtitleColor: (gameContainer && gameContainer.currentTheme) ? gameContainer.currentTheme.accent : "#D99B26"
+                backgroundColor: (gameContainer && gameContainer.currentTheme) ? gameContainer.currentTheme.cardOuter : "#101216"
+                dividerColor: (gameContainer && gameContainer.currentTheme) ? gameContainer.currentTheme.cardBorder : "#252830"
+            }
 
             trailingActionBar.numberOfSlots: 5
             trailingActionBar.delegate: Component {
@@ -93,40 +84,54 @@ MainView {
                     id: actionButton
                     action: modelData
                     objectName: (action && action.objectName) ? (action.objectName + "_button") : "action_button"
-                    width: units.gu(5)
+                    width: units.gu(4.8)
                     height: parent ? parent.height : units.gu(5)
                     activeFocusOnTab: true
 
                     readonly property bool isSelected: Boolean(action && action.selected)
 
                     Rectangle {
-                        id: background
-                        anchors.fill: parent
-                        color: actionButton.pressed ?
-                                   theme.palette.highlighted.background :
-                                   (actionButton.isSelected ? theme.palette.selected.background : "transparent")
-                    }
-
-                    Icon {
-                        id: icon
+                        id: buttonPill
                         anchors.centerIn: parent
-                        width: units.gu(2.5)
-                        height: units.gu(2.5)
-                        name: action ? (action.iconName || "") : ""
-                        source: action ? (action.iconSource || "") : ""
-                        color: actionButton.enabled ? theme.palette.normal.backgroundText : theme.palette.disabled.backgroundText
-                    }
+                        width: units.gu(4.0)
+                        height: units.gu(4.0)
+                        radius: units.gu(1.3)
+                        color: actionButton.pressed ?
+                                   ((gameContainer && gameContainer.currentTheme) ? gameContainer.currentTheme.accentBg : "rgba(255, 255, 255, 0.15)") :
+                                   (actionButton.isSelected ?
+                                       ((gameContainer && gameContainer.currentTheme) ? gameContainer.currentTheme.accentBg : "#261E10") :
+                                       "transparent")
+                        border.color: actionButton.isSelected ?
+                                          ((gameContainer && gameContainer.currentTheme) ? gameContainer.currentTheme.accent : "#D99B26") :
+                                          (actionButton.pressed ? "rgba(255, 255, 255, 0.18)" : "transparent")
+                        border.width: actionButton.isSelected ? units.gu(0.12) : units.gu(0.08)
 
-                    Rectangle {
-                        id: activeIndicator
-                        anchors {
-                            bottom: parent.bottom
-                            horizontalCenter: parent.horizontalCenter
+                        Icon {
+                            id: icon
+                            anchors.centerIn: parent
+                            width: units.gu(2.3)
+                            height: units.gu(2.3)
+                            name: action ? (action.iconName || "") : ""
+                            source: action ? (action.iconSource || "") : ""
+                            color: !actionButton.enabled ? "#555A64" :
+                                   (actionButton.isSelected ?
+                                       ((gameContainer && gameContainer.currentTheme) ? gameContainer.currentTheme.accent : "#D99B26") :
+                                       "#F5F3EF")
                         }
-                        width: units.gu(3)
-                        height: units.dp(3)
-                        color: theme.palette.selected.focus
-                        visible: actionButton.isSelected
+
+                        Rectangle {
+                            id: activeIndicator
+                            anchors {
+                                bottom: parent.bottom
+                                bottomMargin: units.dp(2)
+                                horizontalCenter: parent.horizontalCenter
+                            }
+                            width: units.gu(1.8)
+                            height: units.dp(2)
+                            radius: units.dp(1)
+                            color: (gameContainer && gameContainer.currentTheme) ? gameContainer.currentTheme.accent : "#D99B26"
+                            visible: actionButton.isSelected
+                        }
                     }
                 }
             }
@@ -241,6 +246,7 @@ MainView {
             property bool hapticsEnabled: true
             property real touchSensitivityMultiplier: 1.0
             property int themeMode: 0
+            property int ballStyle: 0
             property var previousTheme: null
             property real themeTransitionProgress: 1.0
             property var currentTheme: Themes.getTheme(themeMode, currentLevel)
@@ -278,6 +284,8 @@ MainView {
             property real squash: 1.0
             property real squashVelocity: 0.0
             property bool isSuperFall: false
+            property real ballRotationX: 0.0
+            property real ballRotationY: 0.0
 
             property real ringSpacing: units.gu(26)
             property real outerRadius: units.gu(20)
@@ -316,6 +324,7 @@ MainView {
             property int currentLevel: Progression.calculateLevel(ballY, ringSpacing, levelRings, units.gu(2))
             property real levelProgress: Progression.calculateLevelProgress(ballY, currentLevel, ringSpacing, levelRings)
             property string bannerText: ""
+            property string bannerSubText: ""
             property bool bannerIsCheckpoint: false
             property bool bannerIsZone: false
             property real bannerOpacity: 0.0
@@ -328,11 +337,7 @@ MainView {
             onCurrentLevelChanged: {
                 if (currentLevel > highestLevelReached) {
                     highestLevelReached = currentLevel;
-                    if (Storage.saveHighestLevelForMode) {
-                        Storage.saveHighestLevelForMode(highestLevelReached, difficultyMode);
-                    } else {
-                        Storage.saveHighestLevel(highestLevelReached);
-                    }
+                    Storage.saveHighestLevelForMode(highestLevelReached, difficultyMode);
                 }
                 if (Progression.isCheckpointLevel(currentLevel, difficultyMode)) {
                     unlockCheckpoint(currentLevel);
@@ -346,20 +351,11 @@ MainView {
                 if (isNew) {
                     unlockedCheckpoints = updated;
                     selectedCheckpoint = lvl;
-                    if (Storage.saveUnlockedCheckpointsForMode) {
-                        Storage.saveUnlockedCheckpointsForMode(unlockedCheckpoints, difficultyMode);
-                        Storage.saveSelectedCheckpointForMode(selectedCheckpoint, difficultyMode);
-                    } else {
-                        Storage.saveUnlockedCheckpoints(unlockedCheckpoints);
-                        Storage.saveSelectedCheckpoint(selectedCheckpoint);
-                    }
+                    Storage.saveUnlockedCheckpointsForMode(unlockedCheckpoints, difficultyMode);
+                    Storage.saveSelectedCheckpointForMode(selectedCheckpoint, difficultyMode);
                 } else if (lvl > selectedCheckpoint) {
                     selectedCheckpoint = lvl;
-                    if (Storage.saveSelectedCheckpointForMode) {
-                        Storage.saveSelectedCheckpointForMode(selectedCheckpoint, difficultyMode);
-                    } else {
-                        Storage.saveSelectedCheckpoint(selectedCheckpoint);
-                    }
+                    Storage.saveSelectedCheckpointForMode(selectedCheckpoint, difficultyMode);
                 }
             }
 
@@ -371,11 +367,7 @@ MainView {
                 }
                 var validCheckpoint = Math.max(1, checkpointLevel || selectedCheckpoint || 1);
                 selectedCheckpoint = validCheckpoint;
-                if (Storage.saveSelectedCheckpointForMode) {
-                    Storage.saveSelectedCheckpointForMode(selectedCheckpoint, difficultyMode);
-                } else {
-                    Storage.saveSelectedCheckpoint(selectedCheckpoint);
-                }
+                Storage.saveSelectedCheckpointForMode(selectedCheckpoint, difficultyMode);
                 initGame(validCheckpoint);
             }
 
@@ -383,12 +375,14 @@ MainView {
                 var m = Math.max(0, Math.min(3, parseInt(newMode) || 0));
                 if (m === difficultyMode) return;
                 difficultyMode = m;
-                if (Storage.saveDifficultyMode) {
-                    Storage.saveDifficultyMode(m);
-                }
-                var diffStats = Storage.getDifficultyStats ? Storage.getDifficultyStats(m) : { bestScore: 0, highestLevelReached: 1, unlockedCheckpoints: [1], selectedCheckpoint: 1 };
+                Storage.saveDifficultyMode(m);
+                var diffStats = Storage.getDifficultyStats(m);
                 bestScore = diffStats.bestScore || 0;
                 highestLevelReached = diffStats.highestLevelReached || 1;
+                if (ballStyle !== 0 && !Progression.isBallUnlocked(ballStyle, highestLevelReached)) {
+                    ballStyle = 0;
+                    Storage.saveBallStyle(0);
+                }
                 unlockedCheckpoints = (m === 3) ? [1] : (diffStats.unlockedCheckpoints || [1]);
                 selectedCheckpoint = (m === 3) ? 1 : (diffStats.selectedCheckpoint || 1);
                 var keepSettings = isSettingsOpen;
@@ -406,12 +400,12 @@ MainView {
                 Particles.spawnBounceDust(particles, units, outerRadius, innerRadius, y, color1, color2);
             }
 
-            function spawnShatterDebris(ringY, isGoal, isGrand, theme, isSuper) {
-                Particles.spawnShatterDebris(particles, units, outerRadius, innerRadius, ringY, isGoal, isGrand, theme, isSuper);
+            function spawnShatterDebris(ringY, isGoal, isGrand, theme, isSuper, ring, towerAngle) {
+                Particles.spawnShatterDebris(particles, units, outerRadius, innerRadius, ringY, isGoal, isGrand, theme, isSuper, ring, towerAngle, ringHeight);
             }
 
-            function spawnSegmentShatter(ringY, angle, topClr, edgeClr) {
-                Particles.spawnSegmentShatter(particles, units, outerRadius, innerRadius, ringY, angle, topClr, edgeClr);
+            function spawnSegmentShatter(ringY, angle, topClr, edgeClr, segIndex, towerAngle, ring) {
+                Particles.spawnSegmentShatter(particles, units, outerRadius, innerRadius, ringY, angle, topClr, edgeClr, segIndex, towerAngle, ring, ringHeight);
             }
 
             function generateRing() {
@@ -429,10 +423,13 @@ MainView {
                 rings = [];
                 particles = [];
                 ballTrail = [];
+                ballRotationX = 0.0;
+                ballRotationY = 0.0;
                 squash = 1.0;
                 squashVelocity = 0.0;
                 isSuperFall = false;
                 bannerText = "";
+                bannerSubText = "";
                 bannerIsCheckpoint = false;
                 bannerIsZone = false;
                 bannerOpacity = 0.0;
@@ -471,8 +468,8 @@ MainView {
                 var currentDepth = Math.floor(ballY / ringSpacing);
                 var speedScale = 1.0 + Math.min(0.35, currentDepth * 0.005);
                 ballVy = -bounceSpeed * speedScale * 0.9;
-                squash = 0.52;
-                squashVelocity = (1.0 - squash) * 36.0;
+                squash = 0.44;
+                squashVelocity = (1.0 - squash) * 24.0;
                 lastPhysicsTime = 0.0;
                 soundManager.play("bounce");
                 soundManager.buttonHaptic();
@@ -497,11 +494,7 @@ MainView {
                     var nearest = Progression.getNearestCheckpoint(currentLevel, unlockedCheckpoints, difficultyMode);
                     if (nearest > selectedCheckpoint) {
                         selectedCheckpoint = nearest;
-                        if (Storage.saveSelectedCheckpointForMode) {
-                            Storage.saveSelectedCheckpointForMode(selectedCheckpoint, difficultyMode);
-                        } else {
-                            Storage.saveSelectedCheckpoint(selectedCheckpoint);
-                        }
+                        Storage.saveSelectedCheckpointForMode(selectedCheckpoint, difficultyMode);
                     }
                 } else {
                     selectedCheckpoint = 1;
@@ -551,8 +544,10 @@ MainView {
                 touchSensitivityMultiplier = (stats.touchSensitivityMultiplier !== undefined) ? stats.touchSensitivityMultiplier : 1.0;
                 speedMode = stats.speedMode;
                 themeMode = (stats.themeMode !== undefined) ? stats.themeMode : 0;
-                previousTheme = currentTheme;
                 highestLevelReached = stats.highestLevelReached;
+                previousTheme = currentTheme;
+                var loadedStyle = (stats.ballStyle !== undefined) ? stats.ballStyle : 0;
+                ballStyle = Progression.isBallUnlocked(loadedStyle, highestLevelReached) ? loadedStyle : 0;
                 unlockedCheckpoints = (difficultyMode === 3) ? [1] : stats.unlockedCheckpoints;
                 selectedCheckpoint = (difficultyMode === 3) ? 1 : stats.selectedCheckpoint;
                 isWelcomeOpen = true;
@@ -587,12 +582,14 @@ MainView {
                 if (event.key === Qt.Key_A) {
                     if (!gameOver && !isPaused && !isSettingsOpen && !isWelcomeOpen && !isStageClearOpen && !isStageClearCelebrating) {
                         towerAngle += 0.12;
+                        ballRotationY = (ballRotationY - 0.12 * (outerRadius / ballRadius * 0.65)) % (Math.PI * 2.0);
                         gameCanvas.requestPaint();
                         event.accepted = true;
                     }
                 } else if (event.key === Qt.Key_D) {
                     if (!gameOver && !isPaused && !isSettingsOpen && !isWelcomeOpen && !isStageClearOpen && !isStageClearCelebrating) {
                         towerAngle -= 0.12;
+                        ballRotationY = (ballRotationY + 0.12 * (outerRadius / ballRadius * 0.65)) % (Math.PI * 2.0);
                         gameCanvas.requestPaint();
                         event.accepted = true;
                     }
@@ -601,6 +598,7 @@ MainView {
             Keys.onLeftPressed: {
                 if (!gameOver && !isPaused && !isSettingsOpen && !isWelcomeOpen && !isStageClearOpen && !isStageClearCelebrating) {
                     towerAngle += 0.12;
+                    ballRotationY = (ballRotationY - 0.12 * (outerRadius / ballRadius * 0.65)) % (Math.PI * 2.0);
                     gameCanvas.requestPaint();
                     event.accepted = true;
                 }
@@ -608,6 +606,7 @@ MainView {
             Keys.onRightPressed: {
                 if (!gameOver && !isPaused && !isSettingsOpen && !isWelcomeOpen && !isStageClearOpen && !isStageClearCelebrating) {
                     towerAngle -= 0.12;
+                    ballRotationY = (ballRotationY + 0.12 * (outerRadius / ballRadius * 0.65)) % (Math.PI * 2.0);
                     gameCanvas.requestPaint();
                     event.accepted = true;
                 }
@@ -731,6 +730,7 @@ MainView {
                 onTriggered: {
                     if (gameContainer.isWelcomeOpen) {
                         gameContainer.towerAngle -= 0.005;
+                        gameContainer.ballRotationY = (gameContainer.ballRotationY + 0.005 * (gameContainer.outerRadius / gameContainer.ballRadius * 0.65)) % (Math.PI * 2.0);
                         gameCanvas.requestPaint();
                         return;
                     }
@@ -792,7 +792,10 @@ MainView {
                         var dx = mouse.x - gameContainer.lastDragX;
 
                         var sens = gameContainer.touchSensitivityMultiplier;
-                        gameContainer.towerAngle -= dx * 0.014 * sens;
+                        var deltaAngle = -dx * 0.014 * sens;
+                        gameContainer.towerAngle += deltaAngle;
+                        var rollRatio = (gameContainer.outerRadius / gameContainer.ballRadius) * 0.65;
+                        gameContainer.ballRotationY = (gameContainer.ballRotationY - deltaAngle * rollRatio) % (Math.PI * 2.0);
                         var fling = -(dx / elapsed) * 0.12 * sens;
                         gameContainer.angularVelocity = Math.max(-0.25, Math.min(0.25, fling));
 
@@ -832,6 +835,7 @@ MainView {
             MilestoneBanner {
                 z: 20
                 text: gameContainer.bannerText
+                subText: gameContainer.bannerSubText
                 isCheckpoint: gameContainer.bannerIsCheckpoint
                 isZoneTransition: gameContainer.bannerIsZone
                 bannerOpacity: gameContainer.bannerOpacity
@@ -855,6 +859,8 @@ MainView {
                 totalRings: gameContainer.totalRings
                 speedMode: gameContainer.speedMode
                 themeMode: gameContainer.themeMode
+                ballStyle: gameContainer.ballStyle
+                highestLevelReached: gameContainer.highestLevelReached
                 difficultyMode: gameContainer.difficultyMode
                 currentLevel: gameContainer.currentLevel
                 selectedCheckpoint: gameContainer.selectedCheckpoint
@@ -886,11 +892,7 @@ MainView {
                         return;
                     }
                     gameContainer.selectedCheckpoint = checkpoint;
-                    if (Storage.saveSelectedCheckpointForMode) {
-                        Storage.saveSelectedCheckpointForMode(checkpoint, gameContainer.difficultyMode);
-                    } else {
-                        Storage.saveSelectedCheckpoint(checkpoint);
-                    }
+                    Storage.saveSelectedCheckpointForMode(checkpoint, gameContainer.difficultyMode);
                     gameCanvas.requestPaint();
                 }
                 onSettingsRequested: {
@@ -959,6 +961,12 @@ MainView {
                     soundManager.buttonHaptic();
                     gameContainer.themeMode = mode;
                     Storage.saveStat("themeMode", mode.toString());
+                    gameCanvas.requestPaint();
+                }
+                onBallStyleSelected: {
+                    soundManager.buttonHaptic();
+                    gameContainer.ballStyle = style;
+                    Storage.saveBallStyle(style);
                     gameCanvas.requestPaint();
                 }
                 onTouchSensitivitySelected: {
